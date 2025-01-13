@@ -1,0 +1,34 @@
+
+3.wifi指令打开（打开wifi和服务器后会变卡）
+
+dbus-send --system --print-reply --dest=rockchip.dbserver / rockchip.dbserver.net.Cmd \string:"{ \"table\": \"NetworkPower\",\"key\": {\"sType\": \"wifi\"}, \"data\": {\"iPower\": 1}, \"cmd\": \"Update\" }"
+
+
+//打开wpa_supplicant进程（注意wpa_supplicant.conf的位置）
+wpa_supplicant -B -i wlan0 -c /data/cfg/wpa_supplicant.conf
+//当蓝牙没有打开是rfkill0   f2为rfkill0  f8位rfkill1
+echo 1 > /sys/class/rfkill/rfkill0/state
+//打开wifi
+ifconfig wlan0 up
+//扫描附近的wifi
+wpa_cli -i wlan0 -p /var/run/wpa_supplicant scan
+//打印扫描出的wifi
+wpa_cli -i wlan0 -p /var/run/wpa_supplicant scan_results(wifi名称为/x编码)
+echo -e `wpa_cli -i wlan0 -p /var/run/wpa_supplicant scan_result`(wifi名称为中文)
+
+//连接指定wifi
+wifi_start.sh TianZe 86337898
+//设置自动获取ip
+udhcpc -i wlan0  
+//查看wifi连接信息
+wpa_cli -i wlan0 -p /var/run/wpa_supplicant status
+
+出现
+Line 7: Invalid passphrase length 1 (expected: 8..63) '9"'.
+Line 7: failed to parse psk '"9"'.
+Line 9: failed to parse network block.
+Failed to read or parse configuration '/data/cfg/wpa_supplicant.conf'.
+这种问题 需要修改/data/cfg/wpa_supplicant.conf文件
+//关闭wifi
+ifconfig wlan0 down
+killall wpa_supplicant

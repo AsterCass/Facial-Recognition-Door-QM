@@ -1,0 +1,20 @@
+查看设置：
+
+amixer cget name='Playback Path'
+
+amixer cget name='Master Playback Volume'
+amixer help    查看帮助
+amixer contents  查看各个模块设置
+设置音量（1-255）:
+amixer cset name='Playback Path' 1
+
+amixer cset name='Master Playback Volume' 255
+保存音量
+alsactl store -f /userdata/asound.state
+
+修改上下限音量声响
+vi /usr/share/alsa/cards/rockchip_rk809-.conf
+playback.pcm中的
+
+min_dB -20.0   ->  min_dB -40.0
+max_dB -10.0   ->  max_dB 0.0
