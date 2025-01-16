@@ -49,14 +49,16 @@ message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 
 
-add_executable(FacialRecognitionDoor main.cpp
+add_executable(FacialRecognitionDoor src/main.cpp
+        src/config/config.cpp
+        src/utils/general_utils.cpp
 )
 
 if (WIN32)
-    target_include_directories(FacialRecognitionDoor PUBLIC ${CMAKE_SOURCE_DIR})
+    target_include_directories(FacialRecognitionDoor PUBLIC ${CMAKE_SOURCE_DIR}/include)
     target_link_libraries(FacialRecognitionDoor ${OpenCV_LIBS} Qt5::Core Qt5::Bluetooth Qt5::Widgets)
 elseif (UNIX)
-    target_include_directories(FacialRecognitionDoor PUBLIC ${CMAKE_SOURCE_DIR})
+    target_include_directories(FacialRecognitionDoor PUBLIC ${CMAKE_SOURCE_DIR}/include)
     target_link_libraries(FacialRecognitionDoor ${OpenCV_LIBS} Qt5::Core Qt5::Bluetooth Qt5::Widgets InspireFace)
 else ()
     message(FATAL_ERROR "Unsupported operating system")
