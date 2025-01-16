@@ -6,6 +6,9 @@
 #include <map>
 #include <iostream>
 #include "config/config.h"
+#include <fstream>
+#include <ctime>
+#include <sstream>
 
 using namespace std;
 
@@ -40,8 +43,8 @@ namespace asterGeneralUtils {
         } else {
             currentLogLevel = TRACE;
         }
-        cout << "Load arguments [appEnv] - [" << appEnv << "]" << endl;
-        cout << "Load arguments [currentLogLevel] - [" << currentLogLevel << "]" << endl;
+        cout << "Loaded arguments [appEnv] - [" << appEnv << "]" << endl;
+        cout << "Loaded arguments [currentLogLevel] - [" << currentLogLevel << "]" << endl;
 
         // Load print type
         if (args.find("logPrintType") != args.end()) {
@@ -52,7 +55,7 @@ namespace asterGeneralUtils {
                 return EXIT_FAILURE;
             }
         }
-        cout << "Load arguments [logPrintType] - [" << logPrintType << "]" << endl;
+        cout << "Loaded arguments [logPrintType] - [" << logPrintType << "]" << endl;
 
         // Load taskPullTaskIntervalCount
         if (args.find("taskPullTaskIntervalCount") != args.end()) {
@@ -63,7 +66,7 @@ namespace asterGeneralUtils {
                 return EXIT_FAILURE;
             }
         }
-        cout << "Load arguments [taskPullTaskIntervalCount] - [" << taskPullTaskIntervalCount << "]" << endl;
+        cout << "Loaded arguments [taskPullTaskIntervalCount] - [" << taskPullTaskIntervalCount << "]" << endl;
 
         // Else
 
@@ -113,6 +116,12 @@ namespace asterGeneralUtils {
         if (logPrintType == CONSOLE) {
             cout << outputStr << endl;
         } else if (logPrintType == OFILE) {
+            const string logFileName = oss.str().substr(0, 10).append(".txt");
+            if (std::ofstream logFile(logFileName, std::ios_base::app); logFile.is_open()) {
+                logFile << outputStr << std::endl;
+            } else {
+                std::cerr << "Error opening file for logging." << std::endl;
+            }
         }
     }
 }
