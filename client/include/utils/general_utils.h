@@ -5,7 +5,7 @@
 #include "enums/general_enums.h"
 
 
-namespace asterGeneralUtils {
+namespace generalUtils {
     // Parse input arguments
     int loadArguments(int argc, char **argv);
 

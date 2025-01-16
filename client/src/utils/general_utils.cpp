@@ -12,7 +12,7 @@
 
 using namespace std;
 
-namespace asterGeneralUtils {
+namespace generalUtils {
     map<string, string> parseArguments(int argc, char **argv) {
         map<string, string> args;
         for (int i = 1; i < argc; ++i) {
