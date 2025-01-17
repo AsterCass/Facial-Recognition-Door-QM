@@ -4,6 +4,7 @@
 #include <vector>
 #include <functional>
 #include <string>
+#include <QStackedWidget>
 
 // const
 constexpr auto APP_VERSION = "1.0.0";
@@ -28,6 +29,7 @@ constexpr auto ENV_PROD = "prod";
 
 extern int currentLogLevel;
 extern int taskUpdateIpIntervalCount;
+extern QStackedWidget *stackedWidget;
 
 
 // input args

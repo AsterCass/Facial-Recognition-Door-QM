@@ -15,4 +15,9 @@ enum LogPrintType {
     OFILE,
 };
 
+enum MainPage {
+    MAIN_PAGE_INIT,
+    MAIN_PAGE_HOME,
+};
+
 #endif //GENERAL_ENUMS_H

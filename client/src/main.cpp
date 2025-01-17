@@ -1,4 +1,5 @@
 #include <QApplication>
+#include "ui/main_router.h"
 #include "utils/general_utils.h"
 
 int main(int argc, char *argv[]) {
@@ -10,7 +11,12 @@ int main(int argc, char *argv[]) {
     // Init application
     QApplication app(argc, argv);
 
-    generalUtils::logPrintln(DEBUG, __FUNCTION__, "Hello World!");
+    // Page router
+    const auto router = MainRouter::getInstance();
+    router->show();
+
+    // Finish
+    generalUtils::logPrintln(INFO, __FUNCTION__, "Application started");
 
     return QApplication::exec();
 }

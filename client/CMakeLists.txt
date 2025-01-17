@@ -52,6 +52,9 @@ message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 add_executable(FacialRecognitionDoor src/main.cpp
         src/config/config.cpp
         src/utils/general_utils.cpp
+        src/ui/main_router.cpp
+        src/ui/pages/main_page_init.cpp
+        src/ui/pages/main_page_home.cpp
 )
 
 if (WIN32)
