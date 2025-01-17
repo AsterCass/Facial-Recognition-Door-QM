@@ -55,6 +55,7 @@ add_executable(FacialRecognitionDoor src/main.cpp
         src/ui/main_router.cpp
         src/ui/pages/main_page_init.cpp
         src/ui/pages/main_page_home.cpp
+        src/utils/thread_pool.cpp
 )
 
 if (WIN32)

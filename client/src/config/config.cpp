@@ -8,6 +8,7 @@ using namespace std;
 int taskUpdateIpIntervalCount = 1;
 int currentLogLevel = DEBUG;
 QStackedWidget *stackedWidget = nullptr;
+void *mainThreadPool = nullptr;
 
 // input variable
 

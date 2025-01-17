@@ -4,7 +4,7 @@
 
 MainPageHome::MainPageHome(QWidget *parent): QWidget(parent) {
     button = std::make_unique<QPushButton>("I am Home, Click switch", this);
-    QObject::connect(button.get(), &QPushButton::clicked, [](bool) {
+    connect(button.get(), &QPushButton::clicked, [](bool) {
         stackedWidget->setCurrentIndex(MAIN_PAGE_INIT);
     });
 }

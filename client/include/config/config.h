@@ -1,7 +1,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <vector>
 #include <functional>
 #include <string>
 #include <QStackedWidget>
@@ -30,6 +29,7 @@ constexpr auto ENV_PROD = "prod";
 extern int currentLogLevel;
 extern int taskUpdateIpIntervalCount;
 extern QStackedWidget *stackedWidget;
+extern void *mainThreadPool;
 
 
 // input args
