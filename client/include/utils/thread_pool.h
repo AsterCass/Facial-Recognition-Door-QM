@@ -20,7 +20,7 @@ public:
 
     template<class F>
     void enqueue(F &&f) { {
-            std::unique_lock lock(queueMutex);
+            std::unique_lock<std::mutex> lock(queueMutex);
             tasks.emplace(std::forward<F>(f));
         }
         condition.notify_one();
