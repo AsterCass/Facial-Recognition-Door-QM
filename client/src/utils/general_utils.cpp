@@ -16,7 +16,9 @@ namespace generalUtils {
     map<string, string> parseArguments(int argc, char **argv) {
         map<string, string> args;
         for (int i = 1; i < argc; ++i) {
-            if (string arg = argv[i]; arg.substr(0, 2) == "--") {
+            string arg = argv[i];
+            if (arg.substr(0, 2) == "--"
+            ) {
                 string key = arg.substr(2);
                 if (i + 1 < argc && argv[i + 1][0] != '-') {
                     args[key] = argv[i + 1];
@@ -117,7 +119,8 @@ namespace generalUtils {
             cout << outputStr << endl;
         } else if (logPrintType == OFILE) {
             const string logFileName = oss.str().substr(0, 10).append(".txt");
-            if (std::ofstream logFile(logFileName, std::ios_base::app); logFile.is_open()) {
+            std::ofstream logFile(logFileName, std::ios_base::app);
+            if (logFile.is_open()) {
                 logFile << outputStr << std::endl;
             } else {
                 std::cerr << "Error opening file for logging." << std::endl;

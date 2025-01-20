@@ -1,12 +1,9 @@
 #include <QApplication>
+#include "utils/scheduled_task.h"
 #include "config/config.h"
 #include "utils/thread_pool.h"
 #include "ui/main_router.h"
 #include "utils/general_utils.h"
-
-
-void printMessage(const std::string &message) {
-}
 
 int main(int argc, char *argv[]) {
     // Input arg
@@ -25,6 +22,9 @@ int main(int argc, char *argv[]) {
     //         generalUtils::logPrintln(INFO, "TASK", std::to_string(i));
     //     });
     // }
+
+    // Init Schedule task
+    ScheduledTask::getInstance();
 
     // Page router
     const auto router = MainRouter::getInstance();
