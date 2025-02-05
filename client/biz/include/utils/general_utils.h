@@ -7,10 +7,8 @@
 
 namespace generalUtils {
     // Parse input arguments
-    int loadArguments(int argc, char **argv);
+    // int loadArguments(int argc, char **argv);
 
-    // Println log
-    void logPrintln(LogLevel level, const std::string &functionName, const std::string &message);
 }
 
 

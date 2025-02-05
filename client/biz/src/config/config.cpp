@@ -6,7 +6,6 @@ using namespace std;
 // variable
 
 int taskUpdateIpIntervalCount = 1;
-int currentLogLevel = DEBUG;
 QStackedWidget *stackedWidget = nullptr;
 void *mainThreadPool = nullptr;
 
@@ -14,4 +13,3 @@ void *mainThreadPool = nullptr;
 
 int taskPullTaskIntervalCount = 20;
 string appEnv = ENV_PROD;
-int logPrintType = CONSOLE;

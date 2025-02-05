@@ -25,8 +25,6 @@ constexpr auto ENV_PROD = "prod";
 
 
 // variable
-
-extern int currentLogLevel;
 extern int taskUpdateIpIntervalCount;
 extern QStackedWidget *stackedWidget;
 extern void *mainThreadPool;
@@ -36,7 +34,6 @@ extern void *mainThreadPool;
 
 extern int taskPullTaskIntervalCount;
 extern std::string appEnv;
-extern int logPrintType;
 
 
 #endif //CONFIG_H

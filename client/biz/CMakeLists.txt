@@ -19,6 +19,7 @@ else ()
 endif ()
 
 set(SDK_PATH 3rdparty)
+set(AIRSTRIP_PREFIX_PATH ../airstrip)
 find_package(OpenCV REQUIRED)
 find_package(Qt5 REQUIRED COMPONENTS Core Bluetooth Widgets)
 
@@ -26,8 +27,10 @@ find_package(Qt5 REQUIRED COMPONENTS Core Bluetooth Widgets)
 if (WIN32)
     include_directories(
             ${SDK_PATH}/include/windows/inspire
+            ${AIRSTRIP_PREFIX_PATH}/include
     )
     link_directories(
+            ${AIRSTRIP_PREFIX_PATH}/lib
     )
 elseif (UNIX)
     include_directories(
@@ -55,16 +58,15 @@ add_executable(FacialRecognitionDoor src/main.cpp
         src/ui/main_router.cpp
         src/ui/pages/main_page_init.cpp
         src/ui/pages/main_page_home.cpp
-        src/utils/thread_pool.cpp
         src/utils/scheduled_task.cpp
 )
 
 if (WIN32)
     target_include_directories(FacialRecognitionDoor PUBLIC ${CMAKE_SOURCE_DIR}/include)
-    target_link_libraries(FacialRecognitionDoor ${OpenCV_LIBS} Qt5::Core Qt5::Bluetooth Qt5::Widgets)
+    target_link_libraries(FacialRecognitionDoor ${OpenCV_LIBS} airstrip Qt5::Core Qt5::Bluetooth Qt5::Widgets)
 elseif (UNIX)
     target_include_directories(FacialRecognitionDoor PUBLIC ${CMAKE_SOURCE_DIR}/include)
-    target_link_libraries(FacialRecognitionDoor ${OpenCV_LIBS} Qt5::Core Qt5::Bluetooth Qt5::Widgets InspireFace)
+    target_link_libraries(FacialRecognitionDoor ${OpenCV_LIBS} airstrip Qt5::Core Qt5::Bluetooth Qt5::Widgets InspireFace)
 else ()
     message(FATAL_ERROR "Unsupported operating system")
 endif ()

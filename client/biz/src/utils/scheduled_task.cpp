@@ -2,16 +2,19 @@
 #include <thread>
 #include "utils/general_utils.h"
 #include "config/config.h"
+#include "airstrip_log.h"
+
 
 
 using namespace std;
+using namespace airstrip;
 
 void task1() {
-    generalUtils::logPrintln(INFO, __FUNCTION__, "Task 1 Finish");
+    logPrintln(INFO, __FUNCTION__, "Task 1 Finish");
 }
 
 void task2() {
-    generalUtils::logPrintln(INFO, __FUNCTION__, "Task 2 Finish");
+    logPrintln(INFO, __FUNCTION__, "Task 2 Finish");
 }
 
 

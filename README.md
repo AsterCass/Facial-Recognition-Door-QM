@@ -11,6 +11,7 @@
 2. OpenCv
 3. libfacedetection
 4. InspireFace
+5. Boost
 
 ### 目标平台
 

@@ -1,5 +1,6 @@
-#ifndef GENERAL_ENUMS_H
-#define GENERAL_ENUMS_H
+#ifndef AIRSTRIP_ENUMS_H
+#define AIRSTRIP_ENUMS_H
+
 
 enum LogLevel {
     TRACE,
@@ -15,9 +16,5 @@ enum LogPrintType {
     OFILE,
 };
 
-enum MainPage {
-    MAIN_PAGE_INIT,
-    MAIN_PAGE_HOME,
-};
 
-#endif //GENERAL_ENUMS_H
+#endif //AIRSTRIP_ENUMS_H
