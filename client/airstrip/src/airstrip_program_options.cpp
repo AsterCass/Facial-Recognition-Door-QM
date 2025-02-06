@@ -105,7 +105,7 @@ namespace airstrip {
                                        : loadedOpt.first.find(",");
                 auto optStd = loadedOpt.first.substr(0, pos);
                 logPrintln(INFO, __FUNCTION__,
-                           "Load " + optStd + " = " + values.str());
+                           "Loaded " + optStd + " = " + values.str());
             }
         } catch (const exception &e) {
             cout << "Failed to parse options: " << e.what() << endl;
