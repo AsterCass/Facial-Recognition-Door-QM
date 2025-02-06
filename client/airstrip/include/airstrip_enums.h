@@ -11,10 +11,5 @@ enum LogLevel {
     CRITICAL
 };
 
-enum LogPrintType {
-    CONSOLE,
-    OFILE,
-};
-
 
 #endif //AIRSTRIP_ENUMS_H

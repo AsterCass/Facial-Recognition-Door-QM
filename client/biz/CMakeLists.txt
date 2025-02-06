@@ -10,6 +10,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 if (WIN32)
+    set(BOOST_ROOT P:/projects/cplusplus/boost_1_87_0/_install)
     set(CMAKE_PREFIX_PATH P:/projects/cplusplus/OpenCV-MinGW-Build-OpenCV-4.5.5-x64)
     #set(CMAKE_PREFIX_PATH P:/tools/opencv/OpenCV-MinGW-Build-OpenCV-4.5.5-x64)
 elseif (UNIX)
@@ -21,6 +22,7 @@ endif ()
 set(SDK_PATH 3rdparty)
 set(AIRSTRIP_PREFIX_PATH ../airstrip)
 find_package(OpenCV REQUIRED)
+find_package(Boost REQUIRED COMPONENTS program_options json)
 find_package(Qt5 REQUIRED COMPONENTS Core Bluetooth Widgets)
 
 
@@ -63,7 +65,10 @@ add_executable(FacialRecognitionDoor src/main.cpp
 
 if (WIN32)
     target_include_directories(FacialRecognitionDoor PUBLIC ${CMAKE_SOURCE_DIR}/include)
-    target_link_libraries(FacialRecognitionDoor ${OpenCV_LIBS} airstrip Qt5::Core Qt5::Bluetooth Qt5::Widgets)
+    target_link_libraries(FacialRecognitionDoor
+            ${OpenCV_LIBS}
+            airstrip Boost::program_options Boost::json
+            Qt5::Core Qt5::Bluetooth Qt5::Widgets)
 elseif (UNIX)
     target_include_directories(FacialRecognitionDoor PUBLIC ${CMAKE_SOURCE_DIR}/include)
     target_link_libraries(FacialRecognitionDoor ${OpenCV_LIBS} airstrip Qt5::Core Qt5::Bluetooth Qt5::Widgets InspireFace)

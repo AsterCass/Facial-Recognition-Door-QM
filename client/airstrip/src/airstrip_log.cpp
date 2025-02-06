@@ -51,10 +51,14 @@ namespace airstrip {
             }
         }
 
-        if (logPrintType == CONSOLE) {
+        if (outputStr.empty()) {
+            return;
+        }
+
+        if (logPrintPath.empty()) {
             cout << outputStr << endl;
-        } else if (logPrintType == OFILE) {
-            const string logFileName = oss.str().substr(0, 10).append(".txt");
+        } else {
+            const string logFileName = logPrintPath + oss.str().substr(0, 10).append(".txt");
             std::ofstream logFile(logFileName, std::ios_base::app);
             if (logFile.is_open()) {
                 logFile << outputStr << std::endl;
@@ -63,6 +67,4 @@ namespace airstrip {
             }
         }
     }
-
-
 }

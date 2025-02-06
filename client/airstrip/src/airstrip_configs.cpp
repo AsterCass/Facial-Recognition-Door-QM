@@ -1,12 +1,13 @@
 #include "airstrip_configs.h"
 #include "airstrip_enums.h"
 
+using namespace std;
 
 namespace airstrip {
 
     //log
      int logPrintLevel = DEBUG;
-     int logPrintType = CONSOLE;
+     string logPrintPath;
 
 
 

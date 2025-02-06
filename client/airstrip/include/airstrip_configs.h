@@ -1,13 +1,11 @@
 #ifndef AIRSTRIP_CONFIGS_H
 #define AIRSTRIP_CONFIGS_H
+#include <string>
 
 namespace airstrip {
-
     //log
     extern int logPrintLevel;
-    extern int logPrintType;
-
-
+    extern std::string logPrintPath;
 }
 
 

@@ -8,8 +8,3 @@ using namespace std;
 int taskUpdateIpIntervalCount = 1;
 QStackedWidget *stackedWidget = nullptr;
 void *mainThreadPool = nullptr;
-
-// input variable
-
-int taskPullTaskIntervalCount = 20;
-string appEnv = ENV_PROD;

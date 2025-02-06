@@ -1,7 +1,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <functional>
 #include <string>
 #include <QStackedWidget>
 
@@ -23,17 +22,14 @@ constexpr int GENERAL_TASK_INTERVAL_SECONDS = 5;
 constexpr auto ENV_DEV = "dev";
 constexpr auto ENV_PROD = "prod";
 
+constexpr auto PRO_OPT_VERSION = "version";
+constexpr auto PRO_OPT_ENV = "env";
+
 
 // variable
 extern int taskUpdateIpIntervalCount;
 extern QStackedWidget *stackedWidget;
 extern void *mainThreadPool;
-
-
-// input args
-
-extern int taskPullTaskIntervalCount;
-extern std::string appEnv;
 
 
 #endif //CONFIG_H
