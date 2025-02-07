@@ -11,8 +11,7 @@
 using namespace std;
 
 namespace airstrip {
-
-    void logPrintln(LogLevel level, const string &functionName, const string &message) {
+    void logPrintln(const string &message, LogLevel level, const string &functionName) {
         // Time formate
         const auto now = chrono::system_clock::now();
         const auto time = chrono::system_clock::to_time_t(now);

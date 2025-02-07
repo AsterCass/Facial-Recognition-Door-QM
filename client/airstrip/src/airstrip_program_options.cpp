@@ -10,7 +10,7 @@ namespace po = boost::program_options;
 using namespace std;
 
 namespace airstrip {
-    std::map<std::string, std::vector<std::string> > programOptions;
+    map<string, AirstripProgramOptionLoadedOption> programOptions;
 
     void enableProgramOptions(
         const AirstripProgramOptions &optSetting, int argc, char **argv) {
@@ -28,7 +28,7 @@ namespace airstrip {
                 if (opt.second.needInput) {
                     desc.add_options()(
                         opt.first.c_str(),
-                        po::value<vector<string> >(),
+                        po::value<vector<string> >() -> multitoken(),
                         opt.second.optionDesc.c_str());
                 } else {
                     desc.add_options()(
@@ -55,7 +55,9 @@ namespace airstrip {
             } else {
                 logPrintLevel = DEBUG;
             }
-            programOptions["logLevel"] = {std::to_string(logPrintLevel)};
+            programOptions["logLevel"].dataType = INTEGER;
+            programOptions["logLevel"].originData = {to_string(logPrintLevel)};
+
 
             if (vm.count("logPath")) {
                 const auto inputLogPath = vm["logPath"].as<string>();
@@ -67,7 +69,8 @@ namespace airstrip {
             } else {
                 logPrintPath = "";
             }
-            programOptions["logPrintPath"] = {logPrintPath};
+            programOptions["logLevel"].dataType = STRING;
+            programOptions["logPrintPath"].originData = {logPrintPath};
 
             bool haveInput = false;
 
@@ -81,11 +84,13 @@ namespace airstrip {
                         exit(0);
                     }
                     if (opt.second.needInput) {
-                        programOptions[optStd] = vm[optStd].as<vector<string> >();
+                        programOptions[optStd].dataType = opt.second.valueType;
+                        programOptions[optStd].originData = vm[optStd].as<vector<string> >();
                     }
                 } else {
                     if (opt.second.needInput) {
-                        programOptions[optStd] = opt.second.defaultValue;
+                        programOptions[optStd].dataType = opt.second.valueType;
+                        programOptions[optStd].originData = opt.second.defaultValue;
                     }
                 }
             }
@@ -94,21 +99,124 @@ namespace airstrip {
                 exit(0);
             }
 
-            // Print
-            for (auto &loadedOpt: programOptions) {
-                std::ostringstream values;
-                for (const auto &str: loadedOpt.second) {
-                    values << str << " ";
+            // Print and Check
+            for (const auto &loadedOpt: programOptions) {
+                string outputData;
+                bool getOptionRet;
+                switch (loadedOpt.second.dataType) {
+                    case STRING: {
+                        string data;
+                        getOptionRet = getProgramOptions(loadedOpt.first, &data);
+                        outputData = data;
+                        break;
+                    }
+                    case STRING_VECTOR: {
+                        vector<string> data;
+                        getOptionRet = getProgramOptions(loadedOpt.first, &data);
+                        ostringstream values;
+                        for (const auto &str: data) {
+                            values << str << " ";
+                        }
+                        outputData = values.str();
+                        break;
+                    }
+                    case INTEGER: {
+                        int data;
+                        getOptionRet = getProgramOptions(loadedOpt.first, &data);
+                        outputData = to_string(data);
+                        break;
+                    }
+                    case INTEGER_VECTOR: {
+                        vector<int> data;
+                        getOptionRet = getProgramOptions(loadedOpt.first, &data);
+                        ostringstream values;
+                        for (const auto &str: data) {
+                            values << str << " ";
+                        }
+                        outputData = values.str();
+                        break;
+                    }
+                    case DOUBLE: {
+                        double data;
+                        getOptionRet = getProgramOptions(loadedOpt.first, &data);
+                        outputData = to_string(data);
+                        break;
+                    }
+                    case DOUBLE_VECTOR: {
+                        vector<double> data;
+                        getOptionRet = getProgramOptions(loadedOpt.first, &data);
+                        ostringstream values;
+                        for (const auto &str: data) {
+                            values << str << " ";
+                        }
+                        outputData = values.str();
+                        break;
+                    }
                 }
-                const size_t pos = loadedOpt.first.find(",") == string::npos
-                                       ? loadedOpt.first.size()
-                                       : loadedOpt.first.find(",");
-                auto optStd = loadedOpt.first.substr(0, pos);
-                logPrintln(INFO, __FUNCTION__,
-                           "Loaded " + optStd + " = " + values.str());
+                if (getOptionRet) {
+                    logPrintln("Loaded " + loadedOpt.first + " = " + outputData,
+                               INFO, __FUNCTION__);
+                } else {
+                    logPrintln("Load " + loadedOpt.first + " error, please check input",
+                               CRITICAL, __FUNCTION__);
+                    exit(1);
+                }
             }
         } catch (const exception &e) {
             cout << "Failed to parse options: " << e.what() << endl;
         }
+    }
+
+    bool getProgramOptions(const string &optionName, void *optionValue) {
+        if (programOptions.find(optionName) == programOptions.end()) {
+            return false;
+        }
+        const auto loadedOpt = programOptions[optionName];
+
+        try {
+            switch (loadedOpt.dataType) {
+                case STRING: {
+                    auto *data = static_cast<string *>(optionValue);
+                    *data = loadedOpt.originData.at(0);
+                    break;
+                }
+                case STRING_VECTOR: {
+                    auto *data = static_cast<vector<string> *>(optionValue);
+                    for (const auto &cell: loadedOpt.originData) {
+                        data->push_back(cell);
+                    }
+                    break;
+                }
+                case INTEGER: {
+                    auto *data = static_cast<int *>(optionValue);
+                    *data = stoi(loadedOpt.originData.at(0));
+                    break;
+                }
+                case INTEGER_VECTOR: {
+                    auto *data = static_cast<vector<int> *>(optionValue);
+                    for (const auto &cell: loadedOpt.originData) {
+                        data->push_back(stoi(cell));
+                    }
+                    break;
+                }
+                case DOUBLE: {
+                    auto *data = static_cast<double *>(optionValue);
+                    *data = stod(loadedOpt.originData.at(0));
+                    break;
+                }
+                case DOUBLE_VECTOR: {
+                    auto *data = static_cast<vector<double> *>(optionValue);
+                    for (const auto &cell: loadedOpt.originData) {
+                        data->push_back(stod(cell));
+                    }
+                    break;
+                }
+                default:
+                    return false;
+            }
+        } catch (...) {
+            return false;
+        }
+        return true;
     }
 }

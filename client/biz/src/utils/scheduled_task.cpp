@@ -5,16 +5,15 @@
 #include "airstrip_log.h"
 
 
-
 using namespace std;
 using namespace airstrip;
 
 void task1() {
-    logPrintln(INFO, __FUNCTION__, "Task 1 Finish");
+    logPrintln("Task 1 Finish", INFO, __FUNCTION__);
 }
 
 void task2() {
-    logPrintln(INFO, __FUNCTION__, "Task 2 Finish");
+    logPrintln("Task 2 Finish", INFO, __FUNCTION__);
 }
 
 

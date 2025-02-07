@@ -5,11 +5,7 @@
 #include "airstrip_enums.h"
 
 namespace airstrip {
-
-
-    void logPrintln(LogLevel level, const std::string &functionName, const std::string &message);
-
-
+    void logPrintln(const std::string &message, LogLevel level = INFO, const std::string &functionName = "");
 }
 
 #endif // AIRSTRIP_LOG_H

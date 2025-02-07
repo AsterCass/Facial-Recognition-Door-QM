@@ -16,14 +16,15 @@ int main(int argc, char *argv[]) {
         version.needInput = false;
         version.optionDesc = "Produce version";
         version.outputValue = APP_VERSION;
+        version.valueType = STRING;
         optSetting.options[std::string(PRO_OPT_VERSION) + ",v"] = version;
-
         // Env
         airstrip::AirstripProgramOptionDetail env;
         env.needContinue = true;
         env.needInput = true;
         env.optionDesc = "Set produce environment, 0 or 1, 1 means dev, 0 means prod. \nDefault values is 1";
         env.defaultValue = {std::to_string(DEV)};
+        env.valueType = INTEGER;
         optSetting.options[std::string(PRO_OPT_ENV)] = env;
 
         // Task interval Count
@@ -32,9 +33,11 @@ int main(int argc, char *argv[]) {
         taskIvCnt.needInput = true;
         taskIvCnt.optionDesc = "Set common task interval sec count. \nDefault values is 5";
         taskIvCnt.defaultValue = {std::to_string(5)};
+        taskIvCnt.valueType = INTEGER;
         optSetting.options[std::string(PRO_OPT_TASK_IN_CNT)] = taskIvCnt;
     }
     enableProgramOptions(optSetting, argc, argv);
+
 
     // Init application
     QApplication app(argc, argv);
@@ -56,7 +59,7 @@ int main(int argc, char *argv[]) {
     router->show();
 
     // Finish
-    airstrip::logPrintln(INFO, __FUNCTION__, "Application started");
+    airstrip::logPrintln("Application started", INFO, __FUNCTION__);
 
     return QApplication::exec();
 }
