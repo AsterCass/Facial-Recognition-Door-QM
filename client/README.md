@@ -6,17 +6,17 @@
 
 ### 编译流程
 
-* 下载[Boost]((https://www.boost.org/))到本地
+* 下载[Boost]((https://www.boost.org/))到本地，并构建
+* 下载[SQLiteCpp](https://github.com/SRombauts/SQLiteCpp)到本地，并构建
 * 编译脚手架`airstrip`
 * 下载[OpenCV](https://opencv.org/)、[InspireFace](https://github.com/HyperInspire/InspireFace)到本地
 * 再编译业务部分`biz`
 
-### mingw下boost的构建
+#### 编译提示
 
-* 下载源代码之后，进入`tools/build`文件夹
-* 执行`bootstrap.bat mingw`
-* 如果出现错误`res.rc:1: fatal error: when writing output to : Invalid argument`，我们进入`tools/build/src/engine`文件夹下，修改`config_toolset.bat`将
-`set "B2_CXX="%%i" --input res.rc --output res.o && %B2_CXX% -Wl,res.o"`改成
-`set "B2_CXX="%%i" --input res.rc --output res.o --use-temp-file && %B2_CXX% -Wl,res.o"` 即可
-* `b2`构建完成后，将其所在文件夹加入环境变化，返回源代码根目录，执行`b2 --build-dir="build" --toolset=gcc --build-type=complete stage`
-* 此时即可引入项目当中
+* Windows下使用`MinGW`编译`Boost`
+  ，这里我将可能遇到的问题放在了[Windows下构建使用MinGW构建Boost](https://www.astercasc.com/article/detail?articleId=AT188739606681985433)
+  可以参考，其他环境比较简单，参考官方文档即可
+* `SQLiteCpp`就是标准的构建流程，直接拉源码，进入文件夹，
+  `mkdir build && cd build && cmake .. && cmake --build ./ && cmake --install ./ --prefix  ../_install`即可
+* 编译`airstrip`和`biz`前，记得修改`CMakeList.txt`中关于所需库位置的环境变量

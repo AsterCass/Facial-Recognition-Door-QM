@@ -6,6 +6,7 @@
 #include "utils/scheduled_task.h"
 #include "ui/main_router.h"
 #include "config/config.h"
+#include "airstrip_db.h"
 
 int main(int argc, char *argv[]) {
     // Input args
@@ -26,7 +27,6 @@ int main(int argc, char *argv[]) {
         env.defaultValue = {std::to_string(DEV)};
         env.valueType = INTEGER;
         optSetting.options[std::string(PRO_OPT_ENV)] = env;
-
         // Task interval Count
         airstrip::AirstripProgramOptionDetail taskIvCnt;
         taskIvCnt.needContinue = true;
@@ -37,6 +37,9 @@ int main(int argc, char *argv[]) {
         optSetting.options[std::string(PRO_OPT_TASK_IN_CNT)] = taskIvCnt;
     }
     enableProgramOptions(optSetting, argc, argv);
+
+
+    airstrip::CommonBackendConfigDbManager xx("example.db");
 
 
     // Init application
