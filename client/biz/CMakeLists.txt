@@ -22,7 +22,7 @@ endif ()
 set(SDK_PATH 3rdparty)
 set(AIRSTRIP_PREFIX_PATH ../airstrip)
 find_package(OpenCV REQUIRED)
-find_package(Boost REQUIRED COMPONENTS program_options json)
+find_package(Boost REQUIRED COMPONENTS program_options json filesystem)
 find_package(Qt5 REQUIRED COMPONENTS Core Bluetooth Widgets)
 
 
@@ -67,7 +67,7 @@ if (WIN32)
     target_include_directories(FacialRecognitionDoor PUBLIC ${CMAKE_SOURCE_DIR}/include)
     target_link_libraries(FacialRecognitionDoor
             ${OpenCV_LIBS}
-            airstrip Boost::program_options Boost::json
+            airstrip Boost::program_options Boost::json Boost::filesystem
             Qt5::Core Qt5::Bluetooth Qt5::Widgets)
 elseif (UNIX)
     target_include_directories(FacialRecognitionDoor PUBLIC ${CMAKE_SOURCE_DIR}/include)

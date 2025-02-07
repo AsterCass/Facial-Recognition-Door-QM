@@ -7,10 +7,47 @@
 #include <fstream>
 #include <ctime>
 #include <sstream>
+#include <thread>
+#include <boost/filesystem.hpp>
 
 using namespace std;
+namespace fs = boost::filesystem;
 
 namespace airstrip {
+    bool startClearThread = false;
+
+    void clearHistoryLog() {
+        const auto now = chrono::system_clock::now();
+        const auto time = chrono::system_clock::to_time_t(now);
+        const std::time_t cutoff = time - (logReDays * 24 * 60 * 60);
+
+        const fs::directory_iterator end_iter;
+        for (fs::directory_iterator iter(logPrintPath); iter != end_iter; ++iter) {
+            if (is_regular_file(iter->status())) {
+                if (iter->path().extension() == ".txt" &&
+                    iter->path().stem().extension() == ".log") {
+                    const std::time_t fileTime = last_write_time(iter->path());
+                    if (fileTime < cutoff) {
+                        fs::remove(iter->path());
+                    }
+                }
+            }
+        }
+    }
+
+    void clearHistoryLogThreadStart() {
+        if (logPrintPath.empty()) {
+            return;
+        }
+        thread cleanup_thread([&] [[noreturn]] () {
+            while (true) {
+                this_thread::sleep_for(chrono::hours(12));
+                clearHistoryLog();
+            }
+        });
+        cleanup_thread.detach();
+    }
+
     void logPrintln(const string &message, LogLevel level, const string &functionName) {
         // Time formate
         const auto now = chrono::system_clock::now();
@@ -57,13 +94,19 @@ namespace airstrip {
         if (logPrintPath.empty()) {
             cout << outputStr << endl;
         } else {
-            const string logFileName = logPrintPath + oss.str().substr(0, 10).append(".txt");
-            std::ofstream logFile(logFileName, std::ios_base::app);
+            const string logFileName = logPrintPath + oss.str().substr(0, 10).append(".log.txt");
+            ofstream logFile(logFileName, ios_base::app);
             if (logFile.is_open()) {
-                logFile << outputStr << std::endl;
+                logFile << outputStr << endl;
             } else {
-                std::cerr << "Error opening file for logging." << std::endl;
+                cerr << "Error opening file for logging." << endl;
             }
+        }
+
+        // Log clear
+        if (!startClearThread) {
+            startClearThread = true;
+            clearHistoryLogThreadStart();
         }
     }
 }

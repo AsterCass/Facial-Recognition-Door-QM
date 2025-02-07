@@ -4,6 +4,7 @@
 
 namespace airstrip {
     //log
+    extern int logReDays;
     extern int logPrintLevel;
     extern std::string logPrintPath;
 }

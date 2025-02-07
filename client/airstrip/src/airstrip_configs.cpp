@@ -4,11 +4,8 @@
 using namespace std;
 
 namespace airstrip {
-
     //log
-     int logPrintLevel = DEBUG;
-     string logPrintPath;
-
-
-
+    int logReDays = 10;
+    int logPrintLevel = DEBUG;
+    string logPrintPath;
 }

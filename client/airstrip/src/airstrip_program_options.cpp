@@ -24,11 +24,14 @@ namespace airstrip {
             desc.add_options()("logPath", po::value<string>(),
                                "Set log file output directory, if logPath is empty output to console."
                                "\nDefault value is ''");
+            desc.add_options()("logReDays", po::value<string>(),
+                               "Set log files retention days, only work when logPath isn't empty"
+                               "\nDefault value is 10");
             for (auto &opt: optSetting.options) {
                 if (opt.second.needInput) {
                     desc.add_options()(
                         opt.first.c_str(),
-                        po::value<vector<string> >() -> multitoken(),
+                        po::value<vector<string> >()->multitoken(),
                         opt.second.optionDesc.c_str());
                 } else {
                     desc.add_options()(
@@ -41,39 +44,58 @@ namespace airstrip {
             notify(vm);
 
             // Read
-            if (vm.count("help")) {
-                cout << desc << endl;
-                exit(0);
+            {
+                if (vm.count("help")) {
+                    cout << desc << endl;
+                    exit(0);
+                }
             }
-
-            if (vm.count("logLevel")) {
-                try {
-                    logPrintLevel = stoi(vm["logLevel"].as<string>());
-                } catch (...) {
+            // Log level
+            {
+                if (vm.count("logLevel")) {
+                    try {
+                        logPrintLevel = stoi(vm["logLevel"].as<string>());
+                    } catch (...) {
+                        logPrintLevel = DEBUG;
+                    }
+                } else {
                     logPrintLevel = DEBUG;
                 }
-            } else {
-                logPrintLevel = DEBUG;
+                programOptions["logLevel"].dataType = INTEGER;
+                programOptions["logLevel"].originData = {to_string(logPrintLevel)};
             }
-            programOptions["logLevel"].dataType = INTEGER;
-            programOptions["logLevel"].originData = {to_string(logPrintLevel)};
-
-
-            if (vm.count("logPath")) {
-                const auto inputLogPath = vm["logPath"].as<string>();
-                if (!inputLogPath.empty() && inputLogPath.back() != '/') {
-                    logPrintPath = inputLogPath + "/";
+            // Log path
+            {
+                if (vm.count("logPath")) {
+                    const auto inputLogPath = vm["logPath"].as<string>();
+                    if (!inputLogPath.empty() && inputLogPath.back() != '/') {
+                        logPrintPath = inputLogPath + "/";
+                    } else {
+                        logPrintPath = inputLogPath;
+                    }
                 } else {
-                    logPrintPath = inputLogPath;
+                    logPrintPath = "";
                 }
-            } else {
-                logPrintPath = "";
+                programOptions["logLevel"].dataType = STRING;
+                programOptions["logPrintPath"].originData = {logPrintPath};
             }
-            programOptions["logLevel"].dataType = STRING;
-            programOptions["logPrintPath"].originData = {logPrintPath};
+            // Log remain
+            {
+                if (vm.count("logReDays")) {
+                    try {
+                        logReDays = stoi(vm["logReDays"].as<string>());
+                    } catch (...) {
+                        logReDays = 10;
+                    }
+                } else {
+                    logReDays = 10;
+                }
+                programOptions["logReDays"].dataType = INTEGER;
+                programOptions["logReDays"].originData = {to_string(logReDays)};
+            }
 
+            // User custom
             bool haveInput = false;
-
             for (auto &opt: optSetting.options) {
                 const size_t pos = opt.first.find(",") == string::npos ? opt.first.size() : opt.first.find(",");
                 auto optStd = opt.first.substr(0, pos);
