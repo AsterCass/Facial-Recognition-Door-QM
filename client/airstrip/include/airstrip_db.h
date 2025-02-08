@@ -11,16 +11,15 @@ namespace airstrip {
         std::string updateTime;
     };
 
-
     class CommonBackendConfigDbManager {
     public:
         explicit CommonBackendConfigDbManager(const std::string &dbPath);
 
-        void upsertConfig(const std::string &name, std::string configValueJson);
+        void upsertConfig(const std::string &name, const std::string &configValueJson);
 
         void deleteConfig(const std::string &name);
 
-        std::string getConfig(const std::string &name);
+        std::string getConfig(const std::string &name) const;
 
     private:
         void initDb();

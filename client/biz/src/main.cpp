@@ -1,6 +1,8 @@
 #include <QApplication>
 #include <airstrip_log.h>
 #include <airstrip_program_options.h>
+#include <iostream>
+#include <ostream>
 #include <enums/general_enums.h>
 
 #include "utils/scheduled_task.h"
@@ -37,10 +39,6 @@ int main(int argc, char *argv[]) {
         optSetting.options[std::string(PRO_OPT_TASK_IN_CNT)] = taskIvCnt;
     }
     enableProgramOptions(optSetting, argc, argv);
-
-
-    airstrip::CommonBackendConfigDbManager xx("example.db");
-
 
     // Init application
     QApplication app(argc, argv);
