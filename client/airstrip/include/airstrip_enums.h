@@ -20,5 +20,12 @@ enum ProgramOptionInputValueType {
     DOUBLE_VECTOR,
 };
 
+enum RequestMethod {
+    GET,
+    POST,
+    PUT,
+    DELETE,
+};
+
 
 #endif //AIRSTRIP_ENUMS_H

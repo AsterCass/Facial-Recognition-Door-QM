@@ -1,14 +1,10 @@
 #include <QApplication>
 #include <airstrip_log.h>
 #include <airstrip_program_options.h>
-#include <iostream>
-#include <ostream>
 #include <enums/general_enums.h>
-
 #include "utils/scheduled_task.h"
 #include "ui/main_router.h"
-#include "config/config.h"
-#include "airstrip_db.h"
+#include "config/config.h"=
 
 int main(int argc, char *argv[]) {
     // Input args

@@ -44,6 +44,7 @@ set(SOURCES
         src/airstrip_thread_pool.cpp
         src/airstrip_program_options.cpp
         src/airstrip_db.cpp
+        src/airstrip_http.cpp
 )
 
 
