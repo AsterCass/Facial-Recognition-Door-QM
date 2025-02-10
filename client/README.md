@@ -14,6 +14,13 @@
 
 #### 编译提示
 
+* 交叉编译部分，我们这里需要`GCC`的`8.3`版本`ARM`架构，在`GUN`
+  官网下载[资源](https://ftp.gnu.org/gnu/gcc/gcc-8.3.0/gcc-8.3.0.tar.gz)，
+  然后解压后，下载额外资源`cd  gcc-8.3.0 && ./contrib/download_prerequisites`，再则准备编译
+  `mkdir ../gcc-build && cd ../gcc-build`，
+  编译选择某个文件夹
+  `../gcc-8.3.0/configure --target=arm-linux-gnueabihf --prefix=/to/your/path --enable-languages=c,c++ --disable-multilib --enable-threads=posix --with-newlib --with-gnu-as --with-gnu-ld`，
+  编译`make -j$(nproc)` 最后`make install`即可
 * Windows下使用`MinGW`编译`Boost`
   ，这里我将可能遇到的问题放在了[Windows下构建使用MinGW构建Boost](https://www.astercasc.com/article/detail?articleId=AT188739606681985433)
   可以参考，其他环境比较简单，参考官方文档即可
