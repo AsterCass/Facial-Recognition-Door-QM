@@ -20,7 +20,14 @@ if (WIN32)
     )
     #set(CMAKE_PREFIX_PATH P:/tools/opencv/OpenCV-MinGW-Build-OpenCV-4.5.5-x64)
 elseif (UNIX)
-    set(CMAKE_PREFIX_PATH /home/astercasc/Qt5/5.15.2/gcc_64/lib/cmake/Qt5;/usr/local/lib/cmake/opencv4)
+    set(OPENCV_ROOT /home/astercasc/Qt5/5.15.2/gcc_64/lib/cmake/Qt5;/usr/local/lib/cmake/opencv4)
+    set(BOOST_ROOT /home/astercasc/biz/boost/boost_1_82_0/_install)
+    set(SQLITE_CPP_ROOT /home/astercasc/biz/SQLiteCpp/_install)
+    set(CMAKE_PREFIX_PATH
+            "${BOOST_ROOT}"
+            "${SQLITE_CPP_ROOT}"
+            "${OPENCV_ROOT}"
+    )
 else ()
     message(FATAL_ERROR "Unsupported operating system")
 endif ()
@@ -45,9 +52,12 @@ if (WIN32)
 elseif (UNIX)
     include_directories(
             ${SDK_PATH}/include/linux/inspire
+            ${AIRSTRIP_PREFIX_PATH}/include
+            ${SQLITE_CPP_ROOT}/include
     )
     link_directories(
             ${SDK_PATH}/lib/linux/inspire
+            ${AIRSTRIP_PREFIX_PATH}/lib
     )
 else ()
     message(FATAL_ERROR "Unsupported operating system")
@@ -82,7 +92,14 @@ if (WIN32)
     )
 elseif (UNIX)
     target_include_directories(FacialRecognitionDoor PUBLIC ${CMAKE_SOURCE_DIR}/include)
-    target_link_libraries(FacialRecognitionDoor ${OpenCV_LIBS} airstrip Qt5::Core Qt5::Bluetooth Qt5::Widgets InspireFace)
+    target_link_libraries(FacialRecognitionDoor PRIVATE
+            ${OpenCV_LIBS}
+            airstrip
+            SQLiteCpp sqlite3
+            Boost::program_options Boost::json Boost::filesystem
+            Qt5::Core Qt5::Bluetooth Qt5::Widgets
+	    InspireFace
+    )
 else ()
     message(FATAL_ERROR "Unsupported operating system")
 endif ()

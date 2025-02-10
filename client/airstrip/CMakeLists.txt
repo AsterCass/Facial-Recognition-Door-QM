@@ -13,7 +13,12 @@ if (WIN32)
             "${SQLITE_CPP_ROOT}"
     )
 elseif (UNIX)
-    #todo
+    set(BOOST_ROOT /home/astercasc/biz/boost/boost_1_82_0/_install)
+    set(SQLITE_CPP_ROOT /home/astercasc/biz/SQLiteCpp/_install)
+    set(CMAKE_PREFIX_PATH
+            "${BOOST_ROOT}"
+            "${SQLITE_CPP_ROOT}"
+    )
 else ()
     message(FATAL_ERROR "Unsupported operating system")
 endif ()

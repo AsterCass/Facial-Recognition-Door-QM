@@ -2,6 +2,8 @@
 
 #include <airstrip_log.h>
 #include <iostream>
+#include <array>
+
 
 using namespace std;
 

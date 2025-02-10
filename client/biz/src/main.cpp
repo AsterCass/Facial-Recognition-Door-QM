@@ -4,7 +4,7 @@
 #include <enums/general_enums.h>
 #include "utils/scheduled_task.h"
 #include "ui/main_router.h"
-#include "config/config.h"=
+#include "config/config.h"
 
 int main(int argc, char *argv[]) {
     // Input args
