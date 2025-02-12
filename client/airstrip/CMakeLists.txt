@@ -15,9 +15,11 @@ if (WIN32)
 elseif (UNIX)
     set(BOOST_ROOT /data/src/boost/_install)
     set(SQLITE_CPP_ROOT /data/src/sqlitecpp/_install)
+    set(BREAKPAD_ROOT /data/src/breakpad/_install)
     set(CMAKE_PREFIX_PATH
             "${BOOST_ROOT}"
             "${SQLITE_CPP_ROOT}"
+	    "${BREAKPAD_ROOT}"
     )
 else ()
     message(FATAL_ERROR "Unsupported operating system")
@@ -29,12 +31,17 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 
 find_package(Boost REQUIRED COMPONENTS program_options json filesystem)
 find_package(SQLiteCpp REQUIRED)
+if (UNIX)
+    find_package(Breakpad REQUIRED)
+endif ()
 
+message(STATUS "Cmake prefix path: ${CMAKE_PREFIX_PATH}")
 message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "Boost include dirs: ${Boost_INCLUDE_DIRS}")
-message(STATUS "Boost library dirs: ${Boost_LIBRARY_DIRS}")
-message(STATUS "Cmake prefix path: ${CMAKE_PREFIX_PATH}")
+message(STATUS "Boost lib dirs: ${Boost_LIBRARY_DIRS}")
+message(STATUS "Breakpad include dirs: ${BREAKPAD_INCLUDE_DIRS}")
+message(STATUS "Breakpad lib dirs: ${BREAKPAD_LIBRARY_DIR}")
 
 include_directories(
         ${PROJECT_SOURCE_DIR}/include
