@@ -8,12 +8,17 @@
 ### 技术栈
 
 1. Qt
-2. OpenCv
-3. libfacedetection
-4. InspireFace
-5. Boost
+2. OpenCv 
+3. InspireFace 
+4. Boost 
+5. SQLiteCpp 
+6. Breakpad
 
 ### 目标平台
+
+Linux、Windows
+
+#### 严格测试平台
 
 RV1109
 
