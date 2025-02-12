@@ -39,7 +39,7 @@ namespace airstrip {
         if (logPrintPath.empty()) {
             return;
         }
-        thread cleanup_thread([&] [[noreturn]] () {
+	thread cleanup_thread([&] {
             while (true) {
                 this_thread::sleep_for(chrono::hours(12));
                 clearHistoryLog();
