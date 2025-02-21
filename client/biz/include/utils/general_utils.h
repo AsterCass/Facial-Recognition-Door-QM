@@ -6,9 +6,6 @@
 
 
 namespace generalUtils {
-    // Parse input arguments
-    // int loadArguments(int argc, char **argv);
-
 }
 
 

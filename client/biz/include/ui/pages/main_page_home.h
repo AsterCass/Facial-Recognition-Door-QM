@@ -3,6 +3,7 @@
 
 #include <QPushButton>
 #include <QLabel>
+#include <QLineEdit>
 
 class MainPageHome : public QWidget {
 public:
@@ -23,6 +24,9 @@ private:
 
     std::unique_ptr<QPushButton> button;
     std::unique_ptr<QLabel> label;
+
+
+    std::unique_ptr<QLineEdit> edit;
 };
 
 

@@ -37,6 +37,7 @@ int main(int argc, char *argv[]) {
     enableProgramOptions(optSetting, argc, argv);
 
     // Init application
+    qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
     QApplication app(argc, argv);
 
     // Init thread poll
@@ -54,6 +55,8 @@ int main(int argc, char *argv[]) {
     // Page router
     const auto router = MainRouter::getInstance();
     router->show();
+
+    QLocale::setDefault(QLocale(QLocale::Chinese, QLocale::SimplifiedChineseScript, QLocale::China));
 
     // Finish
     airstrip::logPrintln("Application started", INFO, __FUNCTION__);

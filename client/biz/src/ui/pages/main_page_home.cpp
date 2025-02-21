@@ -1,5 +1,4 @@
 #include "ui/pages/main_page_home.h"
-
 #include "config/config.h"
 #include "enums/general_enums.h"
 
@@ -9,6 +8,8 @@ MainPageHome::MainPageHome(QWidget *parent): QWidget(parent) {
         stackedWidget->setCurrentIndex(MAIN_PAGE_INIT);
     });
 
+
+    edit = std::unique_ptr<QLineEdit>(new QLineEdit(this));
 }
 
 
