@@ -8,7 +8,7 @@
 ### 技术栈
 
 1. Qt
-2. OpenCv 
+2. OpenCV
 3. InspireFace 
 4. Boost 
 5. SQLiteCpp 

@@ -23,10 +23,12 @@ elseif (UNIX)
     set(OPENCV_ROOT /home/astercasc/Qt5/5.15.2/gcc_64/lib/cmake/Qt5;/usr/local/lib/cmake/opencv4)
     set(BOOST_ROOT /home/astercasc/biz/boost/boost_1_82_0/_install)
     set(SQLITE_CPP_ROOT /home/astercasc/biz/SQLiteCpp/_install)
+    set(BREAKPAD_ROOT /data/src/breakpad/_install)
     set(CMAKE_PREFIX_PATH
             "${BOOST_ROOT}"
             "${SQLITE_CPP_ROOT}"
             "${OPENCV_ROOT}"
+            "${BREAKPAD_ROOT}"
     )
 else ()
     message(FATAL_ERROR "Unsupported operating system")
@@ -38,6 +40,9 @@ find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS program_options json filesystem)
 find_package(SQLiteCpp REQUIRED)
 find_package(Qt5 REQUIRED COMPONENTS Core Bluetooth Widgets)
+if (UNIX)
+    find_package(Breakpad REQUIRED)
+endif ()
 
 
 if (WIN32)
@@ -68,6 +73,8 @@ message(STATUS "OpenCV version: ${OpenCV_VERSION}")
 message(STATUS "OpenCV include path: ${OpenCV_INCLUDE_DIRS}")
 message(STATUS "OpenCV libraries: ${OpenCV_LIBS}")
 message(STATUS "OpenCV libraries path: ${OpenCV_LIB_PATH}")
+message(STATUS "Breakpad include path: ${BREAKPAD_INCLUDE_DIRS}")
+message(STATUS "Breakpad libraries path: ${BREAKPAD_LIBRARY_DIR}")
 message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 
@@ -98,7 +105,7 @@ elseif (UNIX)
             SQLiteCpp sqlite3
             Boost::program_options Boost::json Boost::filesystem
             Qt5::Core Qt5::Bluetooth Qt5::Widgets
-	    InspireFace
+            InspireFace Breakpad::Client
     )
 else ()
     message(FATAL_ERROR "Unsupported operating system")

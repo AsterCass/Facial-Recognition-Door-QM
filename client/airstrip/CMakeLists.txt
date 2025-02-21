@@ -53,7 +53,7 @@ message(STATUS "Breakpad lib dirs: ${BREAKPAD_LIBRARY_DIR}")
 set(SOURCES
         #        For test
 #        src/main.cpp
-#        src/airstrip_log.cpp
+        src/airstrip_log.cpp
         src/airstrip_configs.cpp
         src/airstrip_thread_pool.cpp
         src/airstrip_program_options.cpp
