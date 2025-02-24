@@ -2,24 +2,42 @@
 
 #include "config/config.h"
 #include "enums/general_enums.h"
+#include "ui/components/virtual_keyboard.h"
 #include "ui/pages/main_page_home.h"
 #include "ui/pages/main_page_init.h"
+#include <QMessageBox>
+#include <QPropertyAnimation>
+
+#include "ui/components/notification.h"
 
 
 MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
-    // Size
-    this->setGeometry(QRect(0, 0, 800, 600));
-    // Load router
-    stackedWidget = new QStackedWidget();
-    mainLayout = new QVBoxLayout(this);
-    mainLayout->addWidget(stackedWidget);
+    // param
+    constexpr int height = 640;
+    constexpr int width = 400;
 
-    // Load all page
+    // Size
+    this->resize(width, height);
+
+    // Load route
+    stackedWidget = new QStackedWidget(this);
+    stackedWidget->setGeometry(QRect(0, 0, width, height));
     stackedWidget->insertWidget(MAIN_PAGE_INIT, MainPageInit::getInstance());
     stackedWidget->insertWidget(MAIN_PAGE_HOME, MainPageHome::getInstance());
-
-    // Current page
     stackedWidget->setCurrentIndex(MAIN_PAGE_INIT);
+    stackedWidget->show();
+
+    // Load notification
+    const auto notification = Notification::getInstance(this);
+    notification->setGeometry(QRect(0, 0, width, height));
+    notification->hide();
+
+    notification->setMessage("1234");
+
+    // // Load virtual keyboard
+    // const auto virtualKeyboard = VirtualKeyboard::getInstance(this);
+    // virtualKeyboard->setGeometry(QRect(0, 0, width, height));
+    // notification->setVisible(false);
 }
 
 

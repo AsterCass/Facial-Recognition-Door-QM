@@ -37,7 +37,6 @@ int main(int argc, char *argv[]) {
     enableProgramOptions(optSetting, argc, argv);
 
     // Init application
-    qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
     QApplication app(argc, argv);
 
     // Init thread poll

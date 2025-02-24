@@ -20,9 +20,6 @@ private:
     explicit MainRouter(QWidget *parent = nullptr);
 
     ~MainRouter() override;
-
-    QVBoxLayout *mainLayout;
-
 };
 
 
