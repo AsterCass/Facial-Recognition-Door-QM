@@ -39,7 +39,8 @@ set(AIRSTRIP_PREFIX_PATH ../airstrip)
 #find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS program_options json filesystem)
 find_package(SQLiteCpp REQUIRED)
-find_package(Qt5 REQUIRED COMPONENTS Core Bluetooth Widgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets)
 if (UNIX)
     find_package(Breakpad REQUIRED)
 endif ()
@@ -56,12 +57,12 @@ if (WIN32)
     )
 elseif (UNIX)
     include_directories(
-	    #${SDK_PATH}/include/linux/inspire
+            #${SDK_PATH}/include/linux/inspire
             ${AIRSTRIP_PREFIX_PATH}/include
             ${SQLITE_CPP_ROOT}/include
     )
     link_directories(
-	    #${SDK_PATH}/lib/linux/inspire
+            #${SDK_PATH}/lib/linux/inspire
             ${AIRSTRIP_PREFIX_PATH}/lib
     )
 else ()
@@ -78,14 +79,18 @@ message(STATUS "Breakpad libraries path: ${BREAKPAD_LIBRARY_DIR}")
 message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 
-
-add_executable(FacialRecognitionDoor src/main.cpp
+set(PROJECT_SOURCES
+        src/main.cpp
         src/config/config.cpp
         src/utils/general_utils.cpp
         src/ui/main_router.cpp
         src/ui/pages/main_page_init.cpp
         src/ui/pages/main_page_home.cpp
         src/utils/scheduled_task.cpp
+)
+
+add_executable(FacialRecognitionDoor src/main.cpp
+        ${PROJECT_SOURCES}
 )
 
 if (WIN32)
@@ -95,18 +100,18 @@ if (WIN32)
             airstrip
             SQLiteCpp sqlite3
             Boost::program_options Boost::json Boost::filesystem
-            Qt5::Core Qt5::Bluetooth Qt5::Widgets
+            Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets
     )
 elseif (UNIX)
     target_include_directories(FacialRecognitionDoor PUBLIC ${CMAKE_SOURCE_DIR}/include)
     target_link_libraries(FacialRecognitionDoor PRIVATE
-	    #${OpenCV_LIBS}
+            #${OpenCV_LIBS}
             airstrip
             SQLiteCpp sqlite3
             Boost::program_options Boost::json Boost::filesystem
-            Qt5::Core Qt5::Widgets
-	    # InspireFace
-	    Breakpad::Client
+            Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets
+            # InspireFace
+            Breakpad::Client
     )
 else ()
     message(FATAL_ERROR "Unsupported operating system")
