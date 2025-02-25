@@ -86,6 +86,7 @@ set(PROJECT_SOURCES
         src/ui/main_router.cpp
         src/ui/components/virtual_keyboard.cpp
         src/ui/components/notification.cpp
+        src/ui/components/common_components.cpp
         src/ui/pages/main_page_init.cpp
         src/ui/pages/main_page_home.cpp
         src/utils/scheduled_task.cpp

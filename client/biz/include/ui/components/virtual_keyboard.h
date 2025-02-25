@@ -13,17 +13,7 @@
 
 class VirtualKeyboardMaskEventFilter final : public QObject {
 protected:
-    bool eventFilter(QObject *watched, QEvent *event) override {
-        if (event->type() == QEvent::MouseButtonPress) {
-            const auto *mouseEvent = static_cast<QMouseEvent *>(event);
-            if (mouseEvent->button() == Qt::LeftButton) {
-                airstrip::logPrintln(watched->objectName().toStdString(), INFO, __FUNCTION__);
-                return true;
-            }
-        }
-        // 继续传播事件
-        return QObject::eventFilter(watched, event);
-    }
+    bool eventFilter(QObject *watched, QEvent *event) override;
 };
 
 typedef struct VirtualKeyboardKey {
@@ -39,9 +29,19 @@ public:
 
     VirtualKeyboard &operator=(const VirtualKeyboard &) = delete;
 
-    static VirtualKeyboard *getInstance(QWidget *parent) {
+    static VirtualKeyboard *getInstance(QWidget *parent = nullptr) {
         static VirtualKeyboard instance(parent);
         return &instance;
+    }
+
+    void hideKeyboard() {
+        currentInput = nullptr;
+        this->hide();
+    }
+
+    void showKeyboard(QLineEdit *input) {
+        currentInput = input;
+        this->show();
     }
 
 private:
@@ -49,10 +49,6 @@ private:
 
     ~VirtualKeyboard() override;
 
-private slots:
-    void handleFocusChanged(QWidget *old, QWidget *now);
-
-private:
     const std::vector<std::vector<VirtualKeyboardKey> > keyRows = {
         {
             {"`", "~"}, {"1", "!"}, {"2", "@"},
@@ -90,6 +86,7 @@ private:
     VirtualKeyboardMaskEventFilter *mainScreenWidgetClickEvent = nullptr;
     QWidget *keyboardWidget = nullptr;
     QGridLayout *keyboardLayout = nullptr;
+    QLineEdit *currentInput = nullptr;
 };
 
 

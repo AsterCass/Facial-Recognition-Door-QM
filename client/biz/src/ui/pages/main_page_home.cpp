@@ -1,6 +1,7 @@
 #include "ui/pages/main_page_home.h"
 #include "config/config.h"
 #include "enums/general_enums.h"
+#include "ui/components/common_components.h"
 
 MainPageHome::MainPageHome(QWidget *parent): QWidget(parent) {
     button = std::unique_ptr<QPushButton>(new QPushButton("I am Home, Click switch", this));
@@ -9,7 +10,7 @@ MainPageHome::MainPageHome(QWidget *parent): QWidget(parent) {
     });
 
 
-    edit = std::unique_ptr<QLineEdit>(new QLineEdit(this));
+    edit = std::unique_ptr<QLineEditPro>(new QLineEditPro(this));
 }
 
 

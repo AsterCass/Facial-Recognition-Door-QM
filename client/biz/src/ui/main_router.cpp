@@ -37,7 +37,7 @@ MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
     // Load virtual keyboard
     const auto virtualKeyboard = VirtualKeyboard::getInstance(this);
     virtualKeyboard->setGeometry(QRect(0, 0, width, height));
-    virtualKeyboard->show();
+    virtualKeyboard->hide();
 }
 
 
