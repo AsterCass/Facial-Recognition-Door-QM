@@ -55,8 +55,6 @@ int main(int argc, char *argv[]) {
     const auto router = MainRouter::getInstance();
     router->show();
 
-    QLocale::setDefault(QLocale(QLocale::Chinese, QLocale::SimplifiedChineseScript, QLocale::China));
-
     // Finish
     airstrip::logPrintln("Application started", INFO, __FUNCTION__);
 

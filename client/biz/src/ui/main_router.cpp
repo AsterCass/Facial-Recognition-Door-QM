@@ -17,7 +17,7 @@ MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
     constexpr int width = 400;
 
     // Size
-    this->resize(width, height);
+    this->setFixedSize(width, height);
 
     // Load route
     stackedWidget = new QStackedWidget(this);
@@ -32,12 +32,10 @@ MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
     notification->setGeometry(QRect(0, 0, width, height));
     notification->hide();
 
-    notification->setMessage("1234");
-
-    // // Load virtual keyboard
-    // const auto virtualKeyboard = VirtualKeyboard::getInstance(this);
-    // virtualKeyboard->setGeometry(QRect(0, 0, width, height));
-    // notification->setVisible(false);
+    // Load virtual keyboard
+    const auto virtualKeyboard = VirtualKeyboard::getInstance(this);
+    virtualKeyboard->setGeometry(QRect(0, 0, width, height));
+    virtualKeyboard->show();
 }
 
 
