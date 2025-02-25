@@ -49,7 +49,9 @@ private:
 
     ~VirtualKeyboard() override;
 
-    const std::vector<std::vector<VirtualKeyboardKey> > keyRows = {
+    void switchCaps();
+
+    std::vector<std::vector<VirtualKeyboardKey> > keyRows = {
         {
             {"`", "~"}, {"1", "!"}, {"2", "@"},
             {"3", "#"}, {"4", "$"}, {"5", "%"},
@@ -69,7 +71,7 @@ private:
             {"d", "D"}, {"f", "F"}, {"g", "G"},
             {"h", "H"}, {"j", "J"}, {"k", "K"},
             {"l", "L"}, {";", ":"}, {"'", "\""},
-            {"Enter"},
+            {"Enter", "Enter"},
         },
         {
             {"Chinese", "Chinese"}, {"z", "Z"}, {"x", "X"},
@@ -78,7 +80,8 @@ private:
             {".", ">"}, {"/", "?"}, {"Chinese", "Chinese"},
         },
         {
-            {"Hide", "Hide"}, {"Space Bar", "Space Bar"}, {"Hide", "Hide"}
+            {"Hide", "Hide"}, {"Space Bar", "Space Bar"},
+            {"Hide", "Hide"}
         },
     };
     QVBoxLayout *layout = nullptr;
@@ -87,6 +90,7 @@ private:
     QWidget *keyboardWidget = nullptr;
     QGridLayout *keyboardLayout = nullptr;
     QLineEdit *currentInput = nullptr;
+    bool isCaps = false;
 };
 
 

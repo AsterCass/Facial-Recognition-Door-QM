@@ -44,13 +44,10 @@ VirtualKeyboard::VirtualKeyboard(QWidget *parent): QWidget(parent) {
     keyboardLayout->setSpacing(4);
     keyboardLayout->setContentsMargins(4, 4, 4, 4);
     int row = 0;
-    for (auto keyRow: keyRows) {
+    for (auto &keyRow: keyRows) {
         int col = 0;
-        for (auto key: keyRow) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored
+        for (auto &key: keyRow) {
             key.btn = new QPushButton(QString::fromStdString(key.key), keyboardWidget);
-#pragma clang diagnostic pop
             QFont font = key.btn->font();
             font.setPointSize(5);
             key.btn->setFont(font);
@@ -103,11 +100,16 @@ VirtualKeyboard::VirtualKeyboard(QWidget *parent): QWidget(parent) {
                         if (!currentInput) {
                             return;
                         }
-                        currentInput->insert(QString::fromStdString(key.key));
+                        currentInput->insert(QString::fromStdString(isCaps ? key.keyCap : key.key));
                         currentInput->setFocus();
                     });
                 } else if (key.key == "Caps") {
-                    //todo
+                    connect(key.btn, &QPushButton::clicked, [this](bool) {
+                        if (!currentInput) {
+                            return;
+                        }
+                        switchCaps();
+                    });
                 }
                 col += 2;
             } else {
@@ -117,7 +119,7 @@ VirtualKeyboard::VirtualKeyboard(QWidget *parent): QWidget(parent) {
                     if (!currentInput) {
                         return;
                     }
-                    currentInput->insert(QString::fromStdString(key.key));
+                    currentInput->insert(QString::fromStdString(isCaps ? key.keyCap : key.key));
                     currentInput->setFocus();
                 });
                 ++col;
@@ -129,3 +131,18 @@ VirtualKeyboard::VirtualKeyboard(QWidget *parent): QWidget(parent) {
 
 
 VirtualKeyboard::~VirtualKeyboard() = default;
+
+void VirtualKeyboard::switchCaps() {
+    isCaps = !isCaps;
+    for (auto &keyRow: keyRows) {
+        for (auto &key: keyRow) {
+            if (key.btn) {
+                if (key.keyCap == "&" && isCaps) {
+                    key.btn->setText("&&");
+                } else {
+                    key.btn->setText(QString::fromStdString(isCaps ? key.keyCap : key.key));
+                }
+            }
+        }
+    }
+}
