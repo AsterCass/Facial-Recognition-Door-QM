@@ -1,10 +1,7 @@
 #ifndef NOTIFICATION_H
 #define NOTIFICATION_H
 
-#include <QLineEdit>
-
-
-class QLabel;
+#include <QLabel>
 
 class Notification : public QWidget {
 public:

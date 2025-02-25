@@ -6,15 +6,17 @@
 #include "ui/pages/main_page_home.h"
 #include "ui/pages/main_page_init.h"
 #include <QMessageBox>
-#include <QPropertyAnimation>
 
+#include "airstrip_program_options.h"
 #include "ui/components/notification.h"
 
 
 MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
     // param
-    constexpr int height = 640;
-    constexpr int width = 400;
+    int height = 0;
+    airstrip::getProgramOptions(PRO_OPT_APP_HEIGHT, &height);
+    int width = 0;
+    airstrip::getProgramOptions(PRO_OPT_APP_WIDTH, &width);
 
     // Size
     this->setFixedSize(width, height);

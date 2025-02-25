@@ -33,6 +33,22 @@ int main(int argc, char *argv[]) {
         taskIvCnt.defaultValue = {std::to_string(5)};
         taskIvCnt.valueType = INTEGER;
         optSetting.options[std::string(PRO_OPT_TASK_IN_CNT)] = taskIvCnt;
+        // App width and height
+        airstrip::AirstripProgramOptionDetail appWidth;
+        airstrip::AirstripProgramOptionDetail appHeight;
+        appWidth.needContinue = true;
+        appWidth.needInput = true;
+        appWidth.optionDesc = "Set app width. \nDefault values is 400";
+        appWidth.defaultValue = {std::to_string(400)};
+        appWidth.valueType = INTEGER;
+        optSetting.options[std::string(PRO_OPT_APP_WIDTH)] = appWidth;
+        appHeight.needContinue = true;
+        appHeight.needInput = true;
+        appHeight.optionDesc = "Set app width. \nDefault values is 640";
+        appHeight.defaultValue = {std::to_string(640)};
+        appHeight.valueType = INTEGER;
+        optSetting.options[std::string(PRO_OPT_APP_HEIGHT)] = appHeight;
+        // Other
     }
     enableProgramOptions(optSetting, argc, argv);
 
