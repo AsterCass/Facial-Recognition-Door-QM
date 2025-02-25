@@ -4,5 +4,5 @@
 
 void QLineEditPro::mousePressEvent(QMouseEvent *event) {
     VirtualKeyboard::getInstance()->showKeyboard(this);
-    QLineEdit::mousePressEvent(event);
+    //QLineEdit::mousePressEvent(event);
 }

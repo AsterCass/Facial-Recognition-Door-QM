@@ -62,6 +62,7 @@ VirtualKeyboard::VirtualKeyboard(QWidget *parent): QWidget(parent) {
                         return;
                     }
                     currentInput->insert(" ");
+                    currentInput->setFocus();
                 });
                 col += 10;
             } else if (key.key == "Backspace" || key.key == "Enter" || key.key == "Chinese" || key.key == "Hide") {
@@ -73,6 +74,7 @@ VirtualKeyboard::VirtualKeyboard(QWidget *parent): QWidget(parent) {
                             return;
                         }
                         currentInput->backspace();
+                        currentInput->setFocus();
                     });
                 } else if (key.key == "Enter" || key.key == "Hide") {
                     connect(key.btn, &QPushButton::clicked, [this](bool) {
@@ -94,6 +96,7 @@ VirtualKeyboard::VirtualKeyboard(QWidget *parent): QWidget(parent) {
                             return;
                         }
                         currentInput->insert("    ");
+                        currentInput->setFocus();
                     });
                 } else if (key.key == "\\") {
                     connect(key.btn, &QPushButton::clicked, [this, key](bool) {
@@ -101,6 +104,7 @@ VirtualKeyboard::VirtualKeyboard(QWidget *parent): QWidget(parent) {
                             return;
                         }
                         currentInput->insert(QString::fromStdString(key.key));
+                        currentInput->setFocus();
                     });
                 } else if (key.key == "Caps") {
                     //todo
@@ -114,6 +118,7 @@ VirtualKeyboard::VirtualKeyboard(QWidget *parent): QWidget(parent) {
                         return;
                     }
                     currentInput->insert(QString::fromStdString(key.key));
+                    currentInput->setFocus();
                 });
                 ++col;
             }
