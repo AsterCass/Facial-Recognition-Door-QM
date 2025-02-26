@@ -64,12 +64,14 @@ int main(int argc, char *argv[]) {
     //     });
     // }
 
-    // Init Schedule task
-    ScheduledTask::getInstance();
-
     // Page router
     const auto router = MainRouter::getInstance();
     router->show();
+    airstrip::logPrintln("UI started", INFO, __FUNCTION__);
+
+    // Init Schedule task
+    ScheduledTask::getInstance();
+    airstrip::logPrintln("ScheduledTask started", INFO, __FUNCTION__);
 
     // Finish
     airstrip::logPrintln("Application started", INFO, __FUNCTION__);

@@ -2,10 +2,9 @@
 #define MAIN_ROUTER_H
 
 #include <QStackedWidget>
-#include <QVBoxLayout>
 
 
-class MainRouter : public QWidget {
+class MainRouter final : public QWidget {
 public:
     MainRouter(const MainRouter &) = delete;
 
