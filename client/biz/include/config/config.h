@@ -15,6 +15,7 @@ constexpr auto PRO_OPT_ENV = "env";
 constexpr auto PRO_OPT_TASK_IN_CNT = "taskIvCnt";
 constexpr auto PRO_OPT_APP_WIDTH = "width";
 constexpr auto PRO_OPT_APP_HEIGHT = "height";
+constexpr auto PRO_OPT_APP_WORK_DIR = "appWorkDir";
 
 
 // variable

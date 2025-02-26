@@ -25,36 +25,44 @@ public:
     void updateWiredStatus(const bool connected) const {
         if (nullptr == wiredIcon) return;
         if (connected) {
-            wiredIcon->setIcon(QIcon(":/assets/images/status-wired.svg"));
+            wiredIcon->setIcon(QIcon(QString::fromStdString(
+                appWorkDir + "static/images/status-wired.svg")));
         } else {
-            wiredIcon->setIcon(QIcon(":/assets/images/status-wired-no.svg"));
+            wiredIcon->setIcon(QIcon(QString::fromStdString(
+                appWorkDir + "static/images/status-wired-no.svg")));
         }
     }
 
     void updateWirelessStatus(const bool connected) const {
         if (nullptr == wirelessIcon) return;
         if (connected) {
-            wirelessIcon->setIcon(QIcon(":/assets/images/status-wireless.svg"));
+            wirelessIcon->setIcon(QIcon(QString::fromStdString(
+                appWorkDir + "static/images/status-wireless.svg")));
         } else {
-            wirelessIcon->setIcon(QIcon(":/assets/images/status-wireless-no.svg"));
+            wirelessIcon->setIcon(QIcon(QString::fromStdString(
+                appWorkDir + "static/images/status-wireless-no.svg")));
         }
     }
 
     void update4GStatus(const bool connected) const {
         if (nullptr == fourGIcon) return;
         if (connected) {
-            fourGIcon->setIcon(QIcon(":/assets/images/status-4g.svg"));
+            fourGIcon->setIcon(QIcon(QString::fromStdString(
+                appWorkDir + "static/images/status-4g.svg")));
         } else {
-            fourGIcon->setIcon(QIcon(":/assets/images/status-4g-no.svg"));
+            fourGIcon->setIcon(QIcon(QString::fromStdString(
+                appWorkDir + "static/images/status-4g-no.svg")));
         }
     }
 
     void updateServerStatus(const bool connected) const {
         if (nullptr == serverIcon) return;
         if (connected) {
-            serverIcon->setIcon(QIcon(":/assets/images/status-server.svg"));
+            serverIcon->setIcon(QIcon(QString::fromStdString(
+                appWorkDir + "static/images/status-server.svg")));
         } else {
-            serverIcon->setIcon(QIcon(":/assets/images/status-server-no.svg"));
+            serverIcon->setIcon(QIcon(QString::fromStdString(
+                appWorkDir + "static/images/status-server-no.svg")));
         }
     }
 
@@ -62,6 +70,8 @@ private:
     explicit MainComponentHeader(QWidget *parent = nullptr);
 
     ~MainComponentHeader() override;
+
+    std::string appWorkDir;
 
     QHBoxLayout *mainLayout = nullptr;
     QSpacerItem *mainSpacer = nullptr;

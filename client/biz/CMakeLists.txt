@@ -95,7 +95,6 @@ set(PROJECT_SOURCES
 
 add_executable(FacialRecognitionDoor src/main.cpp
         ${PROJECT_SOURCES}
-        assets/app.qrc
 )
 
 if (WIN32)

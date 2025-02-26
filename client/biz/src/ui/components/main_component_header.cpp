@@ -1,10 +1,19 @@
 #include "ui/components/main_component_header.h"
 
+#include "airstrip_program_options.h"
+#include "config/config.h"
+#include <QDebug>
+
 
 MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
     if (parent == nullptr) {
         return;
     }
+    // Configuration
+    {
+        airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
+    }
+
     // Main widget
     {
         this->setAutoFillBackground(true);
@@ -50,7 +59,8 @@ MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
         // Wired
         {
             wiredIcon = new QToolButton();
-            wiredIcon->setIcon(QIcon(":/assets/images/status-wired-no.svg"));
+            wiredIcon->setIcon(QIcon(QString::fromStdString(
+                appWorkDir + "static/images/status-wired-no.svg")));
             wiredIcon->setIconSize(QSize(40, 40));
             wiredIcon->setFocusPolicy(Qt::NoFocus);
             wiredIcon->setStyleSheet("background-color: transparent;border: none;");
@@ -60,7 +70,8 @@ MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
         // Wireless
         {
             wirelessIcon = new QToolButton();
-            wirelessIcon->setIcon(QIcon(":/assets/images/status-wireless-no.svg"));
+            wirelessIcon->setIcon(QIcon(QString::fromStdString(
+                appWorkDir + "static/images/status-wireless-no.svg")));
             wirelessIcon->setIconSize(QSize(40, 40));
             wirelessIcon->setFocusPolicy(Qt::NoFocus);
             wirelessIcon->setStyleSheet("background-color: transparent;border: none;");
@@ -70,7 +81,8 @@ MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
         // 4G
         {
             fourGIcon = new QToolButton();
-            fourGIcon->setIcon(QIcon(":/assets/images/status-4g-no.svg"));
+            fourGIcon->setIcon(QIcon(QString::fromStdString(
+                appWorkDir + "static/images/status-4g-no.svg")));
             fourGIcon->setIconSize(QSize(40, 40));
             fourGIcon->setFocusPolicy(Qt::NoFocus);
             fourGIcon->setStyleSheet("background-color: transparent;border: none;");
@@ -80,7 +92,8 @@ MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
         // Server
         {
             serverIcon = new QToolButton();
-            serverIcon->setIcon(QIcon(":/assets/images/status-server-no.svg"));
+            serverIcon->setIcon(QIcon(QString::fromStdString(
+                appWorkDir + "static/images/status-server-no.svg")));
             serverIcon->setIconSize(QSize(40, 40));
             serverIcon->setFocusPolicy(Qt::NoFocus);
             serverIcon->setStyleSheet("background-color: transparent;border: none;");

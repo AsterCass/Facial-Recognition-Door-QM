@@ -48,6 +48,14 @@ int main(int argc, char *argv[]) {
         appHeight.defaultValue = {std::to_string(640)};
         appHeight.valueType = INTEGER;
         optSetting.options[std::string(PRO_OPT_APP_HEIGHT)] = appHeight;
+        // App work dir
+        airstrip::AirstripProgramOptionDetail appWorkDir;
+        appWorkDir.needContinue = true;
+        appWorkDir.needInput = true;
+        appWorkDir.optionDesc = "Set application work directory, for get static resources or script etc.";
+        appWorkDir.defaultValue = {"../assets/data/frd/"};
+        appWorkDir.valueType = STRING;
+        optSetting.options[std::string(PRO_OPT_APP_WORK_DIR)] = appWorkDir;
         // Other
     }
     enableProgramOptions(optSetting, argc, argv);
