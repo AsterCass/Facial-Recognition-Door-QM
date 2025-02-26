@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
     // }
 
     // Init Schedule task
-    // ScheduledTask::getInstance();
+    ScheduledTask::getInstance();
 
     // Page router
     const auto router = MainRouter::getInstance();

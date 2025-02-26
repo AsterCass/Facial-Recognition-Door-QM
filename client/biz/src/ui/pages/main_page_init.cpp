@@ -1,14 +1,20 @@
 #include "ui/pages/main_page_init.h"
-
-#include "config/config.h"
-#include "enums/general_enums.h"
+#include "ui/components/main_component_header.h"
 
 
 MainPageInit::MainPageInit(QWidget *parent): QWidget(parent) {
-    button = std::unique_ptr<QPushButton>(new QPushButton("I am Init, Click switch", this));
-    connect(button.get(), &QPushButton::clicked, [](bool) {
-        stackedWidget->setCurrentIndex(MAIN_PAGE_HOME);
-    });
+    mainLayout = new QVBoxLayout(this);
+    mainLayout->setSpacing(0);
+    mainLayout->setMargin(0);
+
+    header = MainComponentHeader::getInstance(this);
+    body = new QWidget(this);
+    body->setObjectName("pageInitBody");
+    body->setStyleSheet("#pageInitBody{border-image: url(:/assets/images/bg-launch.png)}");
+
+
+    mainLayout->addWidget(header, 1);
+    mainLayout->addWidget(body, 17);
 }
 
 

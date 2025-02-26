@@ -1,10 +1,10 @@
 #ifndef MAIN_PAGE_INIT_H
 #define MAIN_PAGE_INIT_H
 
-#include <QPushButton>
 #include <QLabel>
+#include <QVBoxLayout>
 
-class MainPageInit : public QWidget {
+class MainPageInit final : public QWidget {
 public:
     MainPageInit(const MainPageInit &) = delete;
 
@@ -20,9 +20,9 @@ private:
 
     ~MainPageInit() override;
 
-
-    std::unique_ptr<QPushButton> button;
-    std::unique_ptr<QLabel> label;
+    QVBoxLayout *mainLayout = nullptr;
+    QWidget *header = nullptr;
+    QWidget *body = nullptr;
 };
 
 

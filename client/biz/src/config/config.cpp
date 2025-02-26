@@ -4,7 +4,8 @@
 using namespace std;
 
 // variable
+void *mainThreadPool = nullptr;
+
+QStackedWidget *stackedWidget = nullptr;
 
 int taskUpdateIpIntervalCount = 1;
-QStackedWidget *stackedWidget = nullptr;
-void *mainThreadPool = nullptr;

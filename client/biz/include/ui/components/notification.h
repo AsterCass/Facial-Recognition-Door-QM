@@ -3,7 +3,7 @@
 
 #include <QLabel>
 
-class Notification : public QWidget {
+class Notification final : public QWidget {
 public:
     Notification(const Notification &) = delete;
 
@@ -21,7 +21,6 @@ private:
 
     ~Notification() override;
 
-private:
     QLabel *messageLabel = nullptr;
 };
 

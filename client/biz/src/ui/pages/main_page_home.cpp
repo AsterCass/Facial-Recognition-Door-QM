@@ -8,9 +8,6 @@ MainPageHome::MainPageHome(QWidget *parent): QWidget(parent) {
     connect(button.get(), &QPushButton::clicked, [](bool) {
         stackedWidget->setCurrentIndex(MAIN_PAGE_INIT);
     });
-
-
-    edit = std::unique_ptr<QLineEditPro>(new QLineEditPro(this));
 }
 
 

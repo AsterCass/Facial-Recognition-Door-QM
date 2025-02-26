@@ -84,6 +84,7 @@ set(PROJECT_SOURCES
         src/config/config.cpp
         src/utils/general_utils.cpp
         src/ui/main_router.cpp
+        src/ui/components/main_component_header.cpp
         src/ui/components/virtual_keyboard.cpp
         src/ui/components/notification.cpp
         src/ui/components/common_components.cpp
@@ -94,6 +95,7 @@ set(PROJECT_SOURCES
 
 add_executable(FacialRecognitionDoor src/main.cpp
         ${PROJECT_SOURCES}
+        assets/app.qrc
 )
 
 if (WIN32)
