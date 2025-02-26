@@ -52,7 +52,8 @@ int main(int argc, char *argv[]) {
         airstrip::AirstripProgramOptionDetail appWorkDir;
         appWorkDir.needContinue = true;
         appWorkDir.needInput = true;
-        appWorkDir.optionDesc = "Set application work directory, for get static resources or script etc.";
+        appWorkDir.optionDesc = "Set application work directory, for get static resources or script etc."
+                "\n Default value is '../assets/data/frd/'";
         appWorkDir.defaultValue = {"../assets/data/frd/"};
         appWorkDir.valueType = STRING;
         optSetting.options[std::string(PRO_OPT_APP_WORK_DIR)] = appWorkDir;

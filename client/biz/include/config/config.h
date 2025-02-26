@@ -17,6 +17,9 @@ constexpr auto PRO_OPT_APP_WIDTH = "width";
 constexpr auto PRO_OPT_APP_HEIGHT = "height";
 constexpr auto PRO_OPT_APP_WORK_DIR = "appWorkDir";
 
+const std::vector<std::string> CHINESE_WEEK = {
+    "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日",
+};
 
 // variable
 extern void *mainThreadPool;

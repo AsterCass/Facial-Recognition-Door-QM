@@ -25,8 +25,8 @@ MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
     // Main layout
     {
         mainLayout = new QHBoxLayout(this);
-        mainLayout->setSpacing(5);
-        mainLayout->setContentsMargins(5, 0, 5, 0);
+        mainLayout->setSpacing(10);
+        mainLayout->setContentsMargins(10, 0, 10, 0);
     }
 
     // Status bar
