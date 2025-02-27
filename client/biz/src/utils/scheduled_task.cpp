@@ -41,7 +41,7 @@ void updateUIMainComponentHeader(const std::string &appWorkDir) {
 #ifdef WIN32
         const string wiredIp = execScript(appWorkDir + "script/win/get_wired_ip.ps1");
 #else
-        const string wirelessIp = execScript(appWorkDir + "script/linux/get_wired_ip.sh");
+        const string wiredIp = execScript(appWorkDir + "script/linux/get_wired_ip.sh");
 #endif
         if (wiredIp != currentWiredIp) {
             currentWiredIp = wiredIp;
@@ -69,7 +69,7 @@ void updateUIMainComponentHeader(const std::string &appWorkDir) {
 #ifdef WIN32
         const string fourGIp = "";
 #else
-        const string wirelessIp = execScript(appWorkDir + "script/linux/get_4g_ip.sh");
+        const string fourGIp = execScript(appWorkDir + "script/linux/get_4g_ip.sh");
 #endif
         if (fourGIp != current4gIp) {
             current4gIp = fourGIp;
