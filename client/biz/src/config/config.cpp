@@ -9,3 +9,5 @@ void *mainThreadPool = nullptr;
 QStackedWidget *stackedWidget = nullptr;
 
 int tryGoManagementCount = 0;
+
+airstrip::CommonBackendConfigDbManager commonDb;

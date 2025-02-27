@@ -7,16 +7,16 @@
 using namespace std;
 
 namespace airstrip {
-    CommonBackendConfigDbManager::CommonBackendConfigDbManager(const string &dbPath)
-        : _db(dbPath, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE) {
-        initDb();
-    }
-
-    void CommonBackendConfigDbManager::initDb() {
+    void CommonBackendConfigDbManager::initDb(const std::string &dbPath) {
+        if (!mtx.try_lock() || _db != nullptr) {
+            logPrintln("Database initialization has finished", WARN, __FUNCTION__);
+            return;
+        }
+        _db = new SQLite::Database(dbPath, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
         try {
-            SQLite::Transaction transaction(_db);
+            SQLite::Transaction transaction(*_db);
 
-            _db.exec(R"(
+            _db->exec(R"(
                 CREATE TABLE IF NOT EXISTS common_backend_config (
                     config_name TEXT PRIMARY KEY,
                     config_value_json TEXT NOT NULL,
@@ -32,27 +32,27 @@ namespace airstrip {
         }
     }
 
-    void CommonBackendConfigDbManager::upsertConfig(const string &name, const string &configValueJson) {
+    void CommonBackendConfigDbManager::upsertConfig(const string &name, const string &configValueJson) const {
         if (name.empty()) {
             return;
         }
         try {
-            SQLite::Transaction transaction(_db);
+            SQLite::Transaction transaction(*_db);
 
             SQLite::Statement query(
-                _db, "SELECT * FROM common_backend_config WHERE config_name = ?");
+                *_db, "SELECT * FROM common_backend_config WHERE config_name = ?");
             query.bind(1, name);
             query.exec();
 
             if (query.getChanges() == 0) {
                 SQLite::Statement insert(
-                    _db, "INSERT INTO common_backend_config (config_name, config_value_json) VALUES (?, ?)");
+                    *_db, "INSERT INTO common_backend_config (config_name, config_value_json) VALUES (?, ?)");
                 insert.bind(1, name);
                 insert.bind(2, configValueJson);
                 insert.exec();
             } else {
                 SQLite::Statement update(
-                    _db, "UPDATE common_backend_config SET config_value_json = ?, "
+                    *_db, "UPDATE common_backend_config SET config_value_json = ?, "
                     "update_time = (datetime('now', 'localtime')) "
                     "WHERE config_name = ?");
                 update.bind(1, configValueJson);
@@ -67,14 +67,14 @@ namespace airstrip {
     }
 
 
-    void CommonBackendConfigDbManager::deleteConfig(const string &name) {
+    void CommonBackendConfigDbManager::deleteConfig(const string &name) const {
         if (name.empty()) {
             return;
         }
         try {
-            SQLite::Transaction transaction(_db);
+            SQLite::Transaction transaction(*_db);
 
-            SQLite::Statement query(_db, "DELETE FROM common_backend_config WHERE config_name = ?");
+            SQLite::Statement query(*_db, "DELETE FROM common_backend_config WHERE config_name = ?");
             query.bind(1, name);
             query.exec();
 
@@ -92,7 +92,7 @@ namespace airstrip {
         }
         try {
             SQLite::Statement query(
-                _db, "SELECT config_value_json FROM common_backend_config WHERE config_name = ?");
+                *_db, "SELECT config_value_json FROM common_backend_config WHERE config_name = ?");
             query.bind(1, name);
 
             while (query.executeStep()) {

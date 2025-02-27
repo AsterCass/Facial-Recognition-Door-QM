@@ -2,6 +2,7 @@
 #include <airstrip_log.h>
 #include <airstrip_program_options.h>
 #include <enums/general_enums.h>
+#include "airstrip_db.h"
 #include "utils/scheduled_task.h"
 #include "ui/main_router.h"
 #include "config/config.h"
@@ -73,14 +74,30 @@ int main(int argc, char *argv[]) {
     //     });
     // }
 
+    // Db
+    std::string appWorkDir;
+    airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
+    if (appWorkDir.size() > 0) {
+        commonDb.initDb(appWorkDir + PRO_DB_ADDRESS);
+        std::string serverAddress = commonDb.getConfig(PRO_DB_COMMON_KEY_SERVER_ADD);
+        if (serverAddress.size() <= 0) {
+            commonDb.upsertConfig(PRO_DB_COMMON_KEY_SERVER_ADD, "localhost:5525");
+        }
+        std::string managementPassword = commonDb.getConfig(PRO_DB_COMMON_KEY_MANA_PASS);
+        if (serverAddress.size() <= 0) {
+            commonDb.upsertConfig(PRO_DB_COMMON_KEY_MANA_PASS, "123456");
+        }
+        airstrip::logPrintln("Db finish", INFO, __FUNCTION__);
+    }
+
     // Page router
     const auto router = MainRouter::getInstance();
     router->show();
-    airstrip::logPrintln("UI started", INFO, __FUNCTION__);
+    airstrip::logPrintln("UI finish", INFO, __FUNCTION__);
 
     // Init Schedule task
     ScheduledTask::getInstance();
-    airstrip::logPrintln("ScheduledTask started", INFO, __FUNCTION__);
+    airstrip::logPrintln("ScheduledTask finish", INFO, __FUNCTION__);
 
     // Finish
     airstrip::logPrintln("Application started", INFO, __FUNCTION__);
