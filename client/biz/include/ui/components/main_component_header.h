@@ -2,6 +2,7 @@
 #define MAIN_COMPONENT_HEADER_H
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QPushButton>
 #include <QWidget>
 #include <QToolButton>
 
@@ -77,6 +78,8 @@ private:
     QSpacerItem *mainSpacer = nullptr;
 
     QLabel *time = nullptr;
+
+    QPushButton *hideBtn = nullptr;
 
     QToolButton *wiredIcon = nullptr;
     QToolButton *wirelessIcon = nullptr;

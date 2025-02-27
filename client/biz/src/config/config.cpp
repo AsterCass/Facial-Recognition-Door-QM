@@ -8,4 +8,4 @@ void *mainThreadPool = nullptr;
 
 QStackedWidget *stackedWidget = nullptr;
 
-int taskUpdateIpIntervalCount = 1;
+int tryGoManagementCount = 0;

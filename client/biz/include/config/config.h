@@ -21,12 +21,26 @@ const std::vector<std::string> CHINESE_WEEK = {
     "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日",
 };
 
+#ifdef WIN32
+constexpr auto MINIMUM_FONT_SIZE = 7;
+constexpr auto MINI_FONT_SIZE = 8;
+constexpr auto MEDIUM_FONT_SIZE = 24;
+constexpr auto MAX_FONT_SIZE = 36;
+constexpr auto MINI_ICON_SIZE = 20;
+#else
+constexpr auto MINIMUM_FONT_SIZE = 5;
+constexpr auto MINI_FONT_SIZE = 6;
+constexpr auto MEDIUM_FONT_SIZE = 12;
+constexpr auto MAX_FONT_SIZE = 18;
+constexpr auto MINI_ICON_SIZE = 40;
+#endif
+
 // variable
 extern void *mainThreadPool;
 
 extern QStackedWidget *stackedWidget;
 
-extern int taskUpdateIpIntervalCount;
+extern int tryGoManagementCount;
 
 
 #endif //CONFIG_H

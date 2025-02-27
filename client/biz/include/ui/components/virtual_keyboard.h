@@ -4,10 +4,7 @@
 #include <QLineEdit>
 #include <QVBoxLayout>
 #include <iostream>
-#include <QApplication>
 #include <QPushButton>
-#include <QScreen>
-#include <QDebug>
 #include <QMouseEvent>
 #include "airstrip_log.h"
 

@@ -1,4 +1,4 @@
-# airstrip version 1.0.0
+# airstrip version 1.1.0
 cmake_minimum_required(VERSION 3.10)
 
 project(Airstrip)
@@ -60,6 +60,7 @@ set(SOURCES
         src/airstrip_program_options.cpp
         src/airstrip_db.cpp
         src/airstrip_http.cpp
+        src/airstrip_command.cpp
 )
 
 

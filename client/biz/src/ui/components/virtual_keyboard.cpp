@@ -1,7 +1,5 @@
 #include "ui/components/virtual_keyboard.h"
 
-#include <QPushButton>
-
 using namespace std;
 
 bool VirtualKeyboardMaskEventFilter::eventFilter(QObject *watched, QEvent *event) {

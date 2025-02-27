@@ -2,7 +2,6 @@
 
 #include "airstrip_program_options.h"
 #include "config/config.h"
-#include <QDebug>
 
 
 MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
@@ -40,7 +39,7 @@ MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
             pal.setColor(QPalette::WindowText, Qt::white);
             time->setPalette(pal);
             auto font = time->font();
-            font.setPointSize(6);
+            font.setPointSize(MINI_FONT_SIZE);
             time->setFont(font);
 
             mainLayout->addWidget(time);
@@ -48,6 +47,14 @@ MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
 
         // Hide setting btn
         {
+            hideBtn = new QPushButton(this);
+            hideBtn->setFocusPolicy(Qt::NoFocus);
+            hideBtn->setStyleSheet("background-color: transparent;border: none;");
+            connect(hideBtn, &QPushButton::clicked, this,
+                    [=] {
+                        ++tryGoManagementCount;
+                    });
+            mainLayout->addWidget(hideBtn);
         }
 
         // Spacer
@@ -61,7 +68,7 @@ MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
             wiredIcon = new QToolButton();
             wiredIcon->setIcon(QIcon(QString::fromStdString(
                 appWorkDir + "static/images/status-wired-no.svg")));
-            wiredIcon->setIconSize(QSize(40, 40));
+            wiredIcon->setIconSize(QSize(MINI_ICON_SIZE, MINI_ICON_SIZE));
             wiredIcon->setFocusPolicy(Qt::NoFocus);
             wiredIcon->setStyleSheet("background-color: transparent;border: none;");
             mainLayout->addWidget(wiredIcon);
@@ -72,7 +79,7 @@ MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
             wirelessIcon = new QToolButton();
             wirelessIcon->setIcon(QIcon(QString::fromStdString(
                 appWorkDir + "static/images/status-wireless-no.svg")));
-            wirelessIcon->setIconSize(QSize(40, 40));
+            wirelessIcon->setIconSize(QSize(MINI_ICON_SIZE, MINI_ICON_SIZE));
             wirelessIcon->setFocusPolicy(Qt::NoFocus);
             wirelessIcon->setStyleSheet("background-color: transparent;border: none;");
             mainLayout->addWidget(wirelessIcon);
@@ -83,7 +90,7 @@ MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
             fourGIcon = new QToolButton();
             fourGIcon->setIcon(QIcon(QString::fromStdString(
                 appWorkDir + "static/images/status-4g-no.svg")));
-            fourGIcon->setIconSize(QSize(40, 40));
+            fourGIcon->setIconSize(QSize(MINI_ICON_SIZE, MINI_ICON_SIZE));
             fourGIcon->setFocusPolicy(Qt::NoFocus);
             fourGIcon->setStyleSheet("background-color: transparent;border: none;");
             mainLayout->addWidget(fourGIcon);
@@ -94,7 +101,7 @@ MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
             serverIcon = new QToolButton();
             serverIcon->setIcon(QIcon(QString::fromStdString(
                 appWorkDir + "static/images/status-server-no.svg")));
-            serverIcon->setIconSize(QSize(40, 40));
+            serverIcon->setIconSize(QSize(MINI_ICON_SIZE, MINI_ICON_SIZE));
             serverIcon->setFocusPolicy(Qt::NoFocus);
             serverIcon->setStyleSheet("background-color: transparent;border: none;");
             mainLayout->addWidget(serverIcon);
