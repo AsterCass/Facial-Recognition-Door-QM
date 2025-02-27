@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
             commonDb.upsertConfig(PRO_DB_COMMON_KEY_SERVER_ADD, "localhost:5525");
         }
         std::string managementPassword = commonDb.getConfig(PRO_DB_COMMON_KEY_MANA_PASS);
-        if (serverAddress.size() <= 0) {
+        if (managementPassword.size() <= 0) {
             commonDb.upsertConfig(PRO_DB_COMMON_KEY_MANA_PASS, "123456");
         }
         airstrip::logPrintln("Db finish", INFO, __FUNCTION__);
