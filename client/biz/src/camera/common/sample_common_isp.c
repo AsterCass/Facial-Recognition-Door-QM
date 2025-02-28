@@ -4,10 +4,6 @@
 
 #ifdef RKAIQ
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "camera/common/sample_common.h"
 #include <assert.h>
 #include <fcntl.h>
@@ -856,8 +852,5 @@ rk_aiq_uapi_sysctl_setCrop(aiq_ctx, rect);*/
   return ret;
 }
 
-#ifdef __cplusplus
-}
-#endif
 
 #endif

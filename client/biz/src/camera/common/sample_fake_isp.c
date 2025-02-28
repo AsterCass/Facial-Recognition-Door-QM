@@ -4,9 +4,6 @@
 
 #ifdef RKAIQ
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include <assert.h>
 #include <fcntl.h>
@@ -312,9 +309,5 @@ void make_rkraws(struct mcu_rkaiq_rkraw *mcu_rkraws, uint8_t **rkraws) {
     memcpy(ptr, &tag, 2);
   }
 }
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

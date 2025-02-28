@@ -90,17 +90,19 @@ int main(int argc, char *argv[]) {
         airstrip::logPrintln("Db finish", INFO, __FUNCTION__);
     }
 
-    // Page router
-    const auto router = MainRouter::getInstance();
-    router->show();
-    airstrip::logPrintln("UI finish", INFO, __FUNCTION__);
+    // // Page router
+    // const auto router = MainRouter::getInstance();
+    // router->show();
+    // airstrip::logPrintln("UI finish", INFO, __FUNCTION__);
+    //
+    // // Init Schedule task
+    // ScheduledTask::getInstance();
+    // airstrip::logPrintln("ScheduledTask finish", INFO, __FUNCTION__);
+    //
+    // // Finish
+    // airstrip::logPrintln("Application started", INFO, __FUNCTION__);
 
-    // Init Schedule task
-    ScheduledTask::getInstance();
-    airstrip::logPrintln("ScheduledTask finish", INFO, __FUNCTION__);
-
-    // Finish
-    airstrip::logPrintln("Application started", INFO, __FUNCTION__);
+    startCamera();
 
     return QApplication::exec();
 }

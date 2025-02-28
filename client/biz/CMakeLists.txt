@@ -25,6 +25,7 @@ elseif (UNIX)
     set(SQLITE_CPP_ROOT /data/src/sqlitecpp/_install)
     set(QT_ROOT /data/src/Qt5.12.2/_install/lib/cmake/Qt5)
     set(BREAKPAD_ROOT /data/src/breakpad/_install)
+    set(RK_ROOT /data/src/rockchip/_install)
     set(CMAKE_PREFIX_PATH
             "${BOOST_ROOT}"
             "${SQLITE_CPP_ROOT}"
@@ -67,6 +68,7 @@ elseif (UNIX)
     link_directories(
             #${SDK_PATH}/lib/linux/inspire
             ${AIRSTRIP_PREFIX_PATH}/lib
+            ${RK_ROOT}/lib
     )
 else ()
     message(FATAL_ERROR "Unsupported operating system")
@@ -87,6 +89,7 @@ set(PROJECT_SOURCES
         src/config/config.cpp
         src/camera/common/sample_common_isp.c
         src/camera/common/sample_fake_isp.c
+        src/camera/camera_rk.cpp
         src/ui/main_router.cpp
         src/ui/components/main_component_header.cpp
         src/ui/components/virtual_keyboard.cpp
@@ -121,6 +124,8 @@ elseif (UNIX)
             Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets
             # InspireFace
             Breakpad::Client
+            # rock chip
+            -lrkaiq
     )
 else ()
     message(FATAL_ERROR "Unsupported operating system")
