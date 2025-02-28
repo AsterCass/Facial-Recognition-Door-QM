@@ -7,6 +7,9 @@
 #include "ui/main_router.h"
 #include "config/config.h"
 
+
+#include "../src/camera/camera_rk.cpp"
+
 int main(int argc, char *argv[]) {
     // Input args
     airstrip::AirstripProgramOptions optSetting; {
@@ -16,7 +19,7 @@ int main(int argc, char *argv[]) {
         version.needInput = false;
         version.optionDesc = "Produce version";
         version.outputValue = APP_VERSION;
-        version.valueType = STRING;
+        version.valueType = airstrip::STRING;
         optSetting.options[std::string(PRO_OPT_VERSION) + ",v"] = version;
         // Env
         airstrip::AirstripProgramOptionDetail env;
@@ -24,7 +27,7 @@ int main(int argc, char *argv[]) {
         env.needInput = true;
         env.optionDesc = "Set produce environment, 0 or 1, 1 means dev, 0 means prod. \nDefault values is 1";
         env.defaultValue = {std::to_string(DEV)};
-        env.valueType = INTEGER;
+        env.valueType = airstrip::INTEGER;
         optSetting.options[std::string(PRO_OPT_ENV)] = env;
         // Task interval Count
         airstrip::AirstripProgramOptionDetail taskIvCnt;
@@ -32,7 +35,7 @@ int main(int argc, char *argv[]) {
         taskIvCnt.needInput = true;
         taskIvCnt.optionDesc = "Set common task interval sec count. \nDefault values is 5";
         taskIvCnt.defaultValue = {std::to_string(5)};
-        taskIvCnt.valueType = INTEGER;
+        taskIvCnt.valueType = airstrip::INTEGER;
         optSetting.options[std::string(PRO_OPT_TASK_IN_CNT)] = taskIvCnt;
         // App width and height
         airstrip::AirstripProgramOptionDetail appWidth;
@@ -41,13 +44,13 @@ int main(int argc, char *argv[]) {
         appWidth.needInput = true;
         appWidth.optionDesc = "Set app width. \nDefault values is 400";
         appWidth.defaultValue = {std::to_string(400)};
-        appWidth.valueType = INTEGER;
+        appWidth.valueType = airstrip::INTEGER;
         optSetting.options[std::string(PRO_OPT_APP_WIDTH)] = appWidth;
         appHeight.needContinue = true;
         appHeight.needInput = true;
         appHeight.optionDesc = "Set app width. \nDefault values is 640";
         appHeight.defaultValue = {std::to_string(640)};
-        appHeight.valueType = INTEGER;
+        appHeight.valueType = airstrip::INTEGER;
         optSetting.options[std::string(PRO_OPT_APP_HEIGHT)] = appHeight;
         // App work dir
         airstrip::AirstripProgramOptionDetail appWorkDir;
@@ -56,7 +59,7 @@ int main(int argc, char *argv[]) {
         appWorkDir.optionDesc = "Set application work directory, for get static resources or script etc."
                 "\n Default value is '../assets/data/frd/'";
         appWorkDir.defaultValue = {"../assets/data/frd/"};
-        appWorkDir.valueType = STRING;
+        appWorkDir.valueType = airstrip::STRING;
         optSetting.options[std::string(PRO_OPT_APP_WORK_DIR)] = appWorkDir;
         // Other
     }
@@ -87,7 +90,7 @@ int main(int argc, char *argv[]) {
         if (managementPassword.size() <= 0) {
             commonDb.upsertConfig(PRO_DB_COMMON_KEY_MANA_PASS, "123456");
         }
-        airstrip::logPrintln("Db finish", INFO, __FUNCTION__);
+        logPrintln("Db finish", airstrip::INFO, __FUNCTION__);
     }
 
     // // Page router
@@ -101,6 +104,7 @@ int main(int argc, char *argv[]) {
     //
     // // Finish
     // airstrip::logPrintln("Application started", INFO, __FUNCTION__);
+
 
     startCamera();
 
