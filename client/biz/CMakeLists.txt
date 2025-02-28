@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
+add_definitions(-DRKAIQ)
 
 if (WIN32)
     set(OPENCV_ROOT P:/projects/cplusplus/OpenCV-MinGW-Build-OpenCV-4.5.5-x64)
@@ -49,6 +50,7 @@ endif ()
 if (WIN32)
     include_directories(
             ${SDK_PATH}/include/windows/inspire
+            ${SDK_PATH}/include/common/rockchip
             ${AIRSTRIP_PREFIX_PATH}/include
             ${SQLITE_CPP_ROOT}/include
     )
@@ -58,6 +60,7 @@ if (WIN32)
 elseif (UNIX)
     include_directories(
             #${SDK_PATH}/include/linux/inspire
+            ${SDK_PATH}/include/common/rockchip
             ${AIRSTRIP_PREFIX_PATH}/include
             ${SQLITE_CPP_ROOT}/include
     )
@@ -82,7 +85,8 @@ message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 set(PROJECT_SOURCES
         src/main.cpp
         src/config/config.cpp
-        src/utils/general_utils.cpp
+        src/camera/common/sample_common_isp.c
+        src/camera/common/sample_fake_isp.c
         src/ui/main_router.cpp
         src/ui/components/main_component_header.cpp
         src/ui/components/virtual_keyboard.cpp
@@ -90,6 +94,7 @@ set(PROJECT_SOURCES
         src/ui/components/common_components.cpp
         src/ui/pages/main_page_init.cpp
         src/ui/pages/main_page_home.cpp
+        src/utils/general_utils.cpp
         src/utils/scheduled_task.cpp
 )
 
