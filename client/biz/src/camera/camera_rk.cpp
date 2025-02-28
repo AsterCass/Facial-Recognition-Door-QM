@@ -3,6 +3,7 @@
 
 
 static bool quit = false;
+
 static void sigterm_handler(int sig) {
     fprintf(stderr, "signal %d\n", sig);
     quit = true;
@@ -10,14 +11,12 @@ static void sigterm_handler(int sig) {
 
 
 void startCamera() {
-
     int ret = 0;
 
     int video_width = 1920;
     int video_height = 1080;
 
-
-    int disp_width = 720;
+    int disp_width = 800;
     int disp_height = 1280;
 
     // 0: 红外 1: rga
@@ -118,6 +117,4 @@ void startCamera() {
     while (!quit) {
         usleep(500000);
     }
-
-
 }
