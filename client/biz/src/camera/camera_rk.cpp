@@ -1,16 +1,24 @@
 #include <rkmedia_api.h>
+#include <mutex>
 #include "camera/common/sample_common.h"
+#include "camera/camera_rk.h"
+#include "airstrip_log.h"
 
+using namespace std;
 
-static bool quit = false;
+mutex _mtx;
+bool started = false;
 
-static void sigterm_handler(int sig) {
-    fprintf(stderr, "signal %d\n", sig);
-    quit = true;
-}
+// 0: 红外 1: rga
+RK_S32 s32CamId = 1;
 
+void startCameraRk() {
+    std::lock_guard<std::mutex> lock(_mtx);
+    if (started) {
+        logPrintln("Camera RK has started", airstrip::WARN, __FUNCTION__);
+        return;
+    }
 
-void startCamera() {
     int ret = 0;
 
     int video_width = 1920;
@@ -18,9 +26,6 @@ void startCamera() {
 
     int disp_width = 800;
     int disp_height = 1280;
-
-    // 0: 红外 1: rga
-    RK_S32 s32CamId = 1;
 
     // Init
     SAMPLE_COMM_ISP_Init(s32CamId, RK_AIQ_WORKING_MODE_NORMAL, RK_FALSE, "/etc/iqfiles");
@@ -38,13 +43,12 @@ void startCamera() {
     ret = RK_MPI_VI_SetChnAttr(s32CamId, 0, &vi_chn_attr);
     ret |= RK_MPI_VI_EnableChn(s32CamId, 0);
     if (ret) {
-        printf("Create vi[0] failed! ret=%d\n", ret);
+        logPrintln("Create vi[0] failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
         exit(-1);
     }
 
-
-    RGA_ATTR_S stRgaAttr;
-    memset(&stRgaAttr, 0, sizeof(stRgaAttr));
+    RGA_ATTR_S stRgaAttr = {};
     stRgaAttr.bEnBufPool = RK_TRUE;
     stRgaAttr.u16BufPoolCnt = 2;
     stRgaAttr.u16Rotaion = 90;
@@ -64,11 +68,12 @@ void startCamera() {
     stRgaAttr.stImgOut.u32VirStride = disp_height;
     ret = RK_MPI_RGA_CreateChn(0, &stRgaAttr);
     if (ret) {
-        printf("Create rga[0] falied! ret=%d\n", ret);
+        logPrintln("Create rga[0] failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
         exit(-1);
     }
 
-    VO_CHN_ATTR_S stVoAttr = {0};
+    VO_CHN_ATTR_S stVoAttr = {};
     // VO[0] for primary plane
     stVoAttr.pcDevNode = "/dev/dri/card0";
     stVoAttr.emPlaneType = VO_PLANE_PRIMARY;
@@ -80,7 +85,8 @@ void startCamera() {
     stVoAttr.stDispRect.u32Height = disp_height;
     ret = RK_MPI_VO_CreateChn(0, &stVoAttr);
     if (ret) {
-        printf("Create vo[0] failed! ret=%d\n", ret);
+        logPrintln("Create vo[0] failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
         exit(-1);
     }
 
@@ -88,33 +94,74 @@ void startCamera() {
     MPP_CHN_S stSrcChn = {};
     MPP_CHN_S stDestChn = {};
 
-    printf("#Bind VI[0] to RGA[0]....\n");
+    logPrintln("Bind VI[0] to RGA[0]...", airstrip::INFO, __FUNCTION__);
     stSrcChn.enModId = RK_ID_VI;
     stSrcChn.s32ChnId = 0;
     stDestChn.enModId = RK_ID_RGA;
     stDestChn.s32ChnId = 0;
     ret = RK_MPI_SYS_Bind(&stSrcChn, &stDestChn);
     if (ret) {
-        printf("Bind vi[0] to rga[0] failed! ret=%d\n", ret);
+        logPrintln("Bind vi[0] to rga[0] failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
         exit(-1);
     }
 
 
-    printf("# Bind RGA[0] to VO[0]....\n");
+    logPrintln("Bind RGA[0] to VO[0]...", airstrip::INFO, __FUNCTION__);
     stSrcChn.enModId = RK_ID_RGA;
     stSrcChn.s32ChnId = 0;
     stDestChn.enModId = RK_ID_VO;
     stDestChn.s32ChnId = 0;
     ret = RK_MPI_SYS_Bind(&stSrcChn, &stDestChn);
     if (ret) {
-        printf("Bind rga[0] to vo[0] failed! ret=%d\n", ret);
+        logPrintln("Bind rga[0] to vo[0] failed! ret ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
         exit(-1);
     }
 
+    logPrintln("Camera RK initial finish", airstrip::INFO, __FUNCTION__);
+    started = true;
+}
 
-    printf("%s initial finish\n", __func__);
-    signal(SIGINT, sigterm_handler);
-    while (!quit) {
-        usleep(500000);
+void stopCameraRk() {
+    std::lock_guard<std::mutex> lock(_mtx);
+    if (!started) {
+        logPrintln("Camera RK has stoped", airstrip::WARN, __FUNCTION__);
+        return;
     }
+
+    int ret = 0;
+
+    MPP_CHN_S stSrcChn = {};
+    MPP_CHN_S stDestChn = {};
+
+    stSrcChn.enModId = RK_ID_VI;
+    stSrcChn.s32ChnId = 0;
+    stDestChn.enModId = RK_ID_RGA;
+    stDestChn.s32ChnId = 0;
+    ret = RK_MPI_SYS_UnBind(&stSrcChn, &stDestChn);
+    if (ret) {
+        logPrintln("Unbind vi[0] to rga[0] failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
+
+    stSrcChn.enModId = RK_ID_RGA;
+    stSrcChn.s32ChnId = 0;
+    stDestChn.enModId = RK_ID_VO;
+    stDestChn.s32ChnId = 0;
+    ret = RK_MPI_SYS_UnBind(&stSrcChn, &stDestChn);
+    if (ret) {
+        logPrintln("Unbind rga[0] to vo[0] failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
+
+    RK_MPI_VO_DestroyChn(0);
+    RK_MPI_RGA_DestroyChn(0);
+    RK_MPI_VI_DisableChn(s32CamId, 0);
+
+    logPrintln("Camera RK stop finish", airstrip::INFO, __FUNCTION__);
+
+    started = false;
 }

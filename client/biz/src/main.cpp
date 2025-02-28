@@ -8,7 +8,7 @@
 #include "config/config.h"
 
 
-#include "../src/camera/camera_rk.cpp"
+#include "camera/camera_rk.h"
 
 int main(int argc, char *argv[]) {
     // Input args
@@ -93,20 +93,20 @@ int main(int argc, char *argv[]) {
         logPrintln("Db finish", airstrip::INFO, __FUNCTION__);
     }
 
-    // // Page router
+    // Page router
     // const auto router = MainRouter::getInstance();
     // router->show();
-    // airstrip::logPrintln("UI finish", INFO, __FUNCTION__);
+    // logPrintln("UI finish", airstrip::INFO, __FUNCTION__);
     //
     // // Init Schedule task
     // ScheduledTask::getInstance();
-    // airstrip::logPrintln("ScheduledTask finish", INFO, __FUNCTION__);
+    // logPrintln("ScheduledTask finish", airstrip::INFO, __FUNCTION__);
     //
     // // Finish
-    // airstrip::logPrintln("Application started", INFO, __FUNCTION__);
+    // logPrintln("Application started", airstrip::INFO, __FUNCTION__);
 
+    startCameraRk();
 
-    startCamera();
 
     return QApplication::exec();
 }

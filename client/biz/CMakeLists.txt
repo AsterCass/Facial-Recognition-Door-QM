@@ -89,6 +89,7 @@ set(PROJECT_SOURCES
         src/config/config.cpp
         src/camera/common/sample_common_isp.c
         src/camera/common/sample_fake_isp.c
+        src/camera/camera_rk.cpp
         src/ui/main_router.cpp
         src/ui/components/main_component_header.cpp
         src/ui/components/virtual_keyboard.cpp
