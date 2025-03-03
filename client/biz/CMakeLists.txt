@@ -41,10 +41,14 @@ set(AIRSTRIP_PREFIX_PATH ../airstrip)
 #find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS program_options json filesystem)
 find_package(SQLiteCpp REQUIRED)
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets)
+
 if (UNIX)
+    find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets)
+    find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets)
     find_package(Breakpad REQUIRED)
+else ()
+    find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Widgets MultimediaWidgets)
+    find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets MultimediaWidgets)
 endif ()
 
 
@@ -90,6 +94,7 @@ set(PROJECT_SOURCES
         src/camera/common/sample_common_isp.c
         src/camera/common/sample_fake_isp.c
         src/camera/camera_rk.cpp
+        src/camera/camera_frame.cpp
         src/ui/main_router.cpp
         src/ui/components/main_component_header.cpp
         src/ui/components/virtual_keyboard.cpp
@@ -112,7 +117,7 @@ if (WIN32)
             airstrip
             SQLiteCpp sqlite3
             Boost::program_options Boost::json Boost::filesystem
-            Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets
+            Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::MultimediaWidgets
     )
 elseif (UNIX)
     target_include_directories(FacialRecognitionDoor PUBLIC ${CMAKE_SOURCE_DIR}/include)

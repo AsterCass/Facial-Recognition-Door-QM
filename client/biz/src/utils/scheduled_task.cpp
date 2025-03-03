@@ -10,6 +10,7 @@
 #include "airstrip_log.h"
 #include "config/config.h"
 #include "airstrip_program_options.h"
+#include "camera/camera_frame.h"
 #include "enums/general_enums.h"
 #include "ui/main_router.h"
 #include "ui/components/main_component_header.h"
@@ -91,7 +92,7 @@ void onceTask() {
     ++count;
 
     // Init Camera
-    // startCameraRk();
+    CameraFrame::getInstance()->start();
 
     // To home
     stackedWidget->setCurrentIndex(MAIN_PAGE_HOME);
