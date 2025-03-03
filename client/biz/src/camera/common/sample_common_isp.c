@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef WIN32
 #ifdef RKAIQ
 
 #include "camera/common/sample_common.h"
@@ -852,5 +853,7 @@ rk_aiq_uapi_sysctl_setCrop(aiq_ctx, rect);*/
   return ret;
 }
 
+
+#endif
 
 #endif

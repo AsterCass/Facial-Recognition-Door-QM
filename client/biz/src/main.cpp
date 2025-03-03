@@ -7,9 +7,6 @@
 #include "ui/main_router.h"
 #include "config/config.h"
 
-
-#include "camera/camera_rk.h"
-
 int main(int argc, char *argv[]) {
     // Input args
     airstrip::AirstripProgramOptions optSetting; {
@@ -94,19 +91,16 @@ int main(int argc, char *argv[]) {
     }
 
     // Page router
-    // const auto router = MainRouter::getInstance();
-    // router->show();
-    // logPrintln("UI finish", airstrip::INFO, __FUNCTION__);
-    //
-    // // Init Schedule task
-    // ScheduledTask::getInstance();
-    // logPrintln("ScheduledTask finish", airstrip::INFO, __FUNCTION__);
-    //
-    // // Finish
-    // logPrintln("Application started", airstrip::INFO, __FUNCTION__);
+    const auto router = MainRouter::getInstance();
+    router->show();
+    logPrintln("UI finish", airstrip::INFO, __FUNCTION__);
 
-    startCameraRk();
+    // Init Schedule task
+    ScheduledTask::getInstance();
+    logPrintln("ScheduledTask finish", airstrip::INFO, __FUNCTION__);
 
+    // Finish
+    logPrintln("Application started", airstrip::INFO, __FUNCTION__);
 
     return QApplication::exec();
 }

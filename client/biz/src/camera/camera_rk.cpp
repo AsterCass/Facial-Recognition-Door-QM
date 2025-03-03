@@ -1,3 +1,5 @@
+#ifndef WIN32
+
 #include <rkmedia_api.h>
 #include <mutex>
 #include "camera/common/sample_common.h"
@@ -165,3 +167,5 @@ void stopCameraRk() {
 
     started = false;
 }
+
+#endif

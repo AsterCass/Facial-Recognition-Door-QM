@@ -7,15 +7,20 @@
 using namespace std;
 
 MainPageInit::MainPageInit(QWidget *parent): QWidget(parent) {
+    mainLayout = new QVBoxLayout(this);
+    body = new QWidget(this);
+
+    setElement();
+}
+
+void MainPageInit::setElement() {
     string appWorkDir;
     airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
 
-    mainLayout = new QVBoxLayout(this);
     mainLayout->setSpacing(0);
     mainLayout->setMargin(0);
 
-    header = MainComponentHeader::getInstance(this);
-    body = new QWidget(this);
+    header = MainComponentHeader::getInstance();
     body->setObjectName("pageInitBody");
     QString styleSheet;
     styleSheet.append("#pageInitBody{border-image: url(")
@@ -26,6 +31,10 @@ MainPageInit::MainPageInit(QWidget *parent): QWidget(parent) {
 
     mainLayout->addWidget(header, 1);
     mainLayout->addWidget(body, 17);
+}
+
+void MainPageInit::showEvent(QShowEvent *) {
+    setElement();
 }
 
 

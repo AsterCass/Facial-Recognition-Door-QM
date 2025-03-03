@@ -1,5 +1,6 @@
 #ifndef MAIN_COMPONENT_HEADER_H
 #define MAIN_COMPONENT_HEADER_H
+#include <iostream>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
@@ -13,8 +14,8 @@ public:
 
     MainComponentHeader &operator=(const MainComponentHeader &) = delete;
 
-    static MainComponentHeader *getInstance(QWidget *parent = nullptr) {
-        static MainComponentHeader instance(parent);
+    static MainComponentHeader *getInstance() {
+        static MainComponentHeader instance;
         return &instance;
     }
 

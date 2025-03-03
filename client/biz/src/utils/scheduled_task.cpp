@@ -10,6 +10,8 @@
 #include "airstrip_log.h"
 #include "config/config.h"
 #include "airstrip_program_options.h"
+#include "enums/general_enums.h"
+#include "ui/main_router.h"
 #include "ui/components/main_component_header.h"
 
 using namespace std;
@@ -82,6 +84,19 @@ void updateUIMainComponentHeader(const std::string &appWorkDir) {
     }
 }
 
+
+void onceTask() {
+    static int count = 1;
+    if (count > 1) return;
+    ++count;
+
+    // Init Camera
+    // startCameraRk();
+
+    // To home
+    stackedWidget->setCurrentIndex(MAIN_PAGE_HOME);
+}
+
 void gotoManagement() {
     if (tryGoManagementCount >= 5) {
         tryGoManagementCount = 0;
@@ -101,6 +116,11 @@ void gotoManagement() {
         updateUIMainComponentHeader(appWorkDir);
         // Try go to hided management
         gotoManagement();
+
+        //...
+
+        // Once Task
+        onceTask();
         // Interval
         this_thread::sleep_for(interval);
     }

@@ -1,13 +1,26 @@
 #include "ui/pages/main_page_home.h"
-#include "config/config.h"
-#include "enums/general_enums.h"
-#include "ui/components/common_components.h"
+
+#include "ui/components/main_component_header.h"
 
 MainPageHome::MainPageHome(QWidget *parent): QWidget(parent) {
-    button = std::unique_ptr<QPushButton>(new QPushButton("I am Home, Click switch", this));
-    connect(button.get(), &QPushButton::clicked, [](bool) {
-        stackedWidget->setCurrentIndex(MAIN_PAGE_INIT);
-    });
+    mainLayout = new QVBoxLayout(this);
+    body = new QWidget(this);
+
+    setElement();
+}
+
+void MainPageHome::setElement() {
+    mainLayout->setSpacing(0);
+    mainLayout->setMargin(0);
+
+    header = MainComponentHeader::getInstance();
+
+    mainLayout->addWidget(header, 1);
+    mainLayout->addWidget(body, 17);
+}
+
+void MainPageHome::showEvent(QShowEvent *) {
+    setElement();
 }
 
 

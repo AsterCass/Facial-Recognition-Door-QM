@@ -5,9 +5,6 @@
 
 
 MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
-    if (parent == nullptr) {
-        return;
-    }
     // Configuration
     {
         airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);

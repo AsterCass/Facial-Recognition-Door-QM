@@ -6,10 +6,12 @@
 #include "ui/pages/main_page_home.h"
 #include "ui/pages/main_page_init.h"
 #include <QMessageBox>
+#include <sstream>
 
 #include "airstrip_program_options.h"
 #include "ui/components/notification.h"
 
+using namespace std;
 
 MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
     // param
@@ -24,8 +26,20 @@ MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
     // Load route
     stackedWidget = new QStackedWidget(this);
     stackedWidget->setGeometry(QRect(0, 0, width, height));
-    stackedWidget->insertWidget(MAIN_PAGE_INIT, MainPageInit::getInstance());
-    stackedWidget->insertWidget(MAIN_PAGE_HOME, MainPageHome::getInstance());
+    connect(stackedWidget, &QStackedWidget::currentChanged, [](const int newIndex) {
+        routerQueue.push_back(newIndex);
+        if (routerQueue.size() > 10) {
+            routerQueue.pop_front();
+        }
+        ostringstream oss;
+        oss << "Current widget stack: ";
+        for (const auto index: routerQueue) {
+            oss << index << " ";
+        }
+        logPrintln(oss.str(), airstrip::INFO, __FUNCTION__);
+    });
+    stackedWidget->insertWidget(MAIN_PAGE_INIT, MainPageInit::getInstance(stackedWidget));
+    stackedWidget->insertWidget(MAIN_PAGE_HOME, MainPageHome::getInstance(stackedWidget));
     stackedWidget->setCurrentIndex(MAIN_PAGE_INIT);
     stackedWidget->show();
 

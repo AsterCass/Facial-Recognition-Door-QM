@@ -2,6 +2,7 @@
 #define CONFIG_H
 
 #include <string>
+#include <deque>
 #include <QStackedWidget>
 #include <airstrip_db.h>
 
@@ -48,6 +49,8 @@ extern QStackedWidget *stackedWidget;
 extern int tryGoManagementCount;
 
 extern airstrip::CommonBackendConfigDbManager commonDb;
+
+extern std::deque<int> routerQueue;
 
 
 #endif //CONFIG_H

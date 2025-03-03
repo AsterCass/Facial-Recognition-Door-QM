@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#ifndef WIN32
+
 #ifdef RKAIQ
 
 
@@ -309,5 +311,7 @@ void make_rkraws(struct mcu_rkaiq_rkraw *mcu_rkraws, uint8_t **rkraws) {
     memcpy(ptr, &tag, 2);
   }
 }
+
+#endif
 
 #endif

@@ -10,13 +10,17 @@ public:
 
     MainPageInit &operator=(const MainPageInit &) = delete;
 
-    static MainPageInit *getInstance() {
-        static MainPageInit instance;
+    static MainPageInit *getInstance(QWidget *parent) {
+        static MainPageInit instance(parent);
         return &instance;
     }
 
 private:
     explicit MainPageInit(QWidget *parent = nullptr);
+
+    void showEvent(QShowEvent *event) override;
+
+    void setElement();
 
     ~MainPageInit() override;
 
