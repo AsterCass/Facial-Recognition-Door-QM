@@ -8,14 +8,14 @@
 
 using namespace std;
 
-mutex _mtx;
+mutex mtx;
 bool started = false;
 
 // 0: 红外 1: rga
 RK_S32 s32CamId = 1;
 
 void startCameraRk() {
-    std::lock_guard<std::mutex> lock(_mtx);
+    std::lock_guard<std::mutex> lock(mtx);
     if (started) {
         logPrintln("Camera RK has started", airstrip::WARN, __FUNCTION__);
         return;
@@ -78,7 +78,7 @@ void startCameraRk() {
     VO_CHN_ATTR_S stVoAttr = {};
     // VO[0] for primary plane
     stVoAttr.pcDevNode = "/dev/dri/card0";
-    stVoAttr.emPlaneType = VO_PLANE_PRIMARY;
+    stVoAttr.emPlaneType = VO_PLANE_OVERLAY;
     stVoAttr.enImgType = IMAGE_TYPE_RGB888;
     stVoAttr.u16Zpos = 0;
     stVoAttr.stDispRect.s32X = 0;
@@ -126,7 +126,7 @@ void startCameraRk() {
 }
 
 void stopCameraRk() {
-    std::lock_guard<std::mutex> lock(_mtx);
+    std::lock_guard<std::mutex> lock(mtx);
     if (!started) {
         logPrintln("Camera RK has stoped", airstrip::WARN, __FUNCTION__);
         return;

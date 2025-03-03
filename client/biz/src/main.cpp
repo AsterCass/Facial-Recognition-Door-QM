@@ -77,14 +77,14 @@ int main(int argc, char *argv[]) {
     // Db
     std::string appWorkDir;
     airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
-    if (appWorkDir.size() > 0) {
+    if (!appWorkDir.empty()) {
         commonDb.initDb(appWorkDir + PRO_DB_ADDRESS);
         std::string serverAddress = commonDb.getConfig(PRO_DB_COMMON_KEY_SERVER_ADD);
-        if (serverAddress.size() <= 0) {
+        if (serverAddress.empty()) {
             commonDb.upsertConfig(PRO_DB_COMMON_KEY_SERVER_ADD, "localhost:5525");
         }
         std::string managementPassword = commonDb.getConfig(PRO_DB_COMMON_KEY_MANA_PASS);
-        if (managementPassword.size() <= 0) {
+        if (managementPassword.empty()) {
             commonDb.upsertConfig(PRO_DB_COMMON_KEY_MANA_PASS, "123456");
         }
         logPrintln("Db finish", airstrip::INFO, __FUNCTION__);
@@ -92,6 +92,7 @@ int main(int argc, char *argv[]) {
 
     // Page router
     const auto router = MainRouter::getInstance();
+    router->setWindowFlags(Qt::WindowStaysOnTopHint);
     router->show();
     logPrintln("UI finish", airstrip::INFO, __FUNCTION__);
 
@@ -101,6 +102,7 @@ int main(int argc, char *argv[]) {
 
     // Finish
     logPrintln("Application started", airstrip::INFO, __FUNCTION__);
+
 
     return QApplication::exec();
 }
