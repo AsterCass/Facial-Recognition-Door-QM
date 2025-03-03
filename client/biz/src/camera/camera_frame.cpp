@@ -3,7 +3,7 @@
 #ifdef Q_OS_WIN
 #include <QCameraInfo>
 #include <QCameraViewfinder>
-#elif
+#else
 #include "camera/camera_rk.h"
 #endif
 

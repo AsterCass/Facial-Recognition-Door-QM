@@ -1,5 +1,6 @@
 #ifndef CAMERA_FRAME_H
 #define CAMERA_FRAME_H
+#include <QWidget>
 #include <QVBoxLayout>
 #ifdef Q_OS_WIN
 #include <QCamera>
@@ -32,8 +33,10 @@ private:
     QWidget *mask = nullptr;
     QVBoxLayout *mainLayout = nullptr;
 
+#ifdef Q_OS_WIN
     QCamera *camera = nullptr;
     QVideoWidget *videoWidget = nullptr;
+#endif
 };
 
 
