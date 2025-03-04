@@ -75,6 +75,7 @@ elseif (UNIX)
             #${SDK_PATH}/lib/linux/inspire
             ${AIRSTRIP_PREFIX_PATH}/lib
             ${RK_ROOT}/lib
+            ${OPENCV_ROOT}/lib/opencv4/3rdparty
     )
 else ()
     message(FATAL_ERROR "Unsupported operating system")
@@ -84,7 +85,6 @@ endif ()
 message(STATUS "OpenCV version: ${OpenCV_VERSION}")
 message(STATUS "OpenCV include path: ${OpenCV_INCLUDE_DIRS}")
 message(STATUS "OpenCV libraries: ${OpenCV_LIBS}")
-message(STATUS "OpenCV libraries path: ${OpenCV_LIB_PATH}")
 message(STATUS "Breakpad include path: ${BREAKPAD_INCLUDE_DIRS}")
 message(STATUS "Breakpad libraries path: ${BREAKPAD_LIBRARY_DIR}")
 message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
@@ -124,8 +124,12 @@ if (WIN32)
 elseif (UNIX)
     target_include_directories(FacialRecognitionDoor PUBLIC ${CMAKE_SOURCE_DIR}/include)
     target_link_libraries(FacialRecognitionDoor PRIVATE
-            ${OpenCV_LIBS}
             airstrip
+            # Open CV
+            ${OpenCV_LIBS}
+            -llibprotobuf -lade -littnotify -llibjpeg-turbo -llibwebp -llibpng
+            -llibtiff -llibopenjp2 -lIlmImf -lzlib -ltegra_hal -ldl -lm -lpthread -lrt
+            # SQL
             SQLiteCpp sqlite3
             Boost::program_options Boost::json Boost::filesystem
             Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets

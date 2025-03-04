@@ -29,18 +29,16 @@ static void *process(void *) {
         if (closeProcess) {
             break;
         }
-        printf(" ========== start to get buffer\n");
         if (!mb) {
-            printf(" ========== fail to get buffer\n");
             continue;
         }
-        void *data = RK_MPI_MB_GetPtr(mb);
 
-        cv::Mat frame(disp_height, disp_width, CV_8UC3, data);
+        printf(" ========== start to get buffer\n");
+
+        void *data = RK_MPI_MB_GetPtr(mb);
+        cv::Mat frame(disp_height, disp_width, CV_8UC3, data, disp_width * disp_height * 3);
         cv::cvtColor(frame, frame, cv::COLOR_RGB2BGR);
         imwrite("/data/frd/test.jpg", frame);
-
-        printf(" ========== finish to get buffer\n");
 
         RK_MPI_MB_ReleaseBuffer(mb);
     }
