@@ -1,4 +1,4 @@
-#ifndef WIN32x
+#ifndef WIN32
 
 #include <rkmedia_api.h>
 #include <mutex>
@@ -7,6 +7,8 @@
 #include "airstrip_log.h"
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/types_c.h>
+
+#include "camera/camera_frame.h"
 
 
 using namespace std;
@@ -36,9 +38,10 @@ static void *process(void *) {
         printf(" ========== start to get buffer\n");
 
         void *data = RK_MPI_MB_GetPtr(mb);
-        cv::Mat frame(disp_height, disp_width, CV_8UC3, data, disp_width * disp_height * 3);
-        cv::cvtColor(frame, frame, cv::COLOR_RGB2BGR);
-        imwrite("/data/frd/test.jpg", frame);
+        cv::Mat frame(disp_height, disp_width, CV_8UC3, data);
+        cvtColor(frame, frame, cv::COLOR_RGB2BGR);
+        // imwrite("/data/frd/test.jpg", frame);
+        CameraFrame::getInstance()->updateFrameRK(static_cast<uchar *>(data), disp_width, disp_height);
 
         RK_MPI_MB_ReleaseBuffer(mb);
     }

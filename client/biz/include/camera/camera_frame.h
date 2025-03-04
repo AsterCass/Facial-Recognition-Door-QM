@@ -5,6 +5,8 @@
 #ifdef Q_OS_WIN
 #include <QCamera>
 #include <QVideoWidget>
+#else
+#include <QLabel>
 #endif
 
 
@@ -23,6 +25,8 @@ public:
 
     void stop() const;
 
+    void updateFrameRK(uchar *data, int height, int width) const;
+
 private:
     explicit CameraFrame(QWidget *parent = nullptr);
 
@@ -36,6 +40,8 @@ private:
 #ifdef Q_OS_WIN
     QCamera *camera = nullptr;
     QVideoWidget *videoWidget = nullptr;
+#else
+    QLabel *camera = nullptr;
 #endif
 };
 
