@@ -53,6 +53,7 @@ void CameraFrame::updateFrameRK(uchar *data, int height, int width) const {
     logPrintln(to_string(camera->status()), airstrip::LogLevel::INFO, __FUNCTION__);
 #else
     QImage image(data, width, height, QImage::Format_RGB888);
+    // image.save("/data/frd/test2.jpg");
     camera->setPixmap(QPixmap::fromImage(image));
 #endif
 }

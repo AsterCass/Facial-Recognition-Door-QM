@@ -1,4 +1,4 @@
-#ifndef WIN32
+#ifndef WIN32x
 
 #include <rkmedia_api.h>
 #include <mutex>
@@ -41,9 +41,10 @@ static void *process(void *) {
         cv::Mat frame(disp_height, disp_width, CV_8UC3, data);
         cvtColor(frame, frame, cv::COLOR_RGB2BGR);
         // imwrite("/data/frd/test.jpg", frame);
-        CameraFrame::getInstance()->updateFrameRK(static_cast<uchar *>(data), disp_width, disp_height);
-
+        CameraFrame::getInstance()->updateFrameRK(static_cast<uchar *>(data), disp_height, disp_width);
         RK_MPI_MB_ReleaseBuffer(mb);
+
+        usleep(10 * 1000);
     }
     return nullptr;
 }
