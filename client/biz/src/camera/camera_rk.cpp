@@ -13,6 +13,7 @@ using namespace std;
 
 mutex mtx;
 bool started = false;
+int closeProcess = false;
 
 // 0: 红外 1: rga
 RK_S32 s32CamId = 1;
@@ -20,11 +21,14 @@ RK_S32 s32CamId = 1;
 int disp_width = 800;
 int disp_height = 1280;
 
-[[noreturn]] static void process(void *) {
+[[noreturn]] static void *process(void *) {
     MEDIA_BUFFER mb = nullptr;
 
     while (true) {
         mb = RK_MPI_SYS_GetMediaBuffer(RK_ID_RGA, 0, -1);
+        if (closeProcess) {
+            break;
+        }
         if (!mb) {
             printf(" ========== fail to get buffer\n");
             continue;
@@ -38,6 +42,7 @@ int disp_height = 1280;
 
         RK_MPI_MB_ReleaseBuffer(mb);
     }
+    return nullptr;
 }
 
 void startCameraRk() {

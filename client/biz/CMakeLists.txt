@@ -21,6 +21,7 @@ if (WIN32)
     )
     #set(CMAKE_PREFIX_PATH P:/tools/opencv/OpenCV-MinGW-Build-OpenCV-4.5.5-x64)
 elseif (UNIX)
+    set(OPENCV_ROOT /data/src/opencv/_install)
     set(BOOST_ROOT /data/src/boost/_install)
     set(SQLITE_CPP_ROOT /data/src/sqlitecpp/_install)
     set(QT_ROOT /data/src/Qt5.12.2/_install/lib/cmake/Qt5)
@@ -31,6 +32,7 @@ elseif (UNIX)
             "${SQLITE_CPP_ROOT}"
             "${QT_ROOT}"
             "${BREAKPAD_ROOT}"
+            "${OPENCV_ROOT}"
     )
 else ()
     message(FATAL_ERROR "Unsupported operating system")
