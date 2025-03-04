@@ -21,7 +21,7 @@ RK_S32 s32CamId = 1;
 int disp_width = 800;
 int disp_height = 1280;
 
-[[noreturn]] static void *process(void *) {
+static void *process(void *) {
     MEDIA_BUFFER mb = nullptr;
 
     while (true) {
@@ -29,16 +29,18 @@ int disp_height = 1280;
         if (closeProcess) {
             break;
         }
+        printf(" ========== start to get buffer\n");
         if (!mb) {
             printf(" ========== fail to get buffer\n");
             continue;
         }
         void *data = RK_MPI_MB_GetPtr(mb);
 
+        cv::Mat frame(disp_height, disp_width, CV_8UC3, data);
+        cv::cvtColor(frame, frame, cv::COLOR_RGB2BGR);
+        imwrite("/data/frd/test.jpg", frame);
 
-        cv::Mat yuv(disp_height, disp_width, CV_8UC1, static_cast<uchar *>(data));
-        cvtColor(yuv, yuv, CV_YUV2RGBA_NV21);
-        imwrite("/data/frd/test.jpg", yuv);
+        printf(" ========== finish to get buffer\n");
 
         RK_MPI_MB_ReleaseBuffer(mb);
     }
