@@ -38,7 +38,7 @@ endif ()
 
 set(SDK_PATH 3rdparty)
 set(AIRSTRIP_PREFIX_PATH ../airstrip)
-#find_package(OpenCV REQUIRED)
+find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS program_options json filesystem)
 find_package(SQLiteCpp REQUIRED)
 
@@ -122,7 +122,7 @@ if (WIN32)
 elseif (UNIX)
     target_include_directories(FacialRecognitionDoor PUBLIC ${CMAKE_SOURCE_DIR}/include)
     target_link_libraries(FacialRecognitionDoor PRIVATE
-            #${OpenCV_LIBS}
+            ${OpenCV_LIBS}
             airstrip
             SQLiteCpp sqlite3
             Boost::program_options Boost::json Boost::filesystem

@@ -1,10 +1,13 @@
-#ifndef WIN32
+#ifndef WIN32x
 
 #include <rkmedia_api.h>
 #include <mutex>
 #include "camera/common/sample_common.h"
 #include "camera/camera_rk.h"
 #include "airstrip_log.h"
+#include <opencv2/opencv.hpp>
+#include <opencv2/imgproc/types_c.h>
+
 
 using namespace std;
 
@@ -13,6 +16,29 @@ bool started = false;
 
 // 0: 红外 1: rga
 RK_S32 s32CamId = 1;
+
+int disp_width = 800;
+int disp_height = 1280;
+
+[[noreturn]] static void process(void *) {
+    MEDIA_BUFFER mb = nullptr;
+
+    while (true) {
+        mb = RK_MPI_SYS_GetMediaBuffer(RK_ID_RGA, 0, -1);
+        if (!mb) {
+            printf(" ========== fail to get buffer\n");
+            continue;
+        }
+        void *data = RK_MPI_MB_GetPtr(mb);
+
+
+        cv::Mat yuv(disp_height, disp_width, CV_8UC1, static_cast<uchar *>(data));
+        cvtColor(yuv, yuv, CV_YUV2RGBA_NV21);
+        imwrite("/data/frd/test.jpg", yuv);
+
+        RK_MPI_MB_ReleaseBuffer(mb);
+    }
+}
 
 void startCameraRk() {
     std::lock_guard<std::mutex> lock(mtx);
@@ -25,9 +51,6 @@ void startCameraRk() {
 
     int video_width = 1920;
     int video_height = 1080;
-
-    int disp_width = 800;
-    int disp_height = 1280;
 
     // Init
     SAMPLE_COMM_ISP_Init(s32CamId, RK_AIQ_WORKING_MODE_NORMAL, RK_FALSE, "/etc/iqfiles");
@@ -75,22 +98,22 @@ void startCameraRk() {
         exit(-1);
     }
 
-    VO_CHN_ATTR_S stVoAttr = {};
-    // VO[0] for primary plane
-    stVoAttr.pcDevNode = "/dev/dri/card0";
-    stVoAttr.emPlaneType = VO_PLANE_OVERLAY;
-    stVoAttr.enImgType = IMAGE_TYPE_RGB888;
-    stVoAttr.u16Zpos = 0;
-    stVoAttr.stDispRect.s32X = 0;
-    stVoAttr.stDispRect.s32Y = 0;
-    stVoAttr.stDispRect.u32Width = disp_width;
-    stVoAttr.stDispRect.u32Height = disp_height;
-    ret = RK_MPI_VO_CreateChn(0, &stVoAttr);
-    if (ret) {
-        logPrintln("Create vo[0] failed! ret = " + ret,
-                   airstrip::CRITICAL, __FUNCTION__);
-        exit(-1);
-    }
+    // VO_CHN_ATTR_S stVoAttr = {};
+    // // VO[0] for primary plane
+    // stVoAttr.pcDevNode = "/dev/dri/card0";
+    // stVoAttr.emPlaneType = VO_PLANE_OVERLAY;
+    // stVoAttr.enImgType = IMAGE_TYPE_RGB888;
+    // stVoAttr.u16Zpos = 0;
+    // stVoAttr.stDispRect.s32X = 0;
+    // stVoAttr.stDispRect.s32Y = 0;
+    // stVoAttr.stDispRect.u32Width = disp_width;
+    // stVoAttr.stDispRect.u32Height = disp_height;
+    // ret = RK_MPI_VO_CreateChn(0, &stVoAttr);
+    // if (ret) {
+    //     logPrintln("Create vo[0] failed! ret = " + ret,
+    //                airstrip::CRITICAL, __FUNCTION__);
+    //     exit(-1);
+    // }
 
 
     MPP_CHN_S stSrcChn = {};
@@ -109,14 +132,23 @@ void startCameraRk() {
     }
 
 
-    logPrintln("Bind RGA[0] to VO[0]...", airstrip::INFO, __FUNCTION__);
-    stSrcChn.enModId = RK_ID_RGA;
-    stSrcChn.s32ChnId = 0;
-    stDestChn.enModId = RK_ID_VO;
-    stDestChn.s32ChnId = 0;
-    ret = RK_MPI_SYS_Bind(&stSrcChn, &stDestChn);
+    // logPrintln("Bind RGA[0] to VO[0]...", airstrip::INFO, __FUNCTION__);
+    // stSrcChn.enModId = RK_ID_RGA;
+    // stSrcChn.s32ChnId = 0;
+    // stDestChn.enModId = RK_ID_VO;
+    // stDestChn.s32ChnId = 0;
+    // ret = RK_MPI_SYS_Bind(&stSrcChn, &stDestChn);
+    // if (ret) {
+    //     logPrintln("Bind rga[0] to vo[0] failed! ret = " + ret,
+    //                airstrip::CRITICAL, __FUNCTION__);
+    //     exit(-1);
+    // }
+
+
+    pthread_t readThread;
+    ret = pthread_create(&readThread, nullptr, process, nullptr);
     if (ret) {
-        logPrintln("Bind rga[0] to vo[0] failed! ret ret = " + ret,
+        logPrintln("Create monitor read thread failed! ret = " + ret,
                    airstrip::CRITICAL, __FUNCTION__);
         exit(-1);
     }
@@ -148,18 +180,18 @@ void stopCameraRk() {
         exit(-1);
     }
 
-    stSrcChn.enModId = RK_ID_RGA;
-    stSrcChn.s32ChnId = 0;
-    stDestChn.enModId = RK_ID_VO;
-    stDestChn.s32ChnId = 0;
-    ret = RK_MPI_SYS_UnBind(&stSrcChn, &stDestChn);
-    if (ret) {
-        logPrintln("Unbind rga[0] to vo[0] failed! ret = " + ret,
-                   airstrip::CRITICAL, __FUNCTION__);
-        exit(-1);
-    }
+    // stSrcChn.enModId = RK_ID_RGA;
+    // stSrcChn.s32ChnId = 0;
+    // stDestChn.enModId = RK_ID_VO;
+    // stDestChn.s32ChnId = 0;
+    // ret = RK_MPI_SYS_UnBind(&stSrcChn, &stDestChn);
+    // if (ret) {
+    //     logPrintln("Unbind rga[0] to vo[0] failed! ret = " + ret,
+    //                airstrip::CRITICAL, __FUNCTION__);
+    //     exit(-1);
+    // }
 
-    RK_MPI_VO_DestroyChn(0);
+    //RK_MPI_VO_DestroyChn(0);
     RK_MPI_RGA_DestroyChn(0);
     RK_MPI_VI_DisableChn(s32CamId, 0);
 
