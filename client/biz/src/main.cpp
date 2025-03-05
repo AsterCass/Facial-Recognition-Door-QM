@@ -3,6 +3,7 @@
 #include <airstrip_program_options.h>
 #include <enums/general_enums.h>
 #include "airstrip_db.h"
+#include "airstrip_thread_pool.h"
 #include "utils/scheduled_task.h"
 #include "ui/main_router.h"
 #include "config/config.h"
@@ -66,13 +67,7 @@ int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
     // Init thread poll
-    // mainThreadPool = airstrip::ThreadPool::getInstance(3);
-    // for (int i = 0; i < 10; ++i) {
-    //     static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue([i] {
-    //         std::this_thread::sleep_for(std::chrono::seconds(1));
-    //         airstrip::logPrintln(INFO, "TASK", std::to_string(i));
-    //     });
-    // }
+    mainThreadPool = airstrip::ThreadPool::getInstance(3);
 
     // Db
     std::string appWorkDir;

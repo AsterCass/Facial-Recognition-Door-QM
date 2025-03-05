@@ -8,7 +8,9 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc/types_c.h>
 
+#include "airstrip_thread_pool.h"
 #include "camera/camera_frame.h"
+#include "config/config.h"
 
 
 using namespace std;
@@ -28,22 +30,39 @@ static void *process(void *) {
 
     while (true) {
         mb = RK_MPI_SYS_GetMediaBuffer(RK_ID_RGA, 0, -1);
-        if (closeProcess) {
-            break;
-        }
         if (!mb) {
+            usleep(10 * 1000);
             continue;
         }
+        if (closeProcess) {
+            RK_MPI_MB_ReleaseBuffer(mb);
+            usleep(10 * 1000);
+            break;
+        }
+        bool static onSendFrame = false;
+        if (!onSendFrame) {
+            onSendFrame = true;
 
-        printf(" ========== start to get buffer\n");
+            const void *data = RK_MPI_MB_GetPtr(mb);
+            const size_t size = RK_MPI_MB_GetSize(mb);
+            void *buff = malloc(size);
+            memcpy(buff, data, size);
 
-        void *data = RK_MPI_MB_GetPtr(mb);
-        cv::Mat frame(disp_height, disp_width, CV_8UC3, data);
-        cvtColor(frame, frame, cv::COLOR_RGB2BGR);
-        // imwrite("/data/frd/test.jpg", frame);
-        CameraFrame::getInstance()->updateFrameRK(static_cast<uchar *>(data), disp_height, disp_width);
+            if (mainThreadPool) {
+                static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue([buff] {
+                    cv::Mat frame(disp_height, disp_width, CV_8UC3, buff);
+                    cvtColor(frame, frame, cv::COLOR_RGB2BGR);
+                    CameraFrame::getInstance()->updateFrameRK(static_cast<uchar *>(buff), disp_height, disp_width);
+
+                    free(buff);
+                    onSendFrame = false;
+                });
+            } else {
+                free(buff);
+                onSendFrame = false;
+            }
+        }
         RK_MPI_MB_ReleaseBuffer(mb);
-
         usleep(10 * 1000);
     }
     return nullptr;
@@ -84,7 +103,7 @@ void startCameraRk() {
 
     RGA_ATTR_S stRgaAttr = {};
     stRgaAttr.bEnBufPool = RK_TRUE;
-    stRgaAttr.u16BufPoolCnt = 2;
+    stRgaAttr.u16BufPoolCnt = 8;
     stRgaAttr.u16Rotaion = 90;
     stRgaAttr.stImgIn.u32X = 0;
     stRgaAttr.stImgIn.u32Y = 0;
