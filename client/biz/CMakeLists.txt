@@ -27,7 +27,9 @@ elseif (UNIX)
     set(QT_ROOT /data/src/Qt5.12.2/_install/lib/cmake/Qt5)
     set(BREAKPAD_ROOT /data/src/breakpad/_install)
     set(RK_ROOT /data/src/rockchip/_install)
+    set(INSPIRE_ROOT /data/src/InspireFace/InspireFace-master/build/inspireface-linux-armv7-armhf/InspireFace)
     set(CMAKE_PREFIX_PATH
+            "${INSPIRE_ROOT}"
             "${BOOST_ROOT}"
             "${SQLITE_CPP_ROOT}"
             "${QT_ROOT}"
@@ -72,7 +74,7 @@ elseif (UNIX)
             ${SQLITE_CPP_ROOT}/include
     )
     link_directories(
-            ${SDK_PATH}/lib/linux/inspire
+            ${INSPIRE_ROOT}/lib
             ${AIRSTRIP_PREFIX_PATH}/lib
             ${RK_ROOT}/lib
             ${OPENCV_ROOT}/lib/opencv4/3rdparty
