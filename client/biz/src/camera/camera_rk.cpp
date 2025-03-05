@@ -55,10 +55,12 @@ static void *process(void *) {
                     CameraFrame::getInstance()->updateFrameRK(static_cast<uchar *>(buff), disp_height, disp_width);
 
                     free(buff);
+                    usleep(10 * 1000);
                     onSendFrame = false;
                 });
             } else {
                 free(buff);
+                usleep(10 * 1000);
                 onSendFrame = false;
             }
         }

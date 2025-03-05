@@ -7,6 +7,14 @@
 #include "utils/scheduled_task.h"
 #include "ui/main_router.h"
 #include "config/config.h"
+#ifndef WIN32
+#include "client/linux/handler/exception_handler.h"
+static bool dumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
+void* context, bool succeeded) {
+    printf("Dump path: %s\n", descriptor.path());
+    return succeeded;
+}
+#endif
 
 int main(int argc, char *argv[]) {
     // Input args
@@ -63,6 +71,14 @@ int main(int argc, char *argv[]) {
     }
     enableProgramOptions(optSetting, argc, argv);
 
+    // Dump
+    std::string appWorkDir;
+    airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
+#ifndef WIN32
+    google_breakpad::MinidumpDescriptor descriptor(appWorkDir + "dump/");
+    google_breakpad::ExceptionHandler eh(descriptor, NULL, dumpCallback, NULL, true, -1);
+#endif
+
     // Init application
     QApplication app(argc, argv);
 
@@ -70,8 +86,6 @@ int main(int argc, char *argv[]) {
     mainThreadPool = airstrip::ThreadPool::getInstance(3);
 
     // Db
-    std::string appWorkDir;
-    airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
     if (!appWorkDir.empty()) {
         commonDb.initDb(appWorkDir + PRO_DB_ADDRESS);
         std::string serverAddress = commonDb.getConfig(PRO_DB_COMMON_KEY_SERVER_ADD);
