@@ -1,10 +1,11 @@
 /**
- * @author Jingyu Yan
+ * Created by Jingyu Yan
  * @date 2024-10-01
  */
 
 #ifndef INSPIREFACE_INTYPEDEF_H
 #define INSPIREFACE_INTYPEDEF_H
+#include <stdint.h>
 
 // clang-format off
 typedef void*               HPVoid;                           ///< Pointer to Void.
@@ -16,6 +17,7 @@ typedef float               HFloat;                          ///< Single-precisi
 typedef float*              HPFloat;                         ///< Pointer to Single-precision floating point.
 typedef double              HDouble;                          ///< Double-precision floating point.
 typedef	unsigned char		HUInt8;                           ///< Unsigned 8-bit integer.
+typedef unsigned char*      HPUInt8;                          ///< Pointer to unsigned 8-bit integer.
 typedef signed int			HInt32;                           ///< Signed 32-bit integer.
 typedef signed int			HOption;                          ///< Signed 32-bit integer option.
 typedef signed int*			HPInt32;                          ///< Pointer to signed 32-bit integer.
@@ -24,6 +26,7 @@ typedef int64_t*            HPFaceId;                         ///< Pointer to Fa
 typedef long                HResult;                          ///< Result code.
 typedef char*               HString;                          ///< String.
 typedef const char*         HPath;                            ///< Const String.
+typedef const char*         HFormat;                            ///< Const String.
 typedef char                HBuffer;                            ///< Character.
 typedef char                HChar;                            ///< Character.
 typedef char*               HPBuffer;                           ///< Pointer Character.

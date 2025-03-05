@@ -10,6 +10,9 @@
 #include "airstrip_thread_pool.h"
 #include "camera/camera_frame.h"
 #include "config/config.h"
+#include "utils/face_recognition.h"
+
+#include <QImage>
 
 
 using namespace std;
@@ -24,6 +27,25 @@ RK_S32 s32CamId = 1;
 int disp_width = 800;
 int disp_height = 1280;
 
+//
+// void processWithMb(MEDIA_BUFFER mb) {
+//     if (closeProcess)return;
+//     bool static onSendFrame = false;
+//     if (onSendFrame) {
+//         RK_MPI_MB_ReleaseBuffer(mb);
+//         return;
+//     }
+//     onSendFrame = true;
+//
+//     void *data = RK_MPI_MB_GetPtr(mb);
+//     const QImage image(static_cast<uchar *>(data), disp_width, disp_height, QImage::Format_RGB888);
+//     QMetaObject::invokeMethod(CameraFrame::getInstance()->camera, "setPixmap", Qt::QueuedConnection,
+//                               Q_ARG(QPixmap, QPixmap::fromImage(image)));
+//
+//     usleep(30 * 1000);
+//     onSendFrame = false;
+//     RK_MPI_MB_ReleaseBuffer(mb);
+// }
 
 void processWithMb(MEDIA_BUFFER mb) {
     if (closeProcess)return;
@@ -40,54 +62,13 @@ void processWithMb(MEDIA_BUFFER mb) {
     memcpy(buff, data, size);
 
     static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue([buff] {
+        faceRecognition(buff, disp_height, disp_width);
         CameraFrame::getInstance()->updateFrameRK(buff, disp_height, disp_width);
         delete [] buff;
-        usleep(50 * 1000);
+        usleep(30 * 1000);
         onSendFrame = false;
     });
     RK_MPI_MB_ReleaseBuffer(mb);
-}
-
-static void *process(void *) {
-    MEDIA_BUFFER mb = nullptr;
-
-    while (true) {
-        mb = RK_MPI_SYS_GetMediaBuffer(RK_ID_RGA, 0, -1);
-        if (!mb) {
-            usleep(20 * 1000);
-            continue;
-        }
-        if (closeProcess) {
-            RK_MPI_MB_ReleaseBuffer(mb);
-            usleep(20 * 1000);
-            break;
-        }
-        bool static onSendFrame = false;
-        if (!onSendFrame) {
-            onSendFrame = true;
-
-            const void *data = RK_MPI_MB_GetPtr(mb);
-            const size_t size = RK_MPI_MB_GetSize(mb);
-            void *buff = malloc(size);
-            memcpy(buff, data, size);
-
-            if (mainThreadPool) {
-                static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue([buff] {
-                    CameraFrame::getInstance()->updateFrameRK(static_cast<uchar *>(buff), disp_height, disp_width);
-                    free(buff);
-                    usleep(20 * 1000);
-                    onSendFrame = false;
-                });
-            } else {
-                free(buff);
-                usleep(20 * 1000);
-                onSendFrame = false;
-            }
-        }
-        RK_MPI_MB_ReleaseBuffer(mb);
-        usleep(20 * 1000);
-    }
-    return nullptr;
 }
 
 void startCameraRk() {

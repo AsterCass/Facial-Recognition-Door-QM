@@ -56,7 +56,7 @@ endif ()
 
 if (WIN32)
     include_directories(
-            ${SDK_PATH}/include/windows/inspire
+            ${SDK_PATH}/include/common/inspire
             ${SDK_PATH}/include/common/rockchip
             ${AIRSTRIP_PREFIX_PATH}/include
             ${SQLITE_CPP_ROOT}/include
@@ -66,13 +66,13 @@ if (WIN32)
     )
 elseif (UNIX)
     include_directories(
-            #${SDK_PATH}/include/linux/inspire
+            ${SDK_PATH}/include/common/inspire
             ${SDK_PATH}/include/common/rockchip
             ${AIRSTRIP_PREFIX_PATH}/include
             ${SQLITE_CPP_ROOT}/include
     )
     link_directories(
-            #${SDK_PATH}/lib/linux/inspire
+            ${SDK_PATH}/lib/linux/inspire
             ${AIRSTRIP_PREFIX_PATH}/lib
             ${RK_ROOT}/lib
             ${OPENCV_ROOT}/lib/opencv4/3rdparty
@@ -104,6 +104,7 @@ set(PROJECT_SOURCES
         src/ui/components/common_components.cpp
         src/ui/pages/main_page_init.cpp
         src/ui/pages/main_page_home.cpp
+        src/utils/face_recognition.cpp
         src/utils/general_utils.cpp
         src/utils/scheduled_task.cpp
 )
@@ -134,6 +135,8 @@ elseif (UNIX)
             Boost::program_options Boost::json Boost::filesystem
             Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets
             # InspireFace
+            InspireFace
+            # Crash
             Breakpad::Client
             # Rock chip
             -lrkaiq -leasymedia -ldrm -lrockchip_mpp -lavformat -lavcodec -lswresample -lavutil -lasound
