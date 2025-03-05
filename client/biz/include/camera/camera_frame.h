@@ -7,6 +7,7 @@
 #include <QVideoWidget>
 #else
 #include <QLabel>
+#include <QImage>
 #endif
 
 
@@ -25,7 +26,7 @@ public:
 
     void stop() const;
 
-    void updateFrameRK(uchar *data, int height, int width) const;
+    void updateFrameRK(uchar *data, int height, int width);
 
 private:
     explicit CameraFrame(QWidget *parent = nullptr);
@@ -42,6 +43,7 @@ private:
     QVideoWidget *videoWidget = nullptr;
 #else
     QLabel *camera = nullptr;
+    QImage* imageCache = nullptr;
 #endif
 };
 

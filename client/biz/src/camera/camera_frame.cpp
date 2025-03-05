@@ -5,7 +5,6 @@
 #include <QCameraInfo>
 #include <QCameraViewfinder>
 #else
-#include <QImage>
 #include "camera/camera_rk.h"
 #endif
 
@@ -48,13 +47,17 @@ CameraFrame::CameraFrame(QWidget *parent): QWidget(parent) {
     }
 }
 
-void CameraFrame::updateFrameRK(uchar *data, int height, int width) const {
+void CameraFrame::updateFrameRK(uchar *data, int height, int width) {
 #ifdef Q_OS_WIN
     logPrintln(to_string(camera->status()), airstrip::LogLevel::INFO, __FUNCTION__);
 #else
-    QImage image(data, width, height, QImage::Format_RGB888);
-    // image.save("/data/frd/test2.jpg");
-    camera->setPixmap(QPixmap::fromImage(image));
+    if (!imageCache) {
+        imageCache = new QImage(data, width, height, QImage::Format_RGB888);
+    }
+    memcpy(imageCache->bits(), data, width * height);
+
+    QMetaObject::invokeMethod(camera, "setPixmap", Qt::QueuedConnection,
+                              Q_ARG(QPixmap, QPixmap::fromImage(*imageCache)));
 #endif
 }
 

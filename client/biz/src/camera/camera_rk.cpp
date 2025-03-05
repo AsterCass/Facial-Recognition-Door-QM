@@ -25,6 +25,17 @@ RK_S32 s32CamId = 1;
 int disp_width = 800;
 int disp_height = 1280;
 
+
+void processWithMd(MEDIA_BUFFER mb) {
+    if (closeProcess) {
+        return;
+    }
+    void *data = RK_MPI_MB_GetPtr(mb);
+    CameraFrame::getInstance()->updateFrameRK(static_cast<uchar *>(data), disp_height, disp_width);
+    RK_MPI_MB_ReleaseBuffer(mb);
+    usleep(10 * 1000);
+}
+
 static void *process(void *) {
     MEDIA_BUFFER mb = nullptr;
 
@@ -50,10 +61,7 @@ static void *process(void *) {
 
             if (mainThreadPool) {
                 static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue([buff] {
-                    cv::Mat frame(disp_height, disp_width, CV_8UC3, buff);
-                    cvtColor(frame, frame, cv::COLOR_RGB2BGR);
                     CameraFrame::getInstance()->updateFrameRK(static_cast<uchar *>(buff), disp_height, disp_width);
-
                     free(buff);
                     usleep(10 * 1000);
                     onSendFrame = false;
@@ -116,7 +124,7 @@ void startCameraRk() {
     stRgaAttr.stImgIn.u32VirStride = video_height;
     stRgaAttr.stImgOut.u32X = 0;
     stRgaAttr.stImgOut.u32Y = 0;
-    stRgaAttr.stImgOut.imgType = IMAGE_TYPE_RGB888;
+    stRgaAttr.stImgOut.imgType = IMAGE_TYPE_BGR888;
     stRgaAttr.stImgOut.u32Width = disp_width;
     stRgaAttr.stImgOut.u32Height = disp_height;
     stRgaAttr.stImgOut.u32HorStride = disp_width;
@@ -161,6 +169,19 @@ void startCameraRk() {
         exit(-1);
     }
 
+
+    if (false) {
+        MPP_CHN_S stEncChn;
+        stEncChn.enModId = RK_ID_RGA;
+        stEncChn.s32DevId = 0;
+        stEncChn.s32ChnId = 0;
+        ret = RK_MPI_SYS_RegisterOutCb(&stEncChn, processWithMd);
+        if (ret) {
+            logPrintln("Register out cb failed! ret = " + ret,
+                       airstrip::CRITICAL, __FUNCTION__);
+            exit(-1);
+        }
+    }
 
     // logPrintln("Bind RGA[0] to VO[0]...", airstrip::INFO, __FUNCTION__);
     // stSrcChn.enModId = RK_ID_RGA;

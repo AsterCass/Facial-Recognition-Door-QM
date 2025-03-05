@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
     std::string appWorkDir;
     airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
 #ifndef WIN32
-    google_breakpad::MinidumpDescriptor descriptor(appWorkDir + "dump/");
+    google_breakpad::MinidumpDescriptor descriptor(appWorkDir + "dump");
     google_breakpad::ExceptionHandler eh(descriptor, NULL, dumpCallback, NULL, true, -1);
 #endif
 
