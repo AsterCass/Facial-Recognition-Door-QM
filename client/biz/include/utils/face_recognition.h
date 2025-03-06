@@ -5,6 +5,8 @@
 
 void initFaceRecognition();
 
+void faceDetect(const cv::Mat &frame);
+
 void faceRecognition(const cv::Mat &frame);
 
 #endif //FACE_RECOGNITION_H

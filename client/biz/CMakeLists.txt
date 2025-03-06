@@ -62,9 +62,11 @@ if (WIN32)
             ${SDK_PATH}/include/common/rockchip
             ${AIRSTRIP_PREFIX_PATH}/include
             ${SQLITE_CPP_ROOT}/include
+            ${SDK_PATH}/include/windows/face
     )
     link_directories(
             ${AIRSTRIP_PREFIX_PATH}/lib
+            ${SDK_PATH}/lib/windows/face
     )
 elseif (UNIX)
     include_directories(
@@ -72,12 +74,14 @@ elseif (UNIX)
             ${SDK_PATH}/include/common/rockchip
             ${AIRSTRIP_PREFIX_PATH}/include
             ${SQLITE_CPP_ROOT}/include
+            ${SDK_PATH}/include/linux/face
     )
     link_directories(
             ${INSPIRE_ROOT}/lib
             ${AIRSTRIP_PREFIX_PATH}/lib
             ${RK_ROOT}/lib
             ${OPENCV_ROOT}/lib/opencv4/3rdparty
+            ${SDK_PATH}/lib/linux/face
     )
 else ()
     message(FATAL_ERROR "Unsupported operating system")
@@ -123,6 +127,8 @@ if (WIN32)
             SQLiteCpp sqlite3
             Boost::program_options Boost::json Boost::filesystem
             Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::MultimediaWidgets
+            # Face
+            -lfacedetection
     )
 elseif (UNIX)
     target_include_directories(FacialRecognitionDoor PUBLIC ${CMAKE_SOURCE_DIR}/include)
@@ -143,6 +149,8 @@ elseif (UNIX)
             # Rock chip
             -lrkaiq -leasymedia -ldrm -lrockchip_mpp -lavformat -lavcodec -lswresample -lavutil -lasound
             -lRKAP_3A -lRKAP_ANR -lRKAP_Common -lv4l2 -lrga -lmd_share -lod_share -lrkaiq -lz -lv4lconvert -ljpeg
+            # Face
+            -lfacedetection
     )
 else ()
     message(FATAL_ERROR "Unsupported operating system")

@@ -1,4 +1,4 @@
-#ifndef WIN32x
+#ifndef WIN32
 
 #include <rkmedia_api.h>
 #include <mutex>
@@ -56,13 +56,17 @@ void processWithMb(MEDIA_BUFFER mb) {
     }
     onSendFrame = true;
 
-    void *data = RK_MPI_MB_GetPtr(mb);
-    cv::Mat frame(disp_height, disp_width, CV_8UC3, static_cast<uchar *>(data));
+    const void *data = RK_MPI_MB_GetPtr(mb);
+    const size_t size = RK_MPI_MB_GetSize(mb);
+    auto *buff = new uchar[size];
+    memcpy(buff, data, size);
 
-    static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue([frame] {
-        faceRecognition(frame);
+    static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue([buff] {
+        const cv::Mat frame(disp_height, disp_width, CV_8UC3, buff);
+        faceDetect(frame);
         CameraFrame::getInstance()->updateFrameRK(frame);
 
+        delete [] buff;
         usleep(30 * 1000);
         onSendFrame = false;
     });
