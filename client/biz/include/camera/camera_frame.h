@@ -2,6 +2,7 @@
 #define CAMERA_FRAME_H
 #include <QWidget>
 #include <QVBoxLayout>
+#include <opencv2/core.hpp>
 #ifdef Q_OS_WIN
 #include <QCamera>
 #include <QVideoWidget>
@@ -26,7 +27,7 @@ public:
 
     void stop() const;
 
-    void updateFrameRK(uchar *data, int height, int width);
+    void updateFrameRK(const cv::Mat &frame);
 
 private:
     explicit CameraFrame(QWidget *parent = nullptr);

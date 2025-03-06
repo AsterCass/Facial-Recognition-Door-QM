@@ -14,6 +14,7 @@
 #include "enums/general_enums.h"
 #include "ui/main_router.h"
 #include "ui/components/main_component_header.h"
+#include "utils/face_recognition.h"
 
 using namespace std;
 using namespace airstrip;
@@ -93,6 +94,9 @@ void onceTask() {
 
     // Init Camera
     CameraFrame::getInstance()->start();
+
+    // Init Face
+    initFaceRecognition();
 
     // To home
     stackedWidget->setCurrentIndex(MAIN_PAGE_HOME);

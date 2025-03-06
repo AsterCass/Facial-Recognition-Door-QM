@@ -3,6 +3,8 @@
 #include "inspireface.h"
 #include "intypedef.h"
 #include <string>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/core/types.hpp>
 
 #include "airstrip_log.h"
 #include "airstrip_program_options.h"
@@ -12,17 +14,17 @@ using namespace std;
 
 HFSession faceRecognitionSession = {};
 
+bool initialized = false;
+
 void initFaceRecognition() {
-    static bool initialized = false;
     if (initialized) {
         return;
     }
-    initialized = true;
 
     string appWorkDir;
     airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
 
-    const string modelPath = appWorkDir + "model/Gundam-RV1109";
+    const string modelPath = appWorkDir + "model/Pikachu";
     HResult ret = HFLaunchInspireFace(modelPath.c_str());
     if (ret != HSUCCEED) {
         logPrintln("Load Resource error: " + ret, airstrip::INFO, __FUNCTION__);
@@ -42,17 +44,24 @@ void initFaceRecognition() {
 
     HFSessionSetTrackPreviewSize(faceRecognitionSession, detectPixelLevel);
     HFSessionSetFilterMinimumFacePixelSize(faceRecognitionSession, 4);
+
+    initialized = true;
 }
 
-void faceRecognition(void *data, int height, int width) {
-    initFaceRecognition();
+void faceRecognition(const cv::Mat &frame) {
+    if (!initialized) {
+        return;
+    }
+
+    cv::Mat miniFrame;
+    cv::resize(frame, miniFrame, cv::Size(), 0.3, 0.3, cv::INTER_LINEAR);
 
     HFImageStream stream = nullptr;
     HFImageData imageData = {};
-    imageData.data = static_cast<uchar *>(data);
+    imageData.data = miniFrame.data;
     imageData.format = HF_STREAM_RGB;
-    imageData.height = height;
-    imageData.width = width;
+    imageData.height = miniFrame.rows;
+    imageData.width = miniFrame.cols;
     imageData.rotation = HF_CAMERA_ROTATION_0; // Image rotation
     HResult ret = HFCreateImageStream(&imageData, &stream);
 

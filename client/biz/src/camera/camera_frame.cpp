@@ -47,14 +47,14 @@ CameraFrame::CameraFrame(QWidget *parent): QWidget(parent) {
     }
 }
 
-void CameraFrame::updateFrameRK(uchar *data, int height, int width) {
+void CameraFrame::updateFrameRK(const cv::Mat &frame) {
 #ifdef Q_OS_WIN
     logPrintln(to_string(camera->status()), airstrip::LogLevel::INFO, __FUNCTION__);
 #else
     if (!imageCache) {
-        imageCache = new QImage(data, width, height, QImage::Format_RGB888);
+        imageCache = new QImage(frame.data, frame.cols, frame.rows, QImage::Format_RGB888);
     }
-    memcpy(imageCache->bits(), data, width * height);
+    memcpy(imageCache->bits(), frame.data, frame.cols * frame.rows);
 
     QMetaObject::invokeMethod(camera, "setPixmap", Qt::QueuedConnection,
                               Q_ARG(QPixmap, QPixmap::fromImage(*imageCache)));

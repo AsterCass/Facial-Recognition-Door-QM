@@ -56,15 +56,13 @@ void processWithMb(MEDIA_BUFFER mb) {
     }
     onSendFrame = true;
 
-    const void *data = RK_MPI_MB_GetPtr(mb);
-    const size_t size = RK_MPI_MB_GetSize(mb);
-    auto *buff = new uchar[size];
-    memcpy(buff, data, size);
+    void *data = RK_MPI_MB_GetPtr(mb);
+    cv::Mat frame(disp_height, disp_width, CV_8UC3, static_cast<uchar *>(data));
 
-    static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue([buff] {
-        faceRecognition(buff, disp_height, disp_width);
-        CameraFrame::getInstance()->updateFrameRK(buff, disp_height, disp_width);
-        delete [] buff;
+    static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue([frame] {
+        faceRecognition(frame);
+        CameraFrame::getInstance()->updateFrameRK(frame);
+
         usleep(30 * 1000);
         onSendFrame = false;
     });
