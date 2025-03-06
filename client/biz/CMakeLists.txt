@@ -128,7 +128,7 @@ if (WIN32)
             Boost::program_options Boost::json Boost::filesystem
             Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::MultimediaWidgets
             # Face
-            -lfacedetection
+            -lfacedetection -fopenmp
     )
 elseif (UNIX)
     target_include_directories(FacialRecognitionDoor PUBLIC ${CMAKE_SOURCE_DIR}/include)
@@ -150,7 +150,7 @@ elseif (UNIX)
             -lrkaiq -leasymedia -ldrm -lrockchip_mpp -lavformat -lavcodec -lswresample -lavutil -lasound
             -lRKAP_3A -lRKAP_ANR -lRKAP_Common -lv4l2 -lrga -lmd_share -lod_share -lrkaiq -lz -lv4lconvert -ljpeg
             # Face
-            -lfacedetection
+            -lfacedetection -fopenmp
     )
 else ()
     message(FATAL_ERROR "Unsupported operating system")

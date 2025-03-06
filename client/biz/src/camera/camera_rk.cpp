@@ -1,4 +1,4 @@
-#ifndef WIN32
+#ifndef WIN32x
 
 #include <rkmedia_api.h>
 #include <mutex>
@@ -165,28 +165,28 @@ void startCameraRk() {
     }
 
 
-    MPP_CHN_S stEncChn;
-    stEncChn.enModId = RK_ID_RGA;
-    stEncChn.s32DevId = 0;
-    stEncChn.s32ChnId = 0;
-    ret = RK_MPI_SYS_RegisterOutCb(&stEncChn, processWithMb);
-    if (ret) {
-        logPrintln("Register out cb failed! ret = " + ret,
-                   airstrip::CRITICAL, __FUNCTION__);
-        exit(-1);
-    }
-
-    // logPrintln("Bind RGA[0] to VO[0]...", airstrip::INFO, __FUNCTION__);
-    // stSrcChn.enModId = RK_ID_RGA;
-    // stSrcChn.s32ChnId = 0;
-    // stDestChn.enModId = RK_ID_VO;
-    // stDestChn.s32ChnId = 0;
-    // ret = RK_MPI_SYS_Bind(&stSrcChn, &stDestChn);
+    // MPP_CHN_S stEncChn;
+    // stEncChn.enModId = RK_ID_RGA;
+    // stEncChn.s32DevId = 0;
+    // stEncChn.s32ChnId = 0;
+    // ret = RK_MPI_SYS_RegisterOutCb(&stEncChn, processWithMb);
     // if (ret) {
-    //     logPrintln("Bind rga[0] to vo[0] failed! ret = " + ret,
+    //     logPrintln("Register out cb failed! ret = " + ret,
     //                airstrip::CRITICAL, __FUNCTION__);
     //     exit(-1);
     // }
+
+    logPrintln("Bind RGA[0] to VO[0]...", airstrip::INFO, __FUNCTION__);
+    stSrcChn.enModId = RK_ID_RGA;
+    stSrcChn.s32ChnId = 0;
+    stDestChn.enModId = RK_ID_VO;
+    stDestChn.s32ChnId = 0;
+    ret = RK_MPI_SYS_Bind(&stSrcChn, &stDestChn);
+    if (ret) {
+        logPrintln("Bind rga[0] to vo[0] failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
 
 
     // pthread_t readThread;
@@ -224,16 +224,16 @@ void stopCameraRk() {
         exit(-1);
     }
 
-    // stSrcChn.enModId = RK_ID_RGA;
-    // stSrcChn.s32ChnId = 0;
-    // stDestChn.enModId = RK_ID_VO;
-    // stDestChn.s32ChnId = 0;
-    // ret = RK_MPI_SYS_UnBind(&stSrcChn, &stDestChn);
-    // if (ret) {
-    //     logPrintln("Unbind rga[0] to vo[0] failed! ret = " + ret,
-    //                airstrip::CRITICAL, __FUNCTION__);
-    //     exit(-1);
-    // }
+    stSrcChn.enModId = RK_ID_RGA;
+    stSrcChn.s32ChnId = 0;
+    stDestChn.enModId = RK_ID_VO;
+    stDestChn.s32ChnId = 0;
+    ret = RK_MPI_SYS_UnBind(&stSrcChn, &stDestChn);
+    if (ret) {
+        logPrintln("Unbind rga[0] to vo[0] failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
 
     //RK_MPI_VO_DestroyChn(0);
     RK_MPI_RGA_DestroyChn(0);

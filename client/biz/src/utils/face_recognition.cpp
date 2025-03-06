@@ -8,6 +8,7 @@
 
 #include "airstrip_log.h"
 #include "airstrip_program_options.h"
+#include "facedetectcnn.h"
 #include "config/config.h"
 
 using namespace std;
@@ -54,8 +55,18 @@ void faceDetect(const cv::Mat &frame) {
     }
 
     cv::Mat miniFrame;
-    double scaleFactor = 0.3;
-    resize(frame, miniFrame, cv::Size(), 0.3, 0.3, cv::INTER_LINEAR);
+    double scaleFactor = 0.1;
+    resize(frame, miniFrame, cv::Size(), scaleFactor, scaleFactor, cv::INTER_LINEAR);
+
+    int *pResults = NULL;
+    auto *pBuffer = static_cast<unsigned char *>(malloc(0x9000));
+    pResults = facedetect_cnn(pBuffer, miniFrame.data, miniFrame.cols, miniFrame.rows, miniFrame.step);
+    int faceNum = pResults ? *pResults : 0;
+
+    cout << faceNum << endl;
+
+    free(pBuffer);
+    pBuffer = nullptr;
 }
 
 void faceRecognition(const cv::Mat &frame) {
