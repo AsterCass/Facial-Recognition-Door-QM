@@ -82,6 +82,9 @@ void startCameraRk() {
         return;
     }
 
+    display_init(0, 0);
+    display_exit();
+
     int ret = 0;
 
     int video_width = 1920;
@@ -133,22 +136,22 @@ void startCameraRk() {
         exit(-1);
     }
 
-    // VO_CHN_ATTR_S stVoAttr = {};
-    // // VO[0] for primary plane
-    // stVoAttr.pcDevNode = "/dev/dri/card0";
-    // stVoAttr.emPlaneType = VO_PLANE_OVERLAY;
-    // stVoAttr.enImgType = IMAGE_TYPE_RGB888;
-    // stVoAttr.u16Zpos = 0;
-    // stVoAttr.stDispRect.s32X = 0;
-    // stVoAttr.stDispRect.s32Y = 0;
-    // stVoAttr.stDispRect.u32Width = disp_width;
-    // stVoAttr.stDispRect.u32Height = disp_height;
-    // ret = RK_MPI_VO_CreateChn(0, &stVoAttr);
-    // if (ret) {
-    //     logPrintln("Create vo[0] failed! ret = " + ret,
-    //                airstrip::CRITICAL, __FUNCTION__);
-    //     exit(-1);
-    // }
+    VO_CHN_ATTR_S stVoAttr = {};
+    // VO[0] for primary plane
+    stVoAttr.pcDevNode = "/dev/dri/card0";
+    stVoAttr.emPlaneType = VO_PLANE_OVERLAY;
+    stVoAttr.enImgType = IMAGE_TYPE_RGB888;
+    stVoAttr.u16Zpos = 0;
+    stVoAttr.stDispRect.s32X = 0;
+    stVoAttr.stDispRect.s32Y = 0;
+    stVoAttr.stDispRect.u32Width = disp_width;
+    stVoAttr.stDispRect.u32Height = disp_height;
+    ret = RK_MPI_VO_CreateChn(0, &stVoAttr);
+    if (ret) {
+        logPrintln("Create vo[0] failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
 
 
     MPP_CHN_S stSrcChn = {};
@@ -178,17 +181,17 @@ void startCameraRk() {
         exit(-1);
     }
 
-    // logPrintln("Bind RGA[0] to VO[0]...", airstrip::INFO, __FUNCTION__);
-    // stSrcChn.enModId = RK_ID_RGA;
-    // stSrcChn.s32ChnId = 0;
-    // stDestChn.enModId = RK_ID_VO;
-    // stDestChn.s32ChnId = 0;
-    // ret = RK_MPI_SYS_Bind(&stSrcChn, &stDestChn);
-    // if (ret) {
-    //     logPrintln("Bind rga[0] to vo[0] failed! ret = " + ret,
-    //                airstrip::CRITICAL, __FUNCTION__);
-    //     exit(-1);
-    // }
+    logPrintln("Bind RGA[0] to VO[0]...", airstrip::INFO, __FUNCTION__);
+    stSrcChn.enModId = RK_ID_RGA;
+    stSrcChn.s32ChnId = 0;
+    stDestChn.enModId = RK_ID_VO;
+    stDestChn.s32ChnId = 0;
+    ret = RK_MPI_SYS_Bind(&stSrcChn, &stDestChn);
+    if (ret) {
+        logPrintln("Bind rga[0] to vo[0] failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
 
 
     // pthread_t readThread;
