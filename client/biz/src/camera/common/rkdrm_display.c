@@ -40,7 +40,7 @@
 #define INT_MAX 0xff
 #define COLOR_KEY 0xFFFFFFFF
 
-static bool drm_plane_set_property (int fd, drmModePlane * plane,
+static int drm_plane_set_property (int fd, drmModePlane * plane,
         const char *prop_name, uint64_t prop_value)
 {
     drmModeObjectPropertiesPtr props;
@@ -50,7 +50,7 @@ static bool drm_plane_set_property (int fd, drmModePlane * plane,
     props = drmModeObjectGetProperties (fd, plane->plane_id,
             DRM_MODE_OBJECT_PLANE);
     if (!props)
-        return false;
+        return 0;
 
     for (i = 0; i < props->count_props; i++) {
         prop = drmModeGetProperty (fd, props->props[i]);
@@ -62,7 +62,7 @@ static bool drm_plane_set_property (int fd, drmModePlane * plane,
     }
 
     drmModeFreeObjectProperties (props);
-    return ret < 0 ? false : true;
+    return ret < 0 ? 0 : 1;
 }
 
 /**
