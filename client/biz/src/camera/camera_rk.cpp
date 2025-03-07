@@ -124,7 +124,7 @@ void startCameraRk() {
     stRgaAttr.stImgIn.u32VirStride = video_height;
     stRgaAttr.stImgOut.u32X = 0;
     stRgaAttr.stImgOut.u32Y = 0;
-    stRgaAttr.stImgOut.imgType = IMAGE_TYPE_BGR888;
+    stRgaAttr.stImgOut.imgType = IMAGE_TYPE_RGB888;
     stRgaAttr.stImgOut.u32Width = disp_width;
     stRgaAttr.stImgOut.u32Height = disp_height;
     stRgaAttr.stImgOut.u32HorStride = disp_width;

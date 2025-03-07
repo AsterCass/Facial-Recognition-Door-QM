@@ -21,12 +21,14 @@ MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
     airstrip::getProgramOptions(PRO_OPT_APP_WIDTH, &width);
 
     // Size
-    this->setStyleSheet("background: transparent");
+    this->setObjectName("mainRouter");
+    this->setStyleSheet("#mainRouter{background: transparent;}");
     this->setFixedSize(width, height);
 
     // Load route
     stackedWidget = new QStackedWidget(this);
-    stackedWidget->setStyleSheet("background: transparent");
+    this->setObjectName("stackedWidget");
+    this->setStyleSheet("#stackedWidget{background: transparent;}");
     stackedWidget->setGeometry(QRect(0, 0, width, height));
     connect(stackedWidget, &QStackedWidget::currentChanged, [](const int newIndex) {
         routerQueue.push_back(newIndex);
