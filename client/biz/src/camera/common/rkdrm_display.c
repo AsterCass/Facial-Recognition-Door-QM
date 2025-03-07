@@ -38,8 +38,8 @@
 #include <unistd.h>
 #include "camera/common/rkdrm_display.h"
 
-#include <cerrno>
-#include <cstdio>
+#include <errno.h>
+#include <stdio.h>
 
 #include "xf86drm.h"
 #include "libdrm/drm_fourcc.h"
