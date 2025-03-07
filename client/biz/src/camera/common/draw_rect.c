@@ -39,7 +39,8 @@
 #define ABS(x)              (((x)<0) ? -(x) : (x))
 #endif
 
-static void YUV_SWAP(int *x, int *y) {
+static void YUV_SWAP(int *x, int *y)
+{
     int tmp = 0;
 
     tmp = *x;
@@ -47,7 +48,8 @@ static void YUV_SWAP(int *x, int *y) {
     *y = tmp;
 }
 
-YUV_Color set_yuv_color(COLOR_Type color_type) {
+YUV_Color set_yuv_color(COLOR_Type color_type)
+{
     YUV_Color color;
 
     switch (color_type) {
@@ -55,47 +57,48 @@ YUV_Color set_yuv_color(COLOR_Type color_type) {
             color.Y = 226;
             color.U = 0;
             color.V = 149;
-            break;
+        break;
 
         case COLOR_R:
             color.Y = 76;
             color.U = 85;
             color.V = 255;
-            break;
+        break;
 
         case COLOR_G:
             color.Y = 150;
             color.U = 44;
             color.V = 21;
-            break;
+        break;
 
         case COLOR_B:
             color.Y = 29;
             color.U = 255;
             color.V = 107;
-            break;
+        break;
 
         case COLOR_BK:
             color.Y = 16;
             color.U = 128;
             color.V = 128;
-            break;
+        break;
 
         default:
             color.Y = 128;
             color.U = 128;
             color.V = 128;
-            break;
+        break;
     }
 
     return color;
 }
 
-static int yuv420_draw_point(unsigned char *imgdata,
-                             int width,
-                             int height,
-                             YUV_Point Point,
-                             YUV_Color color) {
+static int yuv420_draw_point(unsigned char* imgdata,
+    int width,
+    int height,
+    YUV_Point Point,
+    YUV_Color color)
+{
     int imgSize;
     int x, y;
 
@@ -125,12 +128,13 @@ static int yuv420_draw_point(unsigned char *imgdata,
     return 0;
 }
 
-static int yuv420_draw_vline(void *imgdata,
-                             int width,
-                             int height,
-                             YUV_Point startPoint,
-                             YUV_Point endPoint,
-                             YUV_Color color) {
+static int yuv420_draw_vline(void* imgdata,
+    int width,
+    int height,
+    YUV_Point startPoint,
+    YUV_Point endPoint,
+    YUV_Color color)
+{
     int ret = 0;
     int x0, y0, y1;
     YUV_Point Point;
@@ -147,8 +151,8 @@ static int yuv420_draw_vline(void *imgdata,
 
     while (Point.y < y1) {
         Point.y++;
-        ret = yuv420_draw_point((unsigned char *) imgdata,
-                                width, height, Point, color);
+        ret = yuv420_draw_point((unsigned char *)imgdata,
+            width, height, Point, color);
         if (ret)
             return -1;
     }
@@ -156,12 +160,13 @@ static int yuv420_draw_vline(void *imgdata,
     return 0;
 }
 
-static int yuv420_draw_hline(void *imgdata,
-                             int width,
-                             int height,
-                             YUV_Point startPoint,
-                             YUV_Point endPoint,
-                             YUV_Color color) {
+static int yuv420_draw_hline(void* imgdata,
+    int width,
+    int height,
+    YUV_Point startPoint,
+    YUV_Point endPoint,
+    YUV_Color color)
+{
     int ret = 0;
     int x0, y0, x1;
     YUV_Point Point;
@@ -178,8 +183,8 @@ static int yuv420_draw_hline(void *imgdata,
 
     while (Point.x < x1) {
         Point.x++;
-        ret = yuv420_draw_point((unsigned char *) imgdata,
-                                width, height, Point, color);
+        ret = yuv420_draw_point((unsigned char *)imgdata,
+            width, height, Point, color);
         if (ret)
             return -1;
     }
@@ -187,12 +192,13 @@ static int yuv420_draw_hline(void *imgdata,
     return 0;
 }
 
-static int yuv420_draw_tline(void *imgdata,
-                             int width,
-                             int height,
-                             YUV_Point startPoint,
-                             YUV_Point endPoint,
-                             YUV_Color color) {
+static int yuv420_draw_tline(void* imgdata,
+    int width,
+    int height,
+    YUV_Point startPoint,
+    YUV_Point endPoint,
+    YUV_Color color)
+{
     int x0, y0, x1, y1;
     int dx, dy, error;
     YUV_Point Point;
@@ -214,21 +220,20 @@ static int yuv420_draw_tline(void *imgdata,
 
     if (dx == 0) {
         yuv420_draw_vline(imgdata, width,
-                          height, startPoint, endPoint, color);
+            height, startPoint, endPoint, color);
         return 0;
     }
-    if (dy == 0) {
+    if (dy == 0){
         yuv420_draw_hline(imgdata, width,
-                          height, startPoint, endPoint, color);
+            height, startPoint, endPoint, color);
         return 0;
     }
 
-    yuv420_draw_point((unsigned char *) imgdata,
-                      width, height, Point, color);
+    yuv420_draw_point((unsigned char *)imgdata,
+        width, height, Point, color);
 
-    if ((dx >= dy) && (dy > 0)) {
-        /* 0<k<=1 */
-        error = (dy * 2) - dx;
+    if ((dx >= dy) && (dy > 0)) {/* 0<k<=1 */
+        error = (dy*2) - dx;
         while (Point.x < x1) {
             if (error > 0) {
                 error += (dy - dx) * 2;
@@ -238,14 +243,13 @@ static int yuv420_draw_tline(void *imgdata,
                 error += dy * 2;
                 Point.x++;
             }
-            yuv420_draw_point((unsigned char *) imgdata,
-                              width, height, Point, color);
+            yuv420_draw_point((unsigned char *)imgdata,
+                width, height, Point, color);
         }
         return 0;
     }
 
-    if ((dy > dx) && (dy > 0)) {
-        /* k>1 */
+    if ((dy > dx) && (dy > 0)) {/* k>1 */
         error = dy - (dx * 2);
         while (Point.y < y1) {
             if (error < 0) {
@@ -256,14 +260,13 @@ static int yuv420_draw_tline(void *imgdata,
                 error += (-dx) * 2;
                 Point.y++;
             }
-            yuv420_draw_point((unsigned char *) imgdata,
-                              width, height, Point, color);
+            yuv420_draw_point((unsigned char *)imgdata,
+                width, height, Point, color);
         }
         return 0;
     }
 
-    if ((dx >= ABS(dy)) && (dy < 0)) {
-        /* -1=<k<0 */
+    if ((dx >= ABS(dy)) && (dy < 0)) { /* -1=<k<0 */
         error = (dy * 2) + dx;
         while (Point.x < x1) {
             if (error < 0) {
@@ -274,14 +277,13 @@ static int yuv420_draw_tline(void *imgdata,
                 error += dy * 2;
                 Point.x++;
             }
-            yuv420_draw_point((unsigned char *) imgdata,
-                              width, height, Point, color);
+            yuv420_draw_point((unsigned char *)imgdata,
+                width, height, Point, color);
         }
         return 0;
     }
 
-    if ((ABS(dy) > dx) && (dy < 0)) {
-        /* k<-1 */
+    if ((ABS(dy) > dx) && (dy < 0)) { /* k<-1 */
         error = dy + (dx * 2);
         while (Point.y > y1) {
             if (error > 0) {
@@ -292,8 +294,8 @@ static int yuv420_draw_tline(void *imgdata,
                 error += dx * 2;
                 Point.y--;
             }
-            yuv420_draw_point((unsigned char *) imgdata,
-                              width, height, Point, color);
+            yuv420_draw_point((unsigned char *)imgdata,
+                width, height, Point, color);
         }
         return 0;
     }
@@ -301,12 +303,13 @@ static int yuv420_draw_tline(void *imgdata,
     return 0;
 }
 
-void yuv420_draw_line(void *imgdata,
-                      int width,
-                      int height,
-                      YUV_Point startPoint,
-                      YUV_Point endPoint,
-                      YUV_Color color) {
+void yuv420_draw_line(void* imgdata,
+    int width,
+    int height,
+    YUV_Point startPoint,
+    YUV_Point endPoint,
+    YUV_Color color)
+{
     YUV_Point sPoint;
     YUV_Point ePoint;
 
@@ -329,16 +332,17 @@ void yuv420_draw_line(void *imgdata,
     yuv420_draw_tline(imgdata, width, height, sPoint, ePoint, color);
 }
 
-void yuv420_draw_rectangle(void *imgdata,
-                           int width,
-                           int height,
-                           YUV_Rect rect_rio,
-                           YUV_Color color) {
+void yuv420_draw_rectangle(void* imgdata,
+    int width,
+    int height,
+    YUV_Rect rect_rio,
+    YUV_Color color)
+{
     int RoiWidth = rect_rio.width;
     int RoiHeight = rect_rio.height;
     int x = rect_rio.x;
     int y = rect_rio.y;
-    YUV_Point Point[4];
+    YUV_Point  Point[4];
 
     Point[0].x = x;
     Point[0].y = y;

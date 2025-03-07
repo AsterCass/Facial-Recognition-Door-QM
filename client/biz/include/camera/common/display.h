@@ -50,6 +50,8 @@ void display_exit(void);
 
 void display_commit(void *ptr, int fd, int fmt, int w, int h, int rotation);
 
+void display_switch(enum display_video_type type);
+
 void display_get_resolution(int *width, int *height);
 
 void display_paint_box(int left, int top, int right, int bottom);

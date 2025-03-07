@@ -32,7 +32,18 @@
 #ifndef _RKDRM_DISPLAY_H_
 #define _RKDRM_DISPLAY_H_
 
+#include <assert.h>
+#include <errno.h>
+#include <getopt.h>
 #include <inttypes.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include <drm/drm_fourcc.h>
+#include <sys/mman.h>
+#include <xf86drm.h>
 #include <xf86drmMode.h>
 
 struct drm_buf {
@@ -78,6 +89,10 @@ struct drm_dev {
     struct drm_dev_plane plane_overlay;
 };
 
+int drmGetBuffer(int fd, int width, int height, int format,
+                 struct drm_buf *buffer);
+
+int drmPutBuffer(int fd, struct drm_buf *buffer);
 
 int drmInit(struct drm_dev *dev);
 

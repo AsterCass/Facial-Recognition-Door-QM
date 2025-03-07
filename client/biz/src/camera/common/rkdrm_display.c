@@ -30,45 +30,38 @@
  * SOFTWARE.
  */
 #include <libdrm/drm_mode.h>
-#include <stdbool.h>
 #include <stdint.h>
-#include <stddef.h>
 #include <xf86drmMode.h>
 #include <sys/mman.h>
 #include <unistd.h>
 #include "camera/common/rkdrm_display.h"
 
-#include <errno.h>
-#include <stdio.h>
-
-#include "xf86drm.h"
-#include "libdrm/drm_fourcc.h"
-
 #define IS_SUPPORT_WINID_PROPERTY 0
 #define INT_MAX 0xff
 #define COLOR_KEY 0xFFFFFFFF
 
-static bool drm_plane_set_property(int fd, drmModePlane *plane,
-                                   const char *prop_name, uint64_t prop_value) {
+static bool drm_plane_set_property (int fd, drmModePlane * plane,
+        const char *prop_name, uint64_t prop_value)
+{
     drmModeObjectPropertiesPtr props;
     drmModePropertyPtr prop;
     int i, ret = -1;
 
-    props = drmModeObjectGetProperties(fd, plane->plane_id,
-                                       DRM_MODE_OBJECT_PLANE);
+    props = drmModeObjectGetProperties (fd, plane->plane_id,
+            DRM_MODE_OBJECT_PLANE);
     if (!props)
         return false;
 
     for (i = 0; i < props->count_props; i++) {
-        prop = drmModeGetProperty(fd, props->props[i]);
-        if (prop && !strcmp(prop->name, prop_name)) {
-            ret = drmModeObjectSetProperty(fd, plane->plane_id,
-                                           DRM_MODE_OBJECT_PLANE, props->props[i], prop_value);
+        prop = drmModeGetProperty (fd, props->props[i]);
+        if (prop && !strcmp (prop->name, prop_name)) {
+            ret = drmModeObjectSetProperty (fd, plane->plane_id,
+                    DRM_MODE_OBJECT_PLANE, props->props[i], prop_value);
         }
-        drmModeFreeProperty(prop);
+        drmModeFreeProperty (prop);
     }
 
-    drmModeFreeObjectProperties(props);
+    drmModeFreeObjectProperties (props);
     return ret < 0 ? false : true;
 }
 
@@ -81,86 +74,187 @@ static bool drm_plane_set_property(int fd, drmModePlane *plane,
  * This only supports RGB formats here for compat with code that doesn't use
  * pixel formats directly yet.
  */
-void drm_fb_get_bpp_depth(uint32_t format, unsigned int *depth, int *bpp) {
+void drm_fb_get_bpp_depth(uint32_t format, unsigned int *depth, int *bpp)
+{
     switch (format) {
-        case DRM_FORMAT_C8:
-        case DRM_FORMAT_RGB332:
-        case DRM_FORMAT_BGR233:
-            *depth = 8;
-            *bpp = 8;
-            break;
-        case DRM_FORMAT_XRGB1555:
-        case DRM_FORMAT_XBGR1555:
-        case DRM_FORMAT_RGBX5551:
-        case DRM_FORMAT_BGRX5551:
-        case DRM_FORMAT_ARGB1555:
-        case DRM_FORMAT_ABGR1555:
-        case DRM_FORMAT_RGBA5551:
-        case DRM_FORMAT_BGRA5551:
-            *depth = 15;
-            *bpp = 16;
-            break;
-        case DRM_FORMAT_RGB565:
-        case DRM_FORMAT_BGR565:
-            *depth = 16;
-            *bpp = 16;
-            break;
-        case DRM_FORMAT_RGB888:
-        case DRM_FORMAT_BGR888:
-            *depth = 24;
-            *bpp = 24;
-            break;
-        case DRM_FORMAT_XRGB8888:
-        case DRM_FORMAT_XBGR8888:
-        case DRM_FORMAT_RGBX8888:
-        case DRM_FORMAT_BGRX8888:
-            *depth = 24;
-            *bpp = 32;
-            break;
-        case DRM_FORMAT_XRGB2101010:
-        case DRM_FORMAT_XBGR2101010:
-        case DRM_FORMAT_RGBX1010102:
-        case DRM_FORMAT_BGRX1010102:
-        case DRM_FORMAT_ARGB2101010:
-        case DRM_FORMAT_ABGR2101010:
-        case DRM_FORMAT_RGBA1010102:
-        case DRM_FORMAT_BGRA1010102:
-            *depth = 30;
-            *bpp = 32;
-            break;
-        case DRM_FORMAT_ARGB8888:
-        case DRM_FORMAT_ABGR8888:
-        case DRM_FORMAT_RGBA8888:
-        case DRM_FORMAT_BGRA8888:
-            *depth = 32;
-            *bpp = 32;
-            break;
-        default:
-            printf("unsupported pixel format %d\n", format);
-            *depth = 0;
-            *bpp = 0;
-            break;
+    case DRM_FORMAT_C8:
+    case DRM_FORMAT_RGB332:
+    case DRM_FORMAT_BGR233:
+        *depth = 8;
+        *bpp = 8;
+        break;
+    case DRM_FORMAT_XRGB1555:
+    case DRM_FORMAT_XBGR1555:
+    case DRM_FORMAT_RGBX5551:
+    case DRM_FORMAT_BGRX5551:
+    case DRM_FORMAT_ARGB1555:
+    case DRM_FORMAT_ABGR1555:
+    case DRM_FORMAT_RGBA5551:
+    case DRM_FORMAT_BGRA5551:
+        *depth = 15;
+        *bpp = 16;
+        break;
+    case DRM_FORMAT_RGB565:
+    case DRM_FORMAT_BGR565:
+        *depth = 16;
+        *bpp = 16;
+        break;
+    case DRM_FORMAT_RGB888:
+    case DRM_FORMAT_BGR888:
+        *depth = 24;
+        *bpp = 24;
+        break;
+    case DRM_FORMAT_XRGB8888:
+    case DRM_FORMAT_XBGR8888:
+    case DRM_FORMAT_RGBX8888:
+    case DRM_FORMAT_BGRX8888:
+        *depth = 24;
+        *bpp = 32;
+        break;
+    case DRM_FORMAT_XRGB2101010:
+    case DRM_FORMAT_XBGR2101010:
+    case DRM_FORMAT_RGBX1010102:
+    case DRM_FORMAT_BGRX1010102:
+    case DRM_FORMAT_ARGB2101010:
+    case DRM_FORMAT_ABGR2101010:
+    case DRM_FORMAT_RGBA1010102:
+    case DRM_FORMAT_BGRA1010102:
+        *depth = 30;
+        *bpp = 32;
+        break;
+    case DRM_FORMAT_ARGB8888:
+    case DRM_FORMAT_ABGR8888:
+    case DRM_FORMAT_RGBA8888:
+    case DRM_FORMAT_BGRA8888:
+        *depth = 32;
+        *bpp = 32;
+        break;
+    default:
+        printf("unsupported pixel format %d\n", format);
+        *depth = 0;
+        *bpp = 0;
+        break;
     }
 }
 
-int drm_format_to_bpp(uint32_t format) {
+int drm_format_to_bpp(uint32_t format)
+{
     unsigned int depth;
     int bpp;
 
-    switch (format) {
-        case DRM_FORMAT_NV12:
-        case DRM_FORMAT_NV21:
-        case DRM_FORMAT_YUV420:
-        case DRM_FORMAT_YUV422:
-        case DRM_FORMAT_YUV444:
-            return 8;
-        default:
-            drm_fb_get_bpp_depth(format, &depth, &bpp);
-            return bpp;
+    switch(format) {
+    case DRM_FORMAT_NV12:
+    case DRM_FORMAT_NV21:
+    case DRM_FORMAT_YUV420:
+    case DRM_FORMAT_YUV422:
+    case DRM_FORMAT_YUV444:
+        return 8;
+    default:
+        drm_fb_get_bpp_depth(format, &depth, &bpp);
+        return bpp;
     }
 }
 
-int drmSetDpmsMode(uint32_t dpms_mode, struct drm_dev *dev) {
+int drmGetBuffer(int fd, int width, int height, int format,
+                 struct drm_buf *buffer)
+{
+    struct drm_mode_create_dumb alloc_arg;
+    struct drm_mode_map_dumb mmap_arg;
+    struct drm_mode_destroy_dumb destory_arg;
+    uint32_t handles[4], pitches[4], offsets[4];
+    int bpp, ret;
+    void *map;
+
+    if (fd < 0 || !width || !height) {
+        printf("%s: invalid parameters\n", __func__);
+        return -EINVAL;
+    }
+
+    bpp = drm_format_to_bpp(format);
+
+    memset(&alloc_arg, 0, sizeof(alloc_arg));
+    alloc_arg.bpp = bpp;
+    alloc_arg.width = width;
+    if (format == DRM_FORMAT_NV12)
+        alloc_arg.height = height * 3 / 2;
+    else
+        alloc_arg.height = height;
+
+    ret = drmIoctl(fd, DRM_IOCTL_MODE_CREATE_DUMB, &alloc_arg);
+    if (ret) {
+        printf("failed to create dumb buffer: %s\n", strerror(errno));
+        return ret;
+    }
+    //HACK of gpu 64 bytes align?
+    if (format == DRM_FORMAT_NV12)
+        alloc_arg.pitch = width;
+
+    memset(&mmap_arg, 0, sizeof(mmap_arg));
+    mmap_arg.handle = alloc_arg.handle;
+
+    ret = drmIoctl(fd, DRM_IOCTL_MODE_MAP_DUMB, &mmap_arg);
+    if (ret) {
+        printf("failed to create map dumb: %s\n", strerror(errno));
+        ret = -EINVAL;
+        goto destory_dumb;
+    }
+
+    map = mmap(0, alloc_arg.size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, mmap_arg.offset);
+    if (map == MAP_FAILED) {
+        printf("failed to mmap buffer: %s\n", strerror(errno));
+        ret = -EINVAL;
+        goto destory_dumb;
+    }
+
+    ret = drmPrimeHandleToFD(fd, alloc_arg.handle, 0, &buffer->dmabuf_fd);
+    if (ret) {
+        printf("failed to get dmabuf fd: %s\n", strerror(errno));
+        munmap(map, alloc_arg.size);
+        ret = -EINVAL;
+        goto destory_dumb;
+    }
+
+    handles[0] = alloc_arg.handle;
+    pitches[0] = alloc_arg.pitch;
+    offsets[0] = 0;
+
+    if (format == DRM_FORMAT_NV12) {
+        handles[1] = alloc_arg.handle;
+        pitches[1] = pitches[0];
+        offsets[1] = pitches[0] * height;
+    }
+
+    ret = drmModeAddFB2(fd, width, height, format, handles,
+                pitches, offsets, (uint32_t*) &buffer->fb_id, 0);
+    if (ret)
+        printf("failed to create fb_id %d\n", ret);
+
+    buffer->handle = alloc_arg.handle;
+    buffer->pitch = alloc_arg.pitch;
+    buffer->size = alloc_arg.size;
+    buffer->map = map;
+
+destory_dumb:
+    memset(&destory_arg, 0, sizeof(destory_arg));
+    destory_arg.handle = alloc_arg.handle;
+    drmIoctl(fd, DRM_IOCTL_MODE_DESTROY_DUMB, &destory_arg);
+
+    return ret;
+}
+
+int drmPutBuffer(int fd, struct drm_buf *buffer)
+{
+    if (buffer) {
+        drmModeRmFB(fd, buffer->fb_id);
+        close(buffer->dmabuf_fd);
+        return munmap(buffer->map, buffer->size);
+    }
+
+    return -EINVAL;
+}
+
+int drmSetDpmsMode(uint32_t dpms_mode, struct drm_dev *dev)
+{
     uint32_t connector_id;
     uint32_t dpms_prop_id;
     int ret = 0;
@@ -180,13 +274,14 @@ int drmSetDpmsMode(uint32_t dpms_mode, struct drm_dev *dev) {
     return 0;
 }
 
-static int drmGetPlaneType(int fd, drmModePlanePtr p) {
+static int drmGetPlaneType(int fd, drmModePlanePtr p)
+{
     drmModeObjectPropertiesPtr props;
     drmModePropertyPtr prop;
     int i, type = -1;
 
     props = drmModeObjectGetProperties(fd, p->plane_id,
-                                       DRM_MODE_OBJECT_PLANE);
+                    DRM_MODE_OBJECT_PLANE);
     if (!props) {
         printf("failed to found props plane[%d] %s\n",
                p->plane_id, strerror(errno));
@@ -207,7 +302,8 @@ static int drmGetPlaneType(int fd, drmModePlanePtr p) {
     return type;
 }
 
-static int drmFillPlaneProp(int fd, struct drm_dev_plane *pp) {
+static int drmFillPlaneProp(int fd, struct drm_dev_plane *pp)
+{
     drmModeObjectPropertiesPtr props;
     drmModePropertyPtr prop;
     struct plane_prop *plane_prop = &pp->plane_prop;
@@ -215,7 +311,7 @@ static int drmFillPlaneProp(int fd, struct drm_dev_plane *pp) {
     int i;
 
     props = drmModeObjectGetProperties(fd, p->plane_id,
-                                       DRM_MODE_OBJECT_PLANE);
+                    DRM_MODE_OBJECT_PLANE);
     if (!props) {
         printf("failed to found props plane[%d] %s\n",
                p->plane_id, strerror(errno));
@@ -257,7 +353,8 @@ static int drmFillPlaneProp(int fd, struct drm_dev_plane *pp) {
     return 0;
 }
 
-static drmModePlanePtr drmGetPlaneByType(int fd, int crtc_index, int type) {
+static drmModePlanePtr drmGetPlaneByType(int fd, int crtc_index, int type)
+{
     drmModePlanePtr plane = NULL;
     drmModePlaneResPtr plane_res;
     int i;
@@ -282,7 +379,8 @@ static drmModePlanePtr drmGetPlaneByType(int fd, int crtc_index, int type) {
     return plane;
 }
 
-drmModeConnectorPtr drmFoundConn(int fd, drmModeResPtr res) {
+drmModeConnectorPtr drmFoundConn(int fd, drmModeResPtr res)
+{
     drmModeConnectorPtr connector = NULL;
     int i;
 
@@ -304,16 +402,17 @@ drmModeConnectorPtr drmFoundConn(int fd, drmModeResPtr res) {
     return connector;
 }
 
-static drmModePropertyPtr drmFoundDPMS(int fd, drmModeConnectorPtr connector) {
+static drmModePropertyPtr drmFoundDPMS(int fd, drmModeConnectorPtr connector)
+{
     drmModePropertyPtr dpms_prop = NULL;
     drmModeObjectPropertiesPtr props;
     int i;
 
     props = drmModeObjectGetProperties(fd, connector->connector_id,
-                                       DRM_MODE_OBJECT_CONNECTOR);
+                       DRM_MODE_OBJECT_CONNECTOR);
     if (!props) {
         printf("failed to found props connector[%d] %s\n",
-               connector->connector_id, strerror(errno));
+            connector->connector_id, strerror(errno));
         goto out;
     }
     for (i = 0; i < props->count_props; i++) {
@@ -332,57 +431,59 @@ out:
 }
 
 static drmModeCrtcPtr drmFoundCrtc(int fd, drmModeResPtr res,
-                                   drmModeConnector *conn, int *crtc_index) {
-    int i;
-    int crtc_id;
-    drmModeEncoder *enc;
-    drmModeCrtc *crtc;
-    uint32_t crtcs_for_connector = 0;
+            drmModeConnector * conn, int *crtc_index)
+{
+  int i;
+  int crtc_id;
+  drmModeEncoder *enc;
+  drmModeCrtc *crtc;
+  uint32_t crtcs_for_connector = 0;
 
-    crtc_id = -1;
-    for (i = 0; i < res->count_encoders; i++) {
-        enc = drmModeGetEncoder(fd, res->encoders[i]);
-        if (enc) {
-            if (enc->encoder_id == conn->encoder_id) {
-                crtc_id = enc->crtc_id;
-                drmModeFreeEncoder(enc);
-                break;
-            }
-            drmModeFreeEncoder(enc);
-        }
+  crtc_id = -1;
+  for (i = 0; i < res->count_encoders; i++) {
+    enc = drmModeGetEncoder (fd, res->encoders[i]);
+    if (enc) {
+      if (enc->encoder_id == conn->encoder_id) {
+        crtc_id = enc->crtc_id;
+        drmModeFreeEncoder (enc);
+        break;
+      }
+      drmModeFreeEncoder (enc);
+    }
+  }
+
+  /* If no active crtc was found, pick the first possible crtc */
+  if (crtc_id == -1) {
+    for (i = 0; i < conn->count_encoders; i++) {
+      enc = drmModeGetEncoder (fd, conn->encoders[i]);
+      crtcs_for_connector |= enc->possible_crtcs;
+      drmModeFreeEncoder (enc);
     }
 
-    /* If no active crtc was found, pick the first possible crtc */
-    if (crtc_id == -1) {
-        for (i = 0; i < conn->count_encoders; i++) {
-            enc = drmModeGetEncoder(fd, conn->encoders[i]);
-            crtcs_for_connector |= enc->possible_crtcs;
-            drmModeFreeEncoder(enc);
-        }
+    if (crtcs_for_connector != 0)
+      crtc_id = res->crtcs[ffs (crtcs_for_connector) - 1];
+  }
 
-        if (crtcs_for_connector != 0)
-            crtc_id = res->crtcs[ffs(crtcs_for_connector) - 1];
-    }
-
-    if (crtc_id == -1)
-        return NULL;
-
-    for (i = 0; i < res->count_crtcs; i++) {
-        crtc = drmModeGetCrtc(fd, res->crtcs[i]);
-        if (crtc) {
-            if (crtc_id == crtc->crtc_id) {
-                if (crtc_index)
-                    *crtc_index = i;
-                return crtc;
-            }
-            drmModeFreeCrtc(crtc);
-        }
-    }
-
+  if (crtc_id == -1)
     return NULL;
+
+  for (i = 0; i < res->count_crtcs; i++) {
+    crtc = drmModeGetCrtc (fd, res->crtcs[i]);
+    if (crtc) {
+      if (crtc_id == crtc->crtc_id) {
+        if (crtc_index)
+          *crtc_index= i;
+        return crtc;
+      }
+      drmModeFreeCrtc (crtc);
+    }
+  }
+
+  return NULL;
 }
 
-int drmInit(struct drm_dev *dev) {
+int drmInit(struct drm_dev *dev)
+{
     drmModeResPtr res;
     drmModeCrtcPtr crtc = NULL;
     drmModeConnectorPtr connector = NULL;
@@ -393,7 +494,7 @@ int drmInit(struct drm_dev *dev) {
     fd = drmOpen("rockchip", NULL);
     if (fd < 0) {
         printf("failed to open rockchip drm: %s\n",
-               strerror(errno));
+            strerror(errno));
         return fd;
     }
     dev->drm_fd = fd;
@@ -413,7 +514,7 @@ int drmInit(struct drm_dev *dev) {
     res = drmModeGetResources(fd);
     if (!res) {
         printf("Failed to get resources: %s\n",
-               strerror(errno));
+            strerror(errno));
         return -ENODEV;
     }
 
@@ -488,7 +589,8 @@ err_conn:
     return ret;
 }
 
-int drmDeinit(struct drm_dev *dev) {
+int drmDeinit(struct drm_dev *dev)
+{
     if (dev->plane_primary.p)
         drmModeFreePlane(dev->plane_primary.p);
     if (dev->plane_overlay.p)
@@ -506,7 +608,8 @@ int drmDeinit(struct drm_dev *dev) {
 }
 
 int drmCommit(struct drm_buf *buffer, int width, int height,
-              int x_off, int y_off, struct drm_dev *dev, int plane_type) {
+              int x_off, int y_off, struct drm_dev *dev, int plane_type)
+{
     drmModeAtomicReq *req;
     drmModeCrtcPtr crtc = dev->crtc;
     drmModePlanePtr plane;
@@ -531,7 +634,7 @@ int drmCommit(struct drm_buf *buffer, int width, int height,
     }
 
     width = width == 0 ? crtc->mode.hdisplay : width;
-    height = height == 0 ? crtc->mode.vdisplay : height;
+    height = height == 0? crtc->mode.vdisplay : height;
 
     req = drmModeAtomicAlloc();
 
@@ -551,7 +654,7 @@ int drmCommit(struct drm_buf *buffer, int width, int height,
     DRM_ATOMIC_ADD_PROP(plane_prop->crtc_h, height);
     //DRM_ATOMIC_ADD_PROP(plane_prop->zpos, plane_zpos);
 
-    //    flags |= DRM_MODE_ATOMIC_ALLOW_MODESET;
+//    flags |= DRM_MODE_ATOMIC_ALLOW_MODESET;
     ret = drmModeAtomicCommit(dev->drm_fd, req, flags, NULL);
     if (ret)
         printf("atomic: couldn't commit new state: %s\n", strerror(errno));
