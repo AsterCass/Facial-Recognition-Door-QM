@@ -101,9 +101,6 @@ set(PROJECT_SOURCES
         src/config/config.cpp
         src/camera/common/sample_common_isp.c
         src/camera/common/sample_fake_isp.c
-        src/camera/common/display.c
-        src/camera/common/draw_rect.c
-        src/camera/common/rkdrm_display.c
         src/camera/camera_rk.cpp
         src/camera/camera_frame.cpp
         src/ui/main_router.cpp

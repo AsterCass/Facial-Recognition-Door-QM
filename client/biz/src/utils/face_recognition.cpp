@@ -55,7 +55,7 @@ void faceDetect(const cv::Mat &frame) {
     }
 
     cv::Mat miniFrame;
-    double scaleFactor = 0.1;
+    double scaleFactor = 0.2;
     resize(frame, miniFrame, cv::Size(), scaleFactor, scaleFactor, cv::INTER_LINEAR);
 
     int *pResults = NULL;
