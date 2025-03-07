@@ -14,6 +14,8 @@
 
 #include <QImage>
 
+#include "camera/common/display.h"
+
 
 using namespace std;
 
@@ -80,6 +82,9 @@ void startCameraRk() {
         return;
     }
 
+    display_init(disp_width, disp_height);
+    display_exit();
+
     int ret = 0;
 
     int video_width = 1920;
@@ -131,22 +136,22 @@ void startCameraRk() {
         exit(-1);
     }
 
-    // VO_CHN_ATTR_S stVoAttr = {};
-    // // VO[0] for primary plane
-    // stVoAttr.pcDevNode = "/dev/dri/card0";
-    // stVoAttr.emPlaneType = VO_PLANE_OVERLAY;
-    // stVoAttr.enImgType = IMAGE_TYPE_RGB888;
-    // stVoAttr.u16Zpos = 0;
-    // stVoAttr.stDispRect.s32X = 0;
-    // stVoAttr.stDispRect.s32Y = 0;
-    // stVoAttr.stDispRect.u32Width = disp_width;
-    // stVoAttr.stDispRect.u32Height = disp_height;
-    // ret = RK_MPI_VO_CreateChn(0, &stVoAttr);
-    // if (ret) {
-    //     logPrintln("Create vo[0] failed! ret = " + ret,
-    //                airstrip::CRITICAL, __FUNCTION__);
-    //     exit(-1);
-    // }
+    VO_CHN_ATTR_S stVoAttr = {};
+    // VO[0] for primary plane
+    stVoAttr.pcDevNode = "/dev/dri/card0";
+    stVoAttr.emPlaneType = VO_PLANE_OVERLAY;
+    stVoAttr.enImgType = IMAGE_TYPE_RGB888;
+    stVoAttr.u16Zpos = 0;
+    stVoAttr.stDispRect.s32X = 0;
+    stVoAttr.stDispRect.s32Y = 0;
+    stVoAttr.stDispRect.u32Width = disp_width;
+    stVoAttr.stDispRect.u32Height = disp_height;
+    ret = RK_MPI_VO_CreateChn(0, &stVoAttr);
+    if (ret) {
+        logPrintln("Create vo[0] failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
 
 
     MPP_CHN_S stSrcChn = {};
