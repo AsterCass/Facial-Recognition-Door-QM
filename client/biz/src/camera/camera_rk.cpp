@@ -23,83 +23,120 @@ int closeProcess = false;
 int g_appWidth;
 int g_appHeight;
 
+int g_onFaceFrameIr = false;
+int g_onFaceFrameRga = false;
+
 #define CAMERA_WIDTH 1920;
 #define CAMERA_HEIGHT 1080;
 
-// void processWithMb(MEDIA_BUFFER mb) {
-//     if (closeProcess)return;
-//     bool static onSendFrame = false;
-//     if (onSendFrame) {
-//         RK_MPI_MB_ReleaseBuffer(mb);
-//         return;
-//     }
-//     onSendFrame = true;
-//
-//     const void *data = RK_MPI_MB_GetPtr(mb);
-//     const size_t size = RK_MPI_MB_GetSize(mb);
-//     auto *buff = new uchar[size];
-//     memcpy(buff, data, size);
-//
-//     static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue([buff] {
-//         const cv::Mat frame(disp_height, disp_width, CV_8UC3, buff);
-//         faceDetect(frame);
-//         CameraFrame::getInstance()->updateFrameRK(frame);
-//
-//         delete [] buff;
-//         usleep(50 * 1000);
-//         onSendFrame = false;
-//     });
-//     RK_MPI_MB_ReleaseBuffer(mb);
-// }
 
-static void *process(void *) {
-    MEDIA_BUFFER irMb = nullptr;
-    MEDIA_BUFFER rgaMb = nullptr;
-
-    while (!closeProcess) {
-        irMb = RK_MPI_SYS_GetMediaBuffer(RK_ID_RGA, 1, -1);
-        rgaMb = RK_MPI_SYS_GetMediaBuffer(RK_ID_RGA, 2, -1);
-
-        if (!irMb || !rgaMb) {
-            if (!usleep(20 * 1000)) closeProcess = true;
-            continue;
-        }
-
-        bool static onSendFrame = false;
-        if (!onSendFrame) {
-            onSendFrame = true;
-
-            const void *dataIr = RK_MPI_MB_GetPtr(irMb);
-            const size_t sizeIr = RK_MPI_MB_GetSize(irMb);
-            void *buffIr = malloc(sizeIr);
-            memcpy(buffIr, dataIr, sizeIr);
-
-            const void *dataRga = RK_MPI_MB_GetPtr(rgaMb);
-            const size_t sizeRga = RK_MPI_MB_GetSize(rgaMb);
-            void *buffRga = malloc(sizeRga);
-            memcpy(buffRga, dataRga, sizeRga);
-
-            if (mainThreadPool) {
-                static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue([buffIr, buffRga] {
-                    const cv::Mat frame(g_appHeight, g_appWidth, CV_8UC3, buffIr);
-                    faceRecognition(frame);
-
-                    free(buffIr);
-                    free(buffRga);
-                    onSendFrame = false;
-                });
-            } else {
-                free(buffIr);
-                free(buffRga);
-                onSendFrame = false;
-            }
-        }
-        RK_MPI_MB_ReleaseBuffer(irMb);
-        RK_MPI_MB_ReleaseBuffer(rgaMb);
-        usleep(200 * 1000);
+void faceRecognitionPreFun(void *irFrame, void *rgaFrame) {
+    static void *s_irFrame = nullptr;
+    static void *s_rgaFrame = nullptr;
+    if (nullptr != irFrame) {
+        s_irFrame = irFrame;
     }
-    return nullptr;
+    if (nullptr != rgaFrame) {
+        s_rgaFrame = rgaFrame;
+    }
+    if (s_irFrame == nullptr || s_rgaFrame == nullptr) {
+        return;
+    }
+
+    const cv::Mat frameIr(g_appHeight, g_appWidth, CV_8UC3, irFrame);
+    faceRecognition(frameIr);
+
+    free(irFrame);
+    free(rgaFrame);
+    g_onFaceFrameRga = false;
+    g_onFaceFrameIr = false;
 }
+
+void processWithMb(bool isIr, MEDIA_BUFFER mb) {
+    const void *data = RK_MPI_MB_GetPtr(mb);
+    const size_t size = RK_MPI_MB_GetSize(mb);
+    auto *buff = new uchar[size];
+    memcpy(buff, data, size);
+
+    auto boundFunction = isIr
+                             ? bind(faceRecognitionPreFun, buff, nullptr)
+                             : bind(faceRecognitionPreFun, nullptr, buff);
+    static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue(boundFunction);
+    RK_MPI_MB_ReleaseBuffer(mb);
+}
+
+void processWithMbIr(MEDIA_BUFFER mb) {
+    if (closeProcess)return;
+    if (g_onFaceFrameIr) {
+        RK_MPI_MB_ReleaseBuffer(mb);
+        return;
+    }
+    g_onFaceFrameIr = true;
+    processWithMb(true, mb);
+}
+
+void processWithMbRga(MEDIA_BUFFER mb) {
+    if (closeProcess)return;
+    if (g_onFaceFrameRga) {
+        RK_MPI_MB_ReleaseBuffer(mb);
+        return;
+    }
+    g_onFaceFrameRga = true;
+    processWithMb(false, mb);
+}
+
+
+// static void *process(void *) {
+//     MEDIA_BUFFER irMb = nullptr;
+//     MEDIA_BUFFER rgaMb = nullptr;
+//
+//     while (!closeProcess) {
+//         irMb = RK_MPI_SYS_GetMediaBuffer(RK_ID_RGA, 1, -1);
+//         rgaMb = RK_MPI_SYS_GetMediaBuffer(RK_ID_RGA, 2, -1);
+//
+//         if (!irMb || !rgaMb) {
+//             if (irMb) {
+//                 RK_MPI_MB_ReleaseBuffer(irMb);
+//             }
+//             if (rgaMb) {
+//                 RK_MPI_MB_ReleaseBuffer(rgaMb);
+//             }
+//             if (!usleep(20 * 1000)) closeProcess = true;
+//             continue;
+//         }
+//
+//         if (!g_onFaceFrame) {
+//             g_onFaceFrame = true;
+//
+//             const void *dataIr = RK_MPI_MB_GetPtr(irMb);
+//             const size_t sizeIr = RK_MPI_MB_GetSize(irMb);
+//             void *buffIr = malloc(sizeIr);
+//             memcpy(buffIr, dataIr, sizeIr);
+//
+//             const void *dataRga = RK_MPI_MB_GetPtr(rgaMb);
+//             const size_t sizeRga = RK_MPI_MB_GetSize(rgaMb);
+//             void *buffRga = malloc(sizeRga);
+//             memcpy(buffRga, dataRga, sizeRga);
+//
+//             if (mainThreadPool) {
+//                 static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue([buffIr, buffRga] {
+//                     // Face Recognition ...
+//                     free(buffIr);
+//                     free(buffRga);
+//                     g_onFaceFrame = false;
+//                 });
+//             } else {
+//                 free(buffIr);
+//                 free(buffRga);
+//                 g_onFaceFrame = false;
+//             }
+//         }
+//         RK_MPI_MB_ReleaseBuffer(irMb);
+//         RK_MPI_MB_ReleaseBuffer(rgaMb);
+//         usleep(200 * 1000);
+//     }
+//     return nullptr;
+// }
 
 void startCameraRk() {
     std::lock_guard<std::mutex> lock(mtx);
@@ -122,6 +159,8 @@ void startCameraRk() {
     int ret = 0;
 
     // Init
+    RK_MPI_SYS_Init();
+
     constexpr RK_S32 irCameraId = 0;
     constexpr RK_S32 rgaCameraId = 1;
     SAMPLE_COMM_ISP_Init(rgaCameraId, RK_AIQ_WORKING_MODE_NORMAL, RK_FALSE, "/etc/iqfiles");
@@ -130,11 +169,8 @@ void startCameraRk() {
 
     SAMPLE_COMM_ISP_Init(irCameraId, RK_AIQ_WORKING_MODE_NORMAL, RK_FALSE, "/etc/iqfiles");
     SAMPLE_COMM_ISP_Run(irCameraId);
-    SAMPLE_COMM_ISP_Run(irCameraId);
     SAMPLE_COMM_ISP_SetFrameRate(irCameraId, 5);
 
-
-    RK_MPI_SYS_Init();
 
     // Init vi 0
     VI_CHN_ATTR_S vi_chn_attr;
@@ -302,17 +338,6 @@ void startCameraRk() {
         exit(-1);
     }
 
-    // MPP_CHN_S stEncChn;
-    // stEncChn.enModId = RK_ID_RGA;
-    // stEncChn.s32DevId = 0;
-    // stEncChn.s32ChnId = 0;
-    // ret = RK_MPI_SYS_RegisterOutCb(&stEncChn, processWithMb);
-    // if (ret) {
-    //     logPrintln("Register out cb failed! ret = " + ret,
-    //                airstrip::CRITICAL, __FUNCTION__);
-    //     exit(-1);
-    // }
-
     logPrintln("Bind RGA[0] to VO[0]...", airstrip::INFO, __FUNCTION__);
     stSrcChn.enModId = RK_ID_RGA;
     stSrcChn.s32ChnId = 0;
@@ -325,14 +350,35 @@ void startCameraRk() {
         exit(-1);
     }
 
-
-    pthread_t readThread;
-    ret = pthread_create(&readThread, nullptr, process, nullptr);
+    MPP_CHN_S stEncChn;
+    stEncChn.enModId = RK_ID_RGA;
+    stEncChn.s32DevId = 0;
+    stEncChn.s32ChnId = 1;
+    ret = RK_MPI_SYS_RegisterOutCb(&stEncChn, processWithMbIr);
     if (ret) {
-        logPrintln("Create monitor read thread failed! ret = " + ret,
+        logPrintln("Register out cb ir failed! ret = " + ret,
                    airstrip::CRITICAL, __FUNCTION__);
         exit(-1);
     }
+
+    stEncChn.enModId = RK_ID_RGA;
+    stEncChn.s32DevId = 0;
+    stEncChn.s32ChnId = 2;
+    ret = RK_MPI_SYS_RegisterOutCb(&stEncChn, processWithMbRga);
+    if (ret) {
+        logPrintln("Register out rga cb failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
+
+
+    // pthread_t readThread;
+    // ret = pthread_create(&readThread, nullptr, process, nullptr);
+    // if (ret) {
+    //     logPrintln("Create monitor read thread failed! ret = " + ret,
+    //                airstrip::CRITICAL, __FUNCTION__);
+    //     exit(-1);
+    // }
 
     logPrintln("Camera RK initial finish", airstrip::INFO, __FUNCTION__);
     started = true;
