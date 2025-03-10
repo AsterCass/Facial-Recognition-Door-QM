@@ -50,7 +50,7 @@ void initFaceRecognition() {
     initialized = true;
 }
 
-bool faceDetect(const cv::Mat &frame, cv::Rect &rect) {
+bool faceDetect(const cv::Mat &frame, cv::Rect &rect, int orgCols, int orgRows) {
     bool ret = false;
     if (!initialized) {
         return ret;
@@ -66,18 +66,32 @@ bool faceDetect(const cv::Mat &frame, cv::Rect &rect) {
 
         // 最大人脸
         const auto *p = (short *) (pResults + 1);
+        const int x = p[1];
+        const int y = p[2];
+        const int w = p[3];
+        const int h = p[4];
 
-        //缩放前对应人形方框所在区域
-        const int origX = static_cast<int>(p[1] / IR_SCALE);
-        const int origY = static_cast<int>(p[2] / IR_SCALE);
-        const int origWidth = static_cast<int>(p[3] / IR_SCALE);
-        const int origHeight = static_cast<int>(p[4] / IR_SCALE);
+        // 校正
+        const int maxWidth = frame.cols;
+        const int maxHeight = frame.rows;
+        const int faceX = std::max(0, x);
+        const int faceY = std::max(0, y);
+        int faceW = std::max(0, w);
+        int faceH = std::max(0, h);
+        faceW = faceX + faceW > maxWidth ? maxWidth - faceX : faceW;
+        faceH = faceY + faceH > maxHeight ? maxHeight - faceY : faceH;
 
-        //矫正
-        rect.x = std::max(0, origX);
-        rect.y = std::max(0, origY);
-        rect.width = std::min(frame.cols - origX, origWidth);
-        rect.height = std::min(frame.rows - origY, origHeight);
+        // 缩放前对应人形方框所在区域
+        const int origX = static_cast<int>(faceX / IR_SCALE);
+        const int origY = static_cast<int>(faceY / IR_SCALE);
+        const int origWidth = static_cast<int>(faceW / IR_SCALE);
+        const int origHeight = static_cast<int>(faceH / IR_SCALE);
+
+        // 二次校正
+        rect.x = std::min(origX, orgCols);
+        rect.y = std::min(origY, orgRows);;
+        rect.width = std::min(orgCols - origX, origWidth);
+        rect.height = std::min(orgRows - origY, origHeight);
     }
 
     free(pBuffer);

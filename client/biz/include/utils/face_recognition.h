@@ -5,7 +5,7 @@
 
 void initFaceRecognition();
 
-bool faceDetect(const cv::Mat &frame, cv::Rect &rect);
+bool faceDetect(const cv::Mat &frame, cv::Rect &rect, int orgCols, int orgRows);
 
 void faceRecognition(const cv::Mat &frame);
 
