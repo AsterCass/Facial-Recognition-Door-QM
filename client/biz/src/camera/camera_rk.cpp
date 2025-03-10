@@ -45,11 +45,15 @@ void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
 
     const cv::Mat frameIr(g_appHeight, g_appWidth, CV_8UC3, s_irFrame);
     const cv::Mat frameRga(g_appHeight, g_appWidth, CV_8UC3, s_rgaFrame);
-    cv::imwrite("/data/frd/test2.jpg", frameRga);
+    imwrite("/data/frd/test2.jpg", frameRga);
     faceDetect(frameIr);
+
+    usleep(500 * 1000);
 
     free(irFrame);
     free(rgaFrame);
+    s_irFrame = nullptr;
+    s_rgaFrame = nullptr;
     g_onFaceFrameRga = false;
     g_onFaceFrameIr = false;
 }
@@ -236,7 +240,7 @@ void startCameraRk() {
     // Init rga 1
     stRgaAttr.bEnBufPool = RK_TRUE;
     stRgaAttr.u16BufPoolCnt = 4;
-    stRgaAttr.u16Rotaion = 90;
+    stRgaAttr.u16Rotaion = 270;
     stRgaAttr.stImgIn.u32X = 0;
     stRgaAttr.stImgIn.u32Y = 0;
     stRgaAttr.stImgIn.imgType = IMAGE_TYPE_NV12;
@@ -246,7 +250,7 @@ void startCameraRk() {
     stRgaAttr.stImgIn.u32VirStride = CAMERA_HEIGHT;
     stRgaAttr.stImgOut.u32X = 0;
     stRgaAttr.stImgOut.u32Y = 0;
-    stRgaAttr.stImgOut.imgType = IMAGE_TYPE_BGR888;
+    stRgaAttr.stImgOut.imgType = IMAGE_TYPE_RGB888;
     stRgaAttr.stImgOut.u32Width = g_appWidth;
     stRgaAttr.stImgOut.u32Height = g_appHeight;
     stRgaAttr.stImgOut.u32HorStride = g_appWidth;
@@ -271,7 +275,7 @@ void startCameraRk() {
     stRgaAttr.stImgIn.u32VirStride = CAMERA_HEIGHT;
     stRgaAttr.stImgOut.u32X = 0;
     stRgaAttr.stImgOut.u32Y = 0;
-    stRgaAttr.stImgOut.imgType = IMAGE_TYPE_BGR888;
+    stRgaAttr.stImgOut.imgType = IMAGE_TYPE_RGB888;
     stRgaAttr.stImgOut.u32Width = g_appWidth;
     stRgaAttr.stImgOut.u32Height = g_appHeight;
     stRgaAttr.stImgOut.u32HorStride = g_appWidth;
