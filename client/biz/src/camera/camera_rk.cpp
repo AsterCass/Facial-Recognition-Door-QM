@@ -30,9 +30,9 @@ int g_onFaceFrameRga = false;
 #define CAMERA_HEIGHT 1080;
 
 
-void faceRecognitionPreFun(void *irFrame, void *rgaFrame) {
-    static void *s_irFrame = nullptr;
-    static void *s_rgaFrame = nullptr;
+void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
+    static uchar *s_irFrame = nullptr;
+    static uchar *s_rgaFrame = nullptr;
     if (nullptr != irFrame) {
         s_irFrame = irFrame;
     }
@@ -43,8 +43,10 @@ void faceRecognitionPreFun(void *irFrame, void *rgaFrame) {
         return;
     }
 
-    const cv::Mat frameIr(g_appHeight, g_appWidth, CV_8UC3, irFrame);
-    faceRecognition(frameIr);
+    const cv::Mat frameIr(g_appHeight, g_appWidth, CV_8UC3, s_irFrame);
+    const cv::Mat frameRga(g_appHeight, g_appWidth, CV_8UC3, s_rgaFrame);
+    cv::imwrite("/data/frd/test2.jpg", frameRga);
+    faceDetect(frameIr);
 
     free(irFrame);
     free(rgaFrame);
@@ -58,9 +60,11 @@ void processWithMb(bool isIr, MEDIA_BUFFER mb) {
     auto *buff = new uchar[size];
     memcpy(buff, data, size);
 
+    uchar *otherBuff = nullptr;
     auto boundFunction = isIr
-                             ? bind(faceRecognitionPreFun, buff, nullptr)
-                             : bind(faceRecognitionPreFun, nullptr, buff);
+                             ? bind(faceRecognitionPreFun, buff, otherBuff)
+                             : bind(faceRecognitionPreFun, otherBuff, buff);
+
     static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue(boundFunction);
     RK_MPI_MB_ReleaseBuffer(mb);
 }
@@ -242,7 +246,7 @@ void startCameraRk() {
     stRgaAttr.stImgIn.u32VirStride = CAMERA_HEIGHT;
     stRgaAttr.stImgOut.u32X = 0;
     stRgaAttr.stImgOut.u32Y = 0;
-    stRgaAttr.stImgOut.imgType = IMAGE_TYPE_RGB888;
+    stRgaAttr.stImgOut.imgType = IMAGE_TYPE_BGR888;
     stRgaAttr.stImgOut.u32Width = g_appWidth;
     stRgaAttr.stImgOut.u32Height = g_appHeight;
     stRgaAttr.stImgOut.u32HorStride = g_appWidth;
@@ -352,7 +356,7 @@ void startCameraRk() {
 
     MPP_CHN_S stEncChn;
     stEncChn.enModId = RK_ID_RGA;
-    stEncChn.s32DevId = 0;
+    stEncChn.s32DevId = 1;
     stEncChn.s32ChnId = 1;
     ret = RK_MPI_SYS_RegisterOutCb(&stEncChn, processWithMbIr);
     if (ret) {
@@ -362,7 +366,7 @@ void startCameraRk() {
     }
 
     stEncChn.enModId = RK_ID_RGA;
-    stEncChn.s32DevId = 0;
+    stEncChn.s32DevId = 2;
     stEncChn.s32ChnId = 2;
     ret = RK_MPI_SYS_RegisterOutCb(&stEncChn, processWithMbRga);
     if (ret) {

@@ -3,6 +3,7 @@
 #include "inspireface.h"
 #include "intypedef.h"
 #include <string>
+#include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/core/types.hpp>
 
@@ -53,6 +54,8 @@ void faceDetect(const cv::Mat &frame) {
     if (!initialized) {
         return;
     }
+
+    cv::imwrite("/data/frd/test.jpg", frame);
 
     cv::Mat miniFrame;
     double scaleFactor = 0.2;
