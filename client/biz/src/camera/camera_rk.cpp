@@ -23,6 +23,9 @@ int closeProcess = false;
 int g_appWidth;
 int g_appHeight;
 
+int g_appWidthIr;
+int g_appHeightIr;
+
 int g_onFaceFrameIr = false;
 int g_onFaceFrameRga = false;
 
@@ -45,7 +48,7 @@ void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
         return;
     }
 
-    const cv::Mat frameIr(g_appHeight, g_appWidth, CV_8UC3, s_irFrame);
+    const cv::Mat frameIr(g_appWidthIr, g_appHeightIr, CV_8UC3, s_irFrame);
     const cv::Mat frameRga(g_appHeight, g_appWidth, CV_8UC3, s_rgaFrame);
     imwrite("/data/frd/test2.jpg", frameRga);
     faceDetect(frameIr);
@@ -160,6 +163,8 @@ void startCameraRk() {
     airstrip::getProgramOptions(PRO_OPT_APP_HEIGHT, &appHeight);
     g_appWidth = appWidth;
     g_appHeight = appHeight;
+    g_appWidthIr = appWidth / 10;
+    g_appHeightIr = appHeight / 10;
 
 
     display_init(0, 0);
@@ -253,10 +258,10 @@ void startCameraRk() {
     stRgaAttr.stImgOut.u32X = 0;
     stRgaAttr.stImgOut.u32Y = 0;
     stRgaAttr.stImgOut.imgType = IMAGE_TYPE_RGB888;
-    stRgaAttr.stImgOut.u32Width = g_appWidth / 4;
-    stRgaAttr.stImgOut.u32Height = g_appHeight / 4;
-    stRgaAttr.stImgOut.u32HorStride = g_appWidth / 4;
-    stRgaAttr.stImgOut.u32VirStride = g_appHeight / 4;
+    stRgaAttr.stImgOut.u32Width = g_appWidthIr;
+    stRgaAttr.stImgOut.u32Height = g_appHeightIr;
+    stRgaAttr.stImgOut.u32HorStride = g_appWidthIr;
+    stRgaAttr.stImgOut.u32VirStride = g_appHeightIr;
     ret = RK_MPI_RGA_CreateChn(1, &stRgaAttr);
     if (ret) {
         logPrintln("Create rga[1] failed! ret = " + ret,
