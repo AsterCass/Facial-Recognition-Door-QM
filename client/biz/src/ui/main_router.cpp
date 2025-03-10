@@ -40,10 +40,10 @@ MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
         for (const auto index: routerQueue) {
             oss << index << " ";
         }
-        logPrintln(oss.str(), airstrip::INFO, __FUNCTION__);
+        airstrip::logPrintln(oss.str());
     });
-    stackedWidget->insertWidget(MAIN_PAGE_INIT, MainPageInit::getInstance(stackedWidget));
     stackedWidget->insertWidget(MAIN_PAGE_HOME, MainPageHome::getInstance(stackedWidget));
+    stackedWidget->insertWidget(MAIN_PAGE_INIT, MainPageInit::getInstance(stackedWidget));
     stackedWidget->setCurrentIndex(MAIN_PAGE_INIT);
     stackedWidget->show();
 

@@ -29,6 +29,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifndef WIN32
 #include <libdrm/drm_mode.h>
 #include <stdint.h>
 #include <xf86drmMode.h>
@@ -663,3 +664,4 @@ int drmCommit(struct drm_buf *buffer, int width, int height,
 
     return ret;
 }
+#endif

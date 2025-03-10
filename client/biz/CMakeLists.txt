@@ -72,6 +72,7 @@ elseif (UNIX)
     include_directories(
             ${SDK_PATH}/include/common/inspire
             ${SDK_PATH}/include/common/rockchip
+            ${SDK_PATH}/include/linux/rockchip
             ${AIRSTRIP_PREFIX_PATH}/include
             ${SQLITE_CPP_ROOT}/include
             ${SDK_PATH}/include/linux/face

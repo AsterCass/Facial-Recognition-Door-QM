@@ -8,14 +8,13 @@ MainPageHome::MainPageHome(QWidget *parent): QWidget(parent) {
 
     this->setObjectName("mainPageHome");
     this->setStyleSheet("#mainPageHome{background: transparent;}");
+    mainLayout->setSpacing(0);
+    mainLayout->setMargin(0);
 
     setElement();
 }
 
 void MainPageHome::setElement() {
-    mainLayout->setSpacing(0);
-    mainLayout->setMargin(0);
-
     header = MainComponentHeader::getInstance();
     body = CameraFrame::getInstance();
 

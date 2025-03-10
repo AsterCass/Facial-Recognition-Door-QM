@@ -7,19 +7,17 @@
 using namespace std;
 
 MainPageInit::MainPageInit(QWidget *parent): QWidget(parent) {
+    airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
+
     mainLayout = new QVBoxLayout(this);
     body = new QWidget(this);
+    mainLayout->setSpacing(0);
+    mainLayout->setMargin(0);
 
     setElement();
 }
 
 void MainPageInit::setElement() {
-    string appWorkDir;
-    airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
-
-    mainLayout->setSpacing(0);
-    mainLayout->setMargin(0);
-
     header = MainComponentHeader::getInstance();
     body->setObjectName("pageInitBody");
     QString styleSheet;
@@ -27,7 +25,6 @@ void MainPageInit::setElement() {
             .append(QString::fromStdString(appWorkDir))
             .append("static/images/bg-launch.png)}");
     body->setStyleSheet(styleSheet);
-
 
     mainLayout->addWidget(header, 1);
     mainLayout->addWidget(body, 17);

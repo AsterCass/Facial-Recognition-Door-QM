@@ -30,6 +30,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+#ifndef WIN32
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
@@ -199,3 +200,4 @@ void display_set_color(YUV_Color color)
     g_disp.color = color;
     pthread_mutex_unlock(&g_lock);
 }
+#endif

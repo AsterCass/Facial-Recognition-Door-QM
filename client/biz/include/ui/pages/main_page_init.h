@@ -3,6 +3,7 @@
 
 #include <QLabel>
 #include <QVBoxLayout>
+#include <string>
 
 class MainPageInit final : public QWidget {
 public:
@@ -27,6 +28,7 @@ private:
     QVBoxLayout *mainLayout = nullptr;
     QWidget *header = nullptr;
     QWidget *body = nullptr;
+    std::string appWorkDir;
 };
 
 
