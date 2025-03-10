@@ -48,10 +48,15 @@ void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
         return;
     }
 
-    const cv::Mat frameIr(g_appWidthIr, g_appHeightIr, CV_8UC3, s_irFrame);
+    const cv::Mat frameIr(g_appHeightIr, g_appWidthIr, CV_8UC3, s_irFrame);
     const cv::Mat frameRga(g_appHeight, g_appWidth, CV_8UC3, s_rgaFrame);
-    imwrite("/data/frd/test2.jpg", frameRga);
-    faceDetect(frameIr);
+    cv::Rect rect;
+    if (faceDetect(frameIr, rect)) {
+        cout << rect.x << " " << rect.y << " " << rect.width << " " << rect.height << endl;
+
+        rectangle(frameRga, rect, cv::Scalar(255, 0, 0), 2);
+        cv::imwrite("/data/frd/test.jpg", frameRga);
+    }
 
     usleep(500 * 1000);
 
@@ -163,8 +168,8 @@ void startCameraRk() {
     airstrip::getProgramOptions(PRO_OPT_APP_HEIGHT, &appHeight);
     g_appWidth = appWidth;
     g_appHeight = appHeight;
-    g_appWidthIr = appWidth / 10;
-    g_appHeightIr = appHeight / 10;
+    g_appWidthIr = static_cast<int>(appWidth * IR_SCALE);
+    g_appHeightIr = static_cast<int>(appHeight * IR_SCALE);
 
 
     display_init(0, 0);

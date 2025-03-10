@@ -50,22 +50,39 @@ void initFaceRecognition() {
     initialized = true;
 }
 
-void faceDetect(const cv::Mat &frame) {
+bool faceDetect(const cv::Mat &frame, cv::Rect &rect) {
+    bool ret = false;
     if (!initialized) {
-        return;
+        return ret;
     }
 
-    cv::imwrite("/data/frd/test.jpg", frame);
-
-    int *pResults = NULL;
+    const int *pResults = nullptr;
     auto *pBuffer = static_cast<unsigned char *>(malloc(0x9000));
     pResults = facedetect_cnn(pBuffer, frame.data, frame.cols, frame.rows, frame.step);
-    int faceNum = pResults ? *pResults : 0;
+    const int faceNum = pResults ? *pResults : 0;
 
-    cout << faceNum << endl;
+    if (faceNum > 0) {
+        ret = true;
+
+        // 最大人脸
+        const auto *p = (short *) (pResults + 1);
+
+        //缩放前对应人形方框所在区域
+        const int origX = static_cast<int>(p[1] / IR_SCALE);
+        const int origY = static_cast<int>(p[2] / IR_SCALE);
+        const int origWidth = static_cast<int>(p[3] / IR_SCALE);
+        const int origHeight = static_cast<int>(p[4] / IR_SCALE);
+
+        //矫正
+        rect.x = std::max(0, origX);
+        rect.y = std::max(0, origY);
+        rect.width = std::min(frame.cols - origX, origWidth);
+        rect.height = std::min(frame.rows - origY, origHeight);
+    }
 
     free(pBuffer);
     pBuffer = nullptr;
+    return ret;
 }
 
 void faceRecognition(const cv::Mat &frame) {
