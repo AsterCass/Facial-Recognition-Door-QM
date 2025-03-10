@@ -57,13 +57,12 @@ void faceDetect(const cv::Mat &frame) {
 
     cv::imwrite("/data/frd/test.jpg", frame);
 
-    cv::Mat miniFrame;
-    double scaleFactor = 0.2;
-    resize(frame, miniFrame, cv::Size(), scaleFactor, scaleFactor, cv::INTER_LINEAR);
+
+    cout << frame.cols << frame.rows << endl;
 
     int *pResults = NULL;
     auto *pBuffer = static_cast<unsigned char *>(malloc(0x9000));
-    pResults = facedetect_cnn(pBuffer, miniFrame.data, miniFrame.cols, miniFrame.rows, miniFrame.step);
+    pResults = facedetect_cnn(pBuffer, frame.data, frame.cols, frame.rows, frame.step);
     int faceNum = pResults ? *pResults : 0;
 
     cout << faceNum << endl;

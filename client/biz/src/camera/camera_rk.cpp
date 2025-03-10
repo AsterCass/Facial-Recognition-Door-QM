@@ -28,6 +28,8 @@ int g_onFaceFrameRga = false;
 
 #define CAMERA_WIDTH 1920;
 #define CAMERA_HEIGHT 1080;
+#define CAMERA_WIDTH_VI 480;
+#define CAMERA_HEIGHT_VI 270;
 
 
 void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
@@ -199,8 +201,8 @@ void startCameraRk() {
     // Init vi 1
     vi_chn_attr.pcVideoNode = "rkispp_scale0";
     vi_chn_attr.u32BufCnt = 3;
-    vi_chn_attr.u32Width = CAMERA_WIDTH;
-    vi_chn_attr.u32Height = CAMERA_HEIGHT;
+    vi_chn_attr.u32Width = CAMERA_WIDTH_VI;
+    vi_chn_attr.u32Height = CAMERA_HEIGHT_VI;
     vi_chn_attr.enPixFmt = IMAGE_TYPE_NV12;
     vi_chn_attr.enWorkMode = VI_WORK_MODE_NORMAL;
     ret = RK_MPI_VI_SetChnAttr(irCameraId, 1, &vi_chn_attr);
@@ -244,17 +246,17 @@ void startCameraRk() {
     stRgaAttr.stImgIn.u32X = 0;
     stRgaAttr.stImgIn.u32Y = 0;
     stRgaAttr.stImgIn.imgType = IMAGE_TYPE_NV12;
-    stRgaAttr.stImgIn.u32Width = CAMERA_WIDTH;
-    stRgaAttr.stImgIn.u32Height = CAMERA_HEIGHT;
-    stRgaAttr.stImgIn.u32HorStride = CAMERA_WIDTH;
-    stRgaAttr.stImgIn.u32VirStride = CAMERA_HEIGHT;
+    stRgaAttr.stImgIn.u32Width = CAMERA_WIDTH_VI;
+    stRgaAttr.stImgIn.u32Height = CAMERA_HEIGHT_VI;
+    stRgaAttr.stImgIn.u32HorStride = CAMERA_WIDTH_VI;
+    stRgaAttr.stImgIn.u32VirStride = CAMERA_HEIGHT_VI;
     stRgaAttr.stImgOut.u32X = 0;
     stRgaAttr.stImgOut.u32Y = 0;
     stRgaAttr.stImgOut.imgType = IMAGE_TYPE_RGB888;
-    stRgaAttr.stImgOut.u32Width = g_appWidth;
-    stRgaAttr.stImgOut.u32Height = g_appHeight;
-    stRgaAttr.stImgOut.u32HorStride = g_appWidth;
-    stRgaAttr.stImgOut.u32VirStride = g_appHeight;
+    stRgaAttr.stImgOut.u32Width = g_appWidth / 4;
+    stRgaAttr.stImgOut.u32Height = g_appHeight / 4;
+    stRgaAttr.stImgOut.u32HorStride = g_appWidth / 4;
+    stRgaAttr.stImgOut.u32VirStride = g_appHeight / 4;
     ret = RK_MPI_RGA_CreateChn(1, &stRgaAttr);
     if (ret) {
         logPrintln("Create rga[1] failed! ret = " + ret,
