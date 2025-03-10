@@ -50,8 +50,8 @@ void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
 
     usleep(500 * 1000);
 
-    free(irFrame);
-    free(rgaFrame);
+    delete [] s_irFrame;
+    delete [] s_rgaFrame;
     s_irFrame = nullptr;
     s_rgaFrame = nullptr;
     g_onFaceFrameRga = false;
