@@ -70,9 +70,11 @@ void faceDetect(const cv::Mat &frame) {
 }
 
 void faceRecognition(const cv::Mat &frame) {
-    if (!initialized) {
-        return;
-    }
+    cout << "======================= " << frame.cols << " " << frame.rows << endl;
+
+    // if (!initialized) {
+    //     return;
+    // }
 
     // HFImageStream stream = nullptr;
     // HFImageData imageData = {};

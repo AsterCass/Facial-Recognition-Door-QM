@@ -1,4 +1,4 @@
-#ifndef WIN32
+#ifndef WIN32x
 
 #include <rkmedia_api.h>
 #include <mutex>
@@ -7,15 +7,12 @@
 #include "airstrip_log.h"
 #include <opencv2/opencv.hpp>
 
+#include "airstrip_program_options.h"
 #include "airstrip_thread_pool.h"
 #include "camera/camera_frame.h"
 #include "config/config.h"
 #include "utils/face_recognition.h"
-
-#include <QImage>
-
 #include "camera/common/display.h"
-
 
 using namespace std;
 
@@ -23,13 +20,12 @@ mutex mtx;
 bool started = false;
 int closeProcess = false;
 
-// 0: 红外 1: rga
-RK_S32 s32CamId = 1;
+int g_appWidth;
+int g_appHeight;
 
-int disp_width = 800;
-int disp_height = 1280;
+#define CAMERA_WIDTH 1920;
+#define CAMERA_HEIGHT 1080;
 
-//
 // void processWithMb(MEDIA_BUFFER mb) {
 //     if (closeProcess)return;
 //     bool static onSendFrame = false;
@@ -39,40 +35,70 @@ int disp_height = 1280;
 //     }
 //     onSendFrame = true;
 //
-//     void *data = RK_MPI_MB_GetPtr(mb);
-//     const QImage image(static_cast<uchar *>(data), disp_width, disp_height, QImage::Format_RGB888);
-//     QMetaObject::invokeMethod(CameraFrame::getInstance()->camera, "setPixmap", Qt::QueuedConnection,
-//                               Q_ARG(QPixmap, QPixmap::fromImage(image)));
+//     const void *data = RK_MPI_MB_GetPtr(mb);
+//     const size_t size = RK_MPI_MB_GetSize(mb);
+//     auto *buff = new uchar[size];
+//     memcpy(buff, data, size);
 //
-//     usleep(30 * 1000);
-//     onSendFrame = false;
+//     static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue([buff] {
+//         const cv::Mat frame(disp_height, disp_width, CV_8UC3, buff);
+//         faceDetect(frame);
+//         CameraFrame::getInstance()->updateFrameRK(frame);
+//
+//         delete [] buff;
+//         usleep(50 * 1000);
+//         onSendFrame = false;
+//     });
 //     RK_MPI_MB_ReleaseBuffer(mb);
 // }
 
-void processWithMb(MEDIA_BUFFER mb) {
-    if (closeProcess)return;
-    bool static onSendFrame = false;
-    if (onSendFrame) {
-        RK_MPI_MB_ReleaseBuffer(mb);
-        return;
+static void *process(void *) {
+    MEDIA_BUFFER irMb = nullptr;
+    MEDIA_BUFFER rgaMb = nullptr;
+
+    while (!closeProcess) {
+        irMb = RK_MPI_SYS_GetMediaBuffer(RK_ID_RGA, 1, -1);
+        rgaMb = RK_MPI_SYS_GetMediaBuffer(RK_ID_RGA, 2, -1);
+
+        if (!irMb || !rgaMb) {
+            if (!usleep(20 * 1000)) closeProcess = true;
+            continue;
+        }
+
+        bool static onSendFrame = false;
+        if (!onSendFrame) {
+            onSendFrame = true;
+
+            const void *dataIr = RK_MPI_MB_GetPtr(irMb);
+            const size_t sizeIr = RK_MPI_MB_GetSize(irMb);
+            void *buffIr = malloc(sizeIr);
+            memcpy(buffIr, dataIr, sizeIr);
+
+            const void *dataRga = RK_MPI_MB_GetPtr(rgaMb);
+            const size_t sizeRga = RK_MPI_MB_GetSize(rgaMb);
+            void *buffRga = malloc(sizeRga);
+            memcpy(buffRga, dataRga, sizeRga);
+
+            if (mainThreadPool) {
+                static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue([buffIr, buffRga] {
+                    const cv::Mat frame(g_appHeight, g_appWidth, CV_8UC3, buffIr);
+                    faceRecognition(frame);
+
+                    free(buffIr);
+                    free(buffRga);
+                    onSendFrame = false;
+                });
+            } else {
+                free(buffIr);
+                free(buffRga);
+                onSendFrame = false;
+            }
+        }
+        RK_MPI_MB_ReleaseBuffer(irMb);
+        RK_MPI_MB_ReleaseBuffer(rgaMb);
+        usleep(200 * 1000);
     }
-    onSendFrame = true;
-
-    const void *data = RK_MPI_MB_GetPtr(mb);
-    const size_t size = RK_MPI_MB_GetSize(mb);
-    auto *buff = new uchar[size];
-    memcpy(buff, data, size);
-
-    static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue([buff] {
-        const cv::Mat frame(disp_height, disp_width, CV_8UC3, buff);
-        faceDetect(frame);
-        CameraFrame::getInstance()->updateFrameRK(frame);
-
-        delete [] buff;
-        usleep(50 * 1000);
-        onSendFrame = false;
-    });
-    RK_MPI_MB_ReleaseBuffer(mb);
+    return nullptr;
 }
 
 void startCameraRk() {
@@ -82,53 +108,84 @@ void startCameraRk() {
         return;
     }
 
+    int appWidth, appHeight;
+    airstrip::getProgramOptions(PRO_OPT_APP_WIDTH, &appWidth);
+    airstrip::getProgramOptions(PRO_OPT_APP_HEIGHT, &appHeight);
+    g_appWidth = appWidth;
+    g_appHeight = appHeight;
+
+
     display_init(0, 0);
     display_exit();
 
+    closeProcess = false;
     int ret = 0;
 
-    int video_width = 1920;
-    int video_height = 1080;
-
     // Init
-    SAMPLE_COMM_ISP_Init(s32CamId, RK_AIQ_WORKING_MODE_NORMAL, RK_FALSE, "/etc/iqfiles");
-    SAMPLE_COMM_ISP_Run(s32CamId);
-    SAMPLE_COMM_ISP_SetFrameRate(s32CamId, 10);
+    constexpr RK_S32 irCameraId = 0;
+    constexpr RK_S32 rgaCameraId = 1;
+    SAMPLE_COMM_ISP_Init(rgaCameraId, RK_AIQ_WORKING_MODE_NORMAL, RK_FALSE, "/etc/iqfiles");
+    SAMPLE_COMM_ISP_Run(rgaCameraId);
+    SAMPLE_COMM_ISP_SetFrameRate(rgaCameraId, 30);
+
+    SAMPLE_COMM_ISP_Init(irCameraId, RK_AIQ_WORKING_MODE_NORMAL, RK_FALSE, "/etc/iqfiles");
+    SAMPLE_COMM_ISP_Run(irCameraId);
+    SAMPLE_COMM_ISP_Run(irCameraId);
+    SAMPLE_COMM_ISP_SetFrameRate(irCameraId, 5);
+
 
     RK_MPI_SYS_Init();
+
+    // Init vi 0
     VI_CHN_ATTR_S vi_chn_attr;
     vi_chn_attr.pcVideoNode = "rkispp_scale0";
     vi_chn_attr.u32BufCnt = 3;
-    vi_chn_attr.u32Width = video_width;
-    vi_chn_attr.u32Height = video_height;
+    vi_chn_attr.u32Width = CAMERA_WIDTH;
+    vi_chn_attr.u32Height = CAMERA_HEIGHT;
     vi_chn_attr.enPixFmt = IMAGE_TYPE_NV12;
     vi_chn_attr.enWorkMode = VI_WORK_MODE_NORMAL;
-    ret = RK_MPI_VI_SetChnAttr(s32CamId, 0, &vi_chn_attr);
-    ret |= RK_MPI_VI_EnableChn(s32CamId, 0);
+    ret = RK_MPI_VI_SetChnAttr(rgaCameraId, 0, &vi_chn_attr);
+    ret |= RK_MPI_VI_EnableChn(rgaCameraId, 0);
     if (ret) {
         logPrintln("Create vi[0] failed! ret = " + ret,
                    airstrip::CRITICAL, __FUNCTION__);
         exit(-1);
     }
 
+    // Init vi 1
+    vi_chn_attr.pcVideoNode = "rkispp_scale0";
+    vi_chn_attr.u32BufCnt = 3;
+    vi_chn_attr.u32Width = CAMERA_WIDTH;
+    vi_chn_attr.u32Height = CAMERA_HEIGHT;
+    vi_chn_attr.enPixFmt = IMAGE_TYPE_NV12;
+    vi_chn_attr.enWorkMode = VI_WORK_MODE_NORMAL;
+    ret = RK_MPI_VI_SetChnAttr(irCameraId, 1, &vi_chn_attr);
+    ret |= RK_MPI_VI_EnableChn(irCameraId, 1);
+    if (ret) {
+        logPrintln("Create vi[1] failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
+
+    // Init rga 0
     RGA_ATTR_S stRgaAttr = {};
     stRgaAttr.bEnBufPool = RK_TRUE;
-    stRgaAttr.u16BufPoolCnt = 8;
+    stRgaAttr.u16BufPoolCnt = 2;
     stRgaAttr.u16Rotaion = 90;
     stRgaAttr.stImgIn.u32X = 0;
     stRgaAttr.stImgIn.u32Y = 0;
     stRgaAttr.stImgIn.imgType = IMAGE_TYPE_NV12;
-    stRgaAttr.stImgIn.u32Width = video_width;
-    stRgaAttr.stImgIn.u32Height = video_height;
-    stRgaAttr.stImgIn.u32HorStride = video_width;
-    stRgaAttr.stImgIn.u32VirStride = video_height;
+    stRgaAttr.stImgIn.u32Width = CAMERA_WIDTH;
+    stRgaAttr.stImgIn.u32Height = CAMERA_HEIGHT;
+    stRgaAttr.stImgIn.u32HorStride = CAMERA_WIDTH;
+    stRgaAttr.stImgIn.u32VirStride = CAMERA_HEIGHT;
     stRgaAttr.stImgOut.u32X = 0;
     stRgaAttr.stImgOut.u32Y = 0;
     stRgaAttr.stImgOut.imgType = IMAGE_TYPE_RGB888;
-    stRgaAttr.stImgOut.u32Width = disp_width;
-    stRgaAttr.stImgOut.u32Height = disp_height;
-    stRgaAttr.stImgOut.u32HorStride = disp_width;
-    stRgaAttr.stImgOut.u32VirStride = disp_height;
+    stRgaAttr.stImgOut.u32Width = g_appWidth;
+    stRgaAttr.stImgOut.u32Height = g_appHeight;
+    stRgaAttr.stImgOut.u32HorStride = g_appWidth;
+    stRgaAttr.stImgOut.u32VirStride = g_appHeight;
     ret = RK_MPI_RGA_CreateChn(0, &stRgaAttr);
     if (ret) {
         logPrintln("Create rga[0] failed! ret = " + ret,
@@ -136,16 +193,67 @@ void startCameraRk() {
         exit(-1);
     }
 
+    // Init rga 1
+    stRgaAttr.bEnBufPool = RK_TRUE;
+    stRgaAttr.u16BufPoolCnt = 4;
+    stRgaAttr.u16Rotaion = 90;
+    stRgaAttr.stImgIn.u32X = 0;
+    stRgaAttr.stImgIn.u32Y = 0;
+    stRgaAttr.stImgIn.imgType = IMAGE_TYPE_NV12;
+    stRgaAttr.stImgIn.u32Width = CAMERA_WIDTH;
+    stRgaAttr.stImgIn.u32Height = CAMERA_HEIGHT;
+    stRgaAttr.stImgIn.u32HorStride = CAMERA_WIDTH;
+    stRgaAttr.stImgIn.u32VirStride = CAMERA_HEIGHT;
+    stRgaAttr.stImgOut.u32X = 0;
+    stRgaAttr.stImgOut.u32Y = 0;
+    stRgaAttr.stImgOut.imgType = IMAGE_TYPE_RGB888;
+    stRgaAttr.stImgOut.u32Width = g_appWidth;
+    stRgaAttr.stImgOut.u32Height = g_appHeight;
+    stRgaAttr.stImgOut.u32HorStride = g_appWidth;
+    stRgaAttr.stImgOut.u32VirStride = g_appHeight;
+    ret = RK_MPI_RGA_CreateChn(1, &stRgaAttr);
+    if (ret) {
+        logPrintln("Create rga[1] failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
+
+    // Init rga 2
+    stRgaAttr.bEnBufPool = RK_TRUE;
+    stRgaAttr.u16BufPoolCnt = 4;
+    stRgaAttr.u16Rotaion = 90;
+    stRgaAttr.stImgIn.u32X = 0;
+    stRgaAttr.stImgIn.u32Y = 0;
+    stRgaAttr.stImgIn.imgType = IMAGE_TYPE_NV12;
+    stRgaAttr.stImgIn.u32Width = CAMERA_WIDTH;
+    stRgaAttr.stImgIn.u32Height = CAMERA_HEIGHT;
+    stRgaAttr.stImgIn.u32HorStride = CAMERA_WIDTH;
+    stRgaAttr.stImgIn.u32VirStride = CAMERA_HEIGHT;
+    stRgaAttr.stImgOut.u32X = 0;
+    stRgaAttr.stImgOut.u32Y = 0;
+    stRgaAttr.stImgOut.imgType = IMAGE_TYPE_BGR888;
+    stRgaAttr.stImgOut.u32Width = g_appWidth;
+    stRgaAttr.stImgOut.u32Height = g_appHeight;
+    stRgaAttr.stImgOut.u32HorStride = g_appWidth;
+    stRgaAttr.stImgOut.u32VirStride = g_appHeight;
+    ret = RK_MPI_RGA_CreateChn(2, &stRgaAttr);
+    if (ret) {
+        logPrintln("Create rga[2] failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
+
+
+    // Init vo 0
     VO_CHN_ATTR_S stVoAttr = {};
-    // VO[0] for primary plane
     stVoAttr.pcDevNode = "/dev/dri/card0";
     stVoAttr.emPlaneType = VO_PLANE_OVERLAY;
     stVoAttr.enImgType = IMAGE_TYPE_RGB888;
     stVoAttr.u16Zpos = 0;
     stVoAttr.stDispRect.s32X = 0;
     stVoAttr.stDispRect.s32Y = 0;
-    stVoAttr.stDispRect.u32Width = disp_width;
-    stVoAttr.stDispRect.u32Height = disp_height;
+    stVoAttr.stDispRect.u32Width = g_appWidth;
+    stVoAttr.stDispRect.u32Height = g_appHeight;
     ret = RK_MPI_VO_CreateChn(0, &stVoAttr);
     if (ret) {
         logPrintln("Create vo[0] failed! ret = " + ret,
@@ -154,6 +262,7 @@ void startCameraRk() {
     }
 
 
+    // Bind
     MPP_CHN_S stSrcChn = {};
     MPP_CHN_S stDestChn = {};
 
@@ -169,17 +278,40 @@ void startCameraRk() {
         exit(-1);
     }
 
-
-    MPP_CHN_S stEncChn;
-    stEncChn.enModId = RK_ID_RGA;
-    stEncChn.s32DevId = 0;
-    stEncChn.s32ChnId = 0;
-    ret = RK_MPI_SYS_RegisterOutCb(&stEncChn, processWithMb);
+    logPrintln("Bind VI[0] to RGA[2]...", airstrip::INFO, __FUNCTION__);
+    stSrcChn.enModId = RK_ID_VI;
+    stSrcChn.s32ChnId = 0;
+    stDestChn.enModId = RK_ID_RGA;
+    stDestChn.s32ChnId = 2;
+    ret = RK_MPI_SYS_Bind(&stSrcChn, &stDestChn);
     if (ret) {
-        logPrintln("Register out cb failed! ret = " + ret,
+        logPrintln("Bind vi[0] to rga[2] failed! ret = " + ret,
                    airstrip::CRITICAL, __FUNCTION__);
         exit(-1);
     }
+
+    logPrintln("Bind VI[1] to RGA[1]...", airstrip::INFO, __FUNCTION__);
+    stSrcChn.enModId = RK_ID_VI;
+    stSrcChn.s32ChnId = 1;
+    stDestChn.enModId = RK_ID_RGA;
+    stDestChn.s32ChnId = 1;
+    ret = RK_MPI_SYS_Bind(&stSrcChn, &stDestChn);
+    if (ret) {
+        logPrintln("Bind vi[1] to rga[1] failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
+
+    // MPP_CHN_S stEncChn;
+    // stEncChn.enModId = RK_ID_RGA;
+    // stEncChn.s32DevId = 0;
+    // stEncChn.s32ChnId = 0;
+    // ret = RK_MPI_SYS_RegisterOutCb(&stEncChn, processWithMb);
+    // if (ret) {
+    //     logPrintln("Register out cb failed! ret = " + ret,
+    //                airstrip::CRITICAL, __FUNCTION__);
+    //     exit(-1);
+    // }
 
     logPrintln("Bind RGA[0] to VO[0]...", airstrip::INFO, __FUNCTION__);
     stSrcChn.enModId = RK_ID_RGA;
@@ -194,13 +326,13 @@ void startCameraRk() {
     }
 
 
-    // pthread_t readThread;
-    // ret = pthread_create(&readThread, nullptr, process, nullptr);
-    // if (ret) {
-    //     logPrintln("Create monitor read thread failed! ret = " + ret,
-    //                airstrip::CRITICAL, __FUNCTION__);
-    //     exit(-1);
-    // }
+    pthread_t readThread;
+    ret = pthread_create(&readThread, nullptr, process, nullptr);
+    if (ret) {
+        logPrintln("Create monitor read thread failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
 
     logPrintln("Camera RK initial finish", airstrip::INFO, __FUNCTION__);
     started = true;
@@ -213,8 +345,13 @@ void stopCameraRk() {
         return;
     }
 
+    closeProcess = true;
     int ret = 0;
 
+    constexpr RK_S32 irCameraId = 0;
+    constexpr RK_S32 rgaCameraId = 1;
+
+    // Unbind
     MPP_CHN_S stSrcChn = {};
     MPP_CHN_S stDestChn = {};
 
@@ -225,6 +362,28 @@ void stopCameraRk() {
     ret = RK_MPI_SYS_UnBind(&stSrcChn, &stDestChn);
     if (ret) {
         logPrintln("Unbind vi[0] to rga[0] failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
+
+    stSrcChn.enModId = RK_ID_VI;
+    stSrcChn.s32ChnId = 0;
+    stDestChn.enModId = RK_ID_RGA;
+    stDestChn.s32ChnId = 2;
+    ret = RK_MPI_SYS_UnBind(&stSrcChn, &stDestChn);
+    if (ret) {
+        logPrintln("Unbind vi[0] to rga[2] failed! ret = " + ret,
+                   airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
+
+    stSrcChn.enModId = RK_ID_VI;
+    stSrcChn.s32ChnId = 1;
+    stDestChn.enModId = RK_ID_RGA;
+    stDestChn.s32ChnId = 1;
+    ret = RK_MPI_SYS_UnBind(&stSrcChn, &stDestChn);
+    if (ret) {
+        logPrintln("Unbind vi[1] to rga[1] failed! ret = " + ret,
                    airstrip::CRITICAL, __FUNCTION__);
         exit(-1);
     }
@@ -240,9 +399,12 @@ void stopCameraRk() {
         exit(-1);
     }
 
-    //RK_MPI_VO_DestroyChn(0);
+    RK_MPI_VO_DestroyChn(0);
     RK_MPI_RGA_DestroyChn(0);
-    RK_MPI_VI_DisableChn(s32CamId, 0);
+    RK_MPI_RGA_DestroyChn(1);
+    RK_MPI_RGA_DestroyChn(2);
+    RK_MPI_VI_DisableChn(rgaCameraId, 0);
+    RK_MPI_VI_DisableChn(irCameraId, 1);
 
     logPrintln("Camera RK stop finish", airstrip::INFO, __FUNCTION__);
 
