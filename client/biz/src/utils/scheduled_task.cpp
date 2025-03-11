@@ -29,19 +29,19 @@ void updateUIMainComponentHeader(const std::string &appWorkDir) {
     const auto time = chrono::system_clock::to_time_t(now);
     const auto today = day_clock::local_day();
     const auto day = today.day_of_week();
-    const auto weekStr = CHINESE_WEEK[day];
+    const auto &weekStr = CHINESE_WEEK[day];
 
     ostringstream oss;
     oss << put_time(localtime(&time), "%Y.%m.%d %H:%M ") << weekStr;
     MainComponentHeader::getInstance()->updateTimeText(string(oss.str()));
 
-    if (appWorkDir.size() <= 0) {
+    if (appWorkDir.empty()) {
         return;
     }
 
     // Wired
     {
-        static string currentWiredIp = "";
+        static string currentWiredIp;
 #ifdef WIN32
         const string wiredIp = execScript(appWorkDir + "script/win/get_wired_ip.ps1");
 #else
@@ -49,13 +49,13 @@ void updateUIMainComponentHeader(const std::string &appWorkDir) {
 #endif
         if (wiredIp != currentWiredIp) {
             currentWiredIp = wiredIp;
-            MainComponentHeader::getInstance()->updateWiredStatus(wiredIp.size() > 0);
+            MainComponentHeader::getInstance()->updateWiredStatus(!wiredIp.empty());
         }
     }
 
     // Wireless
     {
-        static string currentWirelessIp = "";
+        static string currentWirelessIp;
 #ifdef WIN32
         const string wirelessIp = execScript(appWorkDir + "script/win/get_wireless_ip.ps1");
 #else
@@ -63,21 +63,21 @@ void updateUIMainComponentHeader(const std::string &appWorkDir) {
 #endif
         if (wirelessIp != currentWirelessIp) {
             currentWirelessIp = wirelessIp;
-            MainComponentHeader::getInstance()->updateWirelessStatus(wirelessIp.size() > 0);
+            MainComponentHeader::getInstance()->updateWirelessStatus(!wirelessIp.empty());
         }
     }
 
     // 4g
     {
-        static string current4gIp = "";
+        static string current4gIp;
 #ifdef WIN32
-        const string fourGIp = "";
+        const string fourGIp;
 #else
         const string fourGIp = execScript(appWorkDir + "script/linux/get_4g_ip.sh");
 #endif
         if (fourGIp != current4gIp) {
             current4gIp = fourGIp;
-            MainComponentHeader::getInstance()->update4GStatus(fourGIp.size() > 0);
+            MainComponentHeader::getInstance()->update4GStatus(!fourGIp.empty());
         }
     }
 
@@ -97,9 +97,6 @@ void onceTask() {
 
     // Init Face
     initFaceRecognition();
-
-    faceInsert("/data/frd/test9.jpg");
-
 
     // To home
     stackedWidget->setCurrentIndex(MAIN_PAGE_HOME);

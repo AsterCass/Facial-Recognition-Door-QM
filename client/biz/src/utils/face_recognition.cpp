@@ -46,7 +46,7 @@ void initFaceRecognition() {
     }
 
     HFSessionSetTrackPreviewSize(faceRecognitionSession, detectPixelLevel);
-    HFSessionSetFilterMinimumFacePixelSize(faceRecognitionSession, 50);
+    HFSessionSetFilterMinimumFacePixelSize(faceRecognitionSession, 30);
 
     string featureDb = appWorkDir + "face-feature/feature.db";
 
@@ -67,7 +67,7 @@ void initFaceRecognition() {
 }
 
 
-void faceInsert(const std::string &address) {
+void faceInsert(const std::string &address, const std::string &userId) {
     if (!initialized) {
         return;
     }
@@ -76,13 +76,16 @@ void faceInsert(const std::string &address) {
         logPrintln("Read pic error " + address, airstrip::WARN, __FUNCTION__);
         return;
     }
-    faceInsert(image);
+    faceInsert(image, userId);
 }
 
-void faceInsert(const cv::Mat &pic) {
+void faceInsert(const cv::Mat &pic, const std::string &userId) {
     if (!initialized) {
         return;
     }
+
+    logPrintln("Face insert userId = " + userId, airstrip::INFO, __FUNCTION__);
+
     HFImageStream stream = nullptr;
     HFImageData imageData = {};
     imageData.data = pic.data;
@@ -133,7 +136,8 @@ void faceInsert(const cv::Mat &pic) {
         return;
     }
 
-    logPrintln("Face insert Finish " + to_string(resultId), airstrip::INFO, __FUNCTION__);
+    logPrintln("Face insert finish for userId = " + userId, airstrip::INFO, __FUNCTION__);
+
     // todo callback
 
     HFReleaseImageStream(stream);
@@ -251,7 +255,7 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
         return;
     }
 
-    logPrintln("Face recognition ret id = " + to_string(searchResult.id),
+    logPrintln("Face recognition ret id = " + to_string(searchResult.id) + " " + to_string(confidence),
                airstrip::INFO, __FUNCTION__);
     // todo match
 
