@@ -113,10 +113,17 @@ void faceInsert(const cv::Mat &pic) {
         return;
     }
 
-    int64_t resultId = 0;
     HFFaceFeature feature = {};
-    feature.data = static_cast<HPFloat>(multipleFaceData.tokens[0].data);
-    feature.size = multipleFaceData.tokens[0].size;
+    ret = HFFaceFeatureExtract(faceRecognitionSession, stream,
+                               multipleFaceData.tokens[0], &feature);
+    if (ret != HSUCCEED) {
+        logPrintln("Face insert feature extract fail " + ret,
+                   airstrip::WARN, __FUNCTION__);
+        HFReleaseImageStream(stream);
+        return;
+    }
+
+    int64_t resultId = 0;
     HFFaceFeatureIdentity identity = {};
     identity.feature = &feature;
     ret = HFFeatureHubInsertFeature(identity, &resultId);
