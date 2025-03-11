@@ -98,6 +98,9 @@ void onceTask() {
     // Init Face
     initFaceRecognition();
 
+    faceInsert("/data/frd/test9.jpg");
+
+
     // To home
     stackedWidget->setCurrentIndex(MAIN_PAGE_HOME);
 }

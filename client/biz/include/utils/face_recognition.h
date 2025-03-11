@@ -5,6 +5,10 @@
 
 void initFaceRecognition();
 
+void faceInsert(const std::string &address);
+
+void faceInsert(const cv::Mat &pic);
+
 bool faceDetect(const cv::Mat &frame, cv::Rect &rect, int orgCols, int orgRows);
 
 void faceRecognition(const cv::Mat &frame, const cv::Rect &rect);

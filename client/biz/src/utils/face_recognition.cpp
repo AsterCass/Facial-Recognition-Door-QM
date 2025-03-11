@@ -66,6 +66,72 @@ void initFaceRecognition() {
     initialized = true;
 }
 
+
+void faceInsert(const std::string &address) {
+    if (!initialized) {
+        return;
+    }
+    const auto image = cv::imread(address);
+    if (image.empty()) {
+        logPrintln("Read pic error " + address, airstrip::WARN, __FUNCTION__);
+        return;
+    }
+    faceInsert(image);
+}
+
+void faceInsert(const cv::Mat &pic) {
+    if (!initialized) {
+        return;
+    }
+    HFImageStream stream = nullptr;
+    HFImageData imageData = {};
+    imageData.data = pic.data;
+    imageData.format = HF_STREAM_BGR;
+    imageData.height = pic.rows;
+    imageData.width = pic.cols;
+    imageData.rotation = HF_CAMERA_ROTATION_0;
+    HResult ret = HFCreateImageStream(&imageData, &stream);
+    if (ret != HSUCCEED) {
+        logPrintln("Face insert build image fail " + ret,
+                   airstrip::WARN, __FUNCTION__);
+    }
+
+    HFMultipleFaceData multipleFaceData = {};
+    ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
+    if (ret != HSUCCEED) {
+        logPrintln("Face insert track image fail " + ret,
+                   airstrip::WARN, __FUNCTION__);
+        HFReleaseImageStream(stream);
+        return;
+    }
+
+    const auto faceNum = multipleFaceData.detectedNum;
+    if (faceNum <= 0) {
+        // todo error throw
+        logPrintln("Face insert face not found ", airstrip::WARN, __FUNCTION__);
+        HFReleaseImageStream(stream);
+        return;
+    }
+
+    int64_t resultId = 0;
+    HFFaceFeature feature = {};
+    feature.data = multipleFaceData.tokens[0].data();
+    feature.size = multipleFaceData.tokens[0].size();
+    HFFaceFeatureIdentity identity = {};
+    identity.feature = &feature;
+    ret = HFFeatureHubInsertFeature(identity, &resultId);
+    if (ret != HSUCCEED) {
+        logPrintln("Face insert face error " + ret, airstrip::WARN, __FUNCTION__);
+        HFReleaseImageStream(stream);
+        return;
+    }
+
+    // todo callback
+
+    HFReleaseImageStream(stream);
+}
+
+
 bool faceDetect(const cv::Mat &frame, cv::Rect &rect, int orgCols, int orgRows) {
     bool ret = false;
     if (!initialized) {
@@ -167,14 +233,21 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
     HFFaceFeatureIdentity searchResult = {};
     ret = HFFeatureHubFaceSearch(feature, &confidence, &searchResult);
     if (ret != HSUCCEED) {
-        logPrintln("Face recognition feature search fail " + ret,
-                   airstrip::WARN, __FUNCTION__);
+        // logPrintln("Face recognition feature search fail " + ret,
+        //            airstrip::WARN, __FUNCTION__);
         HFReleaseImageStream(stream);
         return;
     }
 
-    logPrintln("Face recognition ret id = " + searchResult.id,
+    if (searchResult.id <= 0) {
+        // todo not match
+        HFReleaseImageStream(stream);
+        return;
+    }
+
+    logPrintln("Face recognition ret id = " + to_string(searchResult.id),
                airstrip::INFO, __FUNCTION__);
+    // todo match
 
 
     HFReleaseImageStream(stream);
