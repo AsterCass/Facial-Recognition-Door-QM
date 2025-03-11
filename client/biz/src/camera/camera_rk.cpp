@@ -52,9 +52,9 @@ void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
     const cv::Mat frameRga(g_appHeight, g_appWidth, CV_8UC3, s_rgaFrame);
     cv::Rect rect;
     if (faceDetect(frameIr, rect, frameRga.cols, frameRga.rows)) {
-        cout << rect.x << " " << rect.y << " " << rect.width << " " << rect.height << endl;
-        rectangle(frameRga, rect, cv::Scalar(255, 0, 0), 2);
-        cv::imwrite("/data/frd/test.jpg", frameRga);
+        //rectangle(frameRga, rect, cv::Scalar(255, 0, 0), 2);
+        //cv::imwrite("/data/frd/test.jpg", frameRga);
+        faceRecognition(frameRga, rect);
     }
 
     usleep(500 * 1000);

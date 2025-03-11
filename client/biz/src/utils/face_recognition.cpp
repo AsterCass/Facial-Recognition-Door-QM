@@ -4,7 +4,6 @@
 #include "intypedef.h"
 #include <string>
 #include <opencv2/imgcodecs.hpp>
-#include <opencv2/imgproc.hpp>
 #include <opencv2/core/types.hpp>
 
 #include "airstrip_log.h"
@@ -23,30 +22,47 @@ void initFaceRecognition() {
         return;
     }
 
-    // string appWorkDir;
-    // airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
-    //
-    // const string modelPath = appWorkDir + "model/Pikachu";
-    // HResult ret = HFLaunchInspireFace(modelPath.c_str());
-    // if (ret != HSUCCEED) {
-    //     logPrintln("Load Resource error: " + ret, airstrip::INFO, __FUNCTION__);
-    //     exit(EXIT_FAILURE);
-    // }
-    //
-    // HOption option = HF_ENABLE_FACE_RECOGNITION;
-    // HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
-    // HInt32 maxDetectNum = 20;
-    // HInt32 detectPixelLevel = 160;
-    // ret = HFCreateInspireFaceSessionOptional(
-    //     option, detMode, maxDetectNum, detectPixelLevel, -1, &faceRecognitionSession);
-    // if (ret != HSUCCEED) {
-    //     logPrintln("Create FaceContext error: " + ret, airstrip::INFO, __FUNCTION__);
-    //     exit(EXIT_FAILURE);
-    // }
-    //
-    // HFSessionSetTrackPreviewSize(faceRecognitionSession, detectPixelLevel);
-    // HFSessionSetFilterMinimumFacePixelSize(faceRecognitionSession, 4);
+    logPrintln("Start init face model", airstrip::INFO, __FUNCTION__);
 
+    string appWorkDir;
+    airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
+
+    const string modelPath = appWorkDir + "model/Pikachu";
+    HResult ret = HFLaunchInspireFace(modelPath.c_str());
+    if (ret != HSUCCEED) {
+        logPrintln("Load resource error: " + ret, airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
+
+    constexpr HOption option = HF_ENABLE_FACE_RECOGNITION;
+    constexpr HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
+    constexpr HInt32 maxDetectNum = 1;
+    constexpr HInt32 detectPixelLevel = 160;
+    ret = HFCreateInspireFaceSessionOptional(
+        option, detMode, maxDetectNum, detectPixelLevel, -1, &faceRecognitionSession);
+    if (ret != HSUCCEED) {
+        logPrintln("Create face context error: " + ret, airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
+
+    HFSessionSetTrackPreviewSize(faceRecognitionSession, detectPixelLevel);
+    HFSessionSetFilterMinimumFacePixelSize(faceRecognitionSession, 50);
+
+    string featureDb = appWorkDir + "face-feature/feature.db";
+
+    HFFeatureHubConfiguration configuration;
+    configuration.primaryKeyMode = HF_PK_AUTO_INCREMENT;
+    configuration.enablePersistence = 1;
+    configuration.persistenceDbPath = &featureDb[0];
+    configuration.searchMode = HF_SEARCH_MODE_EAGER;
+    configuration.searchThreshold = 0.48f;
+    ret = HFFeatureHubDataEnable(configuration);
+    if (ret != HSUCCEED) {
+        logPrintln("Create face db error: " + ret, airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
+
+    logPrintln("Face model init finish", airstrip::INFO, __FUNCTION__);
     initialized = true;
 }
 
@@ -99,33 +115,63 @@ bool faceDetect(const cv::Mat &frame, cv::Rect &rect, int orgCols, int orgRows) 
     return ret;
 }
 
-void faceRecognition(const cv::Mat &frame) {
-    cout << "======================= " << frame.cols << " " << frame.rows << endl;
+void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
+    if (!initialized) {
+        return;
+    }
 
-    // if (!initialized) {
-    //     return;
-    // }
+    cv::imwrite("/data/frd/test.4.jpg", frame);
 
-    // HFImageStream stream = nullptr;
-    // HFImageData imageData = {};
-    // imageData.data = frame.data;
-    // imageData.format = HF_STREAM_RGB;
-    // imageData.height = frame.rows;
-    // imageData.width = frame.cols;
-    // imageData.rotation = HF_CAMERA_ROTATION_0; // Image rotation
-    // HResult ret = HFCreateImageStream(&imageData, &stream);
-    //
-    // HFMultipleFaceData multipleFaceData = {0};
-    // ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
-    //
-    // auto faceNum = multipleFaceData.detectedNum;
-    // airstrip::logPrintln("Num of face: " + faceNum);
-    //
-    // if (multipleFaceData.detectedNum > 0) {
-    //     auto rect = multipleFaceData.rects;
-    //     airstrip::logPrintln(to_string(rect->x));
-    //     airstrip::logPrintln(to_string(rect->y));
-    //     airstrip::logPrintln(to_string(rect->height));
-    //     airstrip::logPrintln(to_string(rect->width));
-    // }
+    HFImageStream stream = nullptr;
+    HFImageData imageData = {};
+    imageData.data = frame.data;
+    imageData.format = HF_STREAM_RGB;
+    imageData.height = frame.rows;
+    imageData.width = frame.cols;
+    imageData.rotation = HF_CAMERA_ROTATION_0;
+    HResult ret = HFCreateImageStream(&imageData, &stream);
+    if (ret != HSUCCEED) {
+        logPrintln("Face recognition build image fail " + ret,
+                   airstrip::WARN, __FUNCTION__);
+    }
+
+    HFMultipleFaceData multipleFaceData = {};
+    ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
+    if (ret != HSUCCEED) {
+        logPrintln("Face recognition track image fail " + ret,
+                   airstrip::WARN, __FUNCTION__);
+        HFReleaseImageStream(stream);
+        return;
+    }
+
+    const auto faceNum = multipleFaceData.detectedNum;
+    airstrip::logPrintln("Num of face: " + faceNum);
+
+    if (multipleFaceData.detectedNum <= 0) {
+        HFReleaseImageStream(stream);
+        return;
+    }
+
+    HFFaceFeature feature = {};
+    ret = HFFaceFeatureExtract(faceRecognitionSession, stream,
+                               multipleFaceData.tokens[0], &feature);
+    if (ret != HSUCCEED) {
+        logPrintln("Face recognition feature extract fail " + ret,
+                   airstrip::WARN, __FUNCTION__);
+        HFReleaseImageStream(stream);
+        return;
+    }
+
+    HFFaceFeature queryFeature = {};
+    queryFeature.data = feature.data();
+    queryFeature.size = feature.size();
+    HFloat confidence;
+    HFFaceFeatureIdentity searchResult = {};
+    HFFeatureHubFaceSearch(queryFeature, &confidence, &searchResult);
+
+    logPrintln("Face recognition ret id = " + searchResult.id,
+               airstrip::INFO, __FUNCTION__);
+
+
+    HFReleaseImageStream(stream);
 }
