@@ -13,7 +13,7 @@
 
 using namespace std;
 
-HFSession faceRecognitionSession = {};
+HFSession faceRecognitionSession = nullptr;
 
 bool initialized = false;
 
@@ -120,12 +120,10 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
         return;
     }
 
-    cv::imwrite("/data/frd/test.4.jpg", frame);
-
     HFImageStream stream = nullptr;
     HFImageData imageData = {};
     imageData.data = frame.data;
-    imageData.format = HF_STREAM_RGB;
+    imageData.format = HF_STREAM_BGR;
     imageData.height = frame.rows;
     imageData.width = frame.cols;
     imageData.rotation = HF_CAMERA_ROTATION_0;
@@ -145,9 +143,11 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
     }
 
     const auto faceNum = multipleFaceData.detectedNum;
-    airstrip::logPrintln("Num of face: " + faceNum);
+    logPrintln("Num of face: " + to_string(faceNum), airstrip::INFO, __FUNCTION__);
 
     if (multipleFaceData.detectedNum <= 0) {
+        logPrintln("Face recognition face not found",
+                   airstrip::WARN, __FUNCTION__);
         HFReleaseImageStream(stream);
         return;
     }
@@ -162,12 +162,16 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
         return;
     }
 
-    HFFaceFeature queryFeature = {};
-    queryFeature.data = feature.data();
-    queryFeature.size = feature.size();
+
     HFloat confidence;
     HFFaceFeatureIdentity searchResult = {};
-    HFFeatureHubFaceSearch(queryFeature, &confidence, &searchResult);
+    ret = HFFeatureHubFaceSearch(feature, &confidence, &searchResult);
+    if (ret != HSUCCEED) {
+        logPrintln("Face recognition feature search fail " + ret,
+                   airstrip::WARN, __FUNCTION__);
+        HFReleaseImageStream(stream);
+        return;
+    }
 
     logPrintln("Face recognition ret id = " + searchResult.id,
                airstrip::INFO, __FUNCTION__);
