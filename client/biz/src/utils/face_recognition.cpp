@@ -115,8 +115,8 @@ void faceInsert(const cv::Mat &pic) {
 
     int64_t resultId = 0;
     HFFaceFeature feature = {};
-    feature.data = multipleFaceData.tokens[0].data();
-    feature.size = multipleFaceData.tokens[0].size();
+    feature.data = static_cast<HPFloat>(multipleFaceData.tokens[0].data);
+    feature.size = multipleFaceData.tokens[0].size;
     HFFaceFeatureIdentity identity = {};
     identity.feature = &feature;
     ret = HFFeatureHubInsertFeature(identity, &resultId);
@@ -126,6 +126,7 @@ void faceInsert(const cv::Mat &pic) {
         return;
     }
 
+    logPrintln("Face insert Finish " + to_string(resultId), airstrip::INFO, __FUNCTION__);
     // todo callback
 
     HFReleaseImageStream(stream);
@@ -212,8 +213,7 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
     logPrintln("Num of face: " + to_string(faceNum), airstrip::INFO, __FUNCTION__);
 
     if (multipleFaceData.detectedNum <= 0) {
-        logPrintln("Face recognition face not found",
-                   airstrip::WARN, __FUNCTION__);
+        // logPrintln("Face recognition face not found",airstrip::WARN, __FUNCTION__);
         HFReleaseImageStream(stream);
         return;
     }
@@ -228,13 +228,12 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
         return;
     }
 
-
     HFloat confidence;
     HFFaceFeatureIdentity searchResult = {};
     ret = HFFeatureHubFaceSearch(feature, &confidence, &searchResult);
     if (ret != HSUCCEED) {
-        // logPrintln("Face recognition feature search fail " + ret,
-        //            airstrip::WARN, __FUNCTION__);
+        logPrintln("Face recognition feature search fail " + ret,
+                   airstrip::WARN, __FUNCTION__);
         HFReleaseImageStream(stream);
         return;
     }
