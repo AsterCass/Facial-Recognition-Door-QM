@@ -10,6 +10,7 @@
 #include "airstrip_log.h"
 #include "config/config.h"
 #include "airstrip_program_options.h"
+#include "api/api.h"
 #include "camera/camera_frame.h"
 #include "enums/general_enums.h"
 #include "nfc/nfc_tool.h"
@@ -21,20 +22,10 @@ using namespace std;
 using namespace airstrip;
 using namespace boost::gregorian;;
 
-// Every (taskIvCnt + executionTime) sec
-void getNfcCode() {
-    const NfcCardData ret = getCardData();
-    if (ret.isExist) {
-        cout << "Nfc card detected" << ret.cardType << " " << ret.cardNo << endl;
-    } else {
-        cout << "Not found NFC card" << endl;
-    }
-}
-
-// Every (2 * taskIvCnt + executionTime) sec
+// Every (10 * taskIvCnt + executionTime) sec
 void updateUIMainComponentHeader(const std::string &appWorkDir) {
-    static int count = 2;
-    if (count++ < 2) return;
+    static int count = 10;
+    if (count++ < 10) return;
     count = 1;
     const auto now = chrono::system_clock::now();
     const auto time = chrono::system_clock::to_time_t(now);
@@ -97,11 +88,36 @@ void updateUIMainComponentHeader(const std::string &appWorkDir) {
     }
 }
 
+// Every (5 * taskIvCnt + executionTime) sec
+void gotoManagement() {
+    static int count = 5;
+    if (count++ < 5) return;
+    count = 1;
+    if (g_tryGoManagementCount >= 5) {
+        g_tryGoManagementCount = 0;
+        logPrintln("Go to management...", INFO, __FUNCTION__);
+    } else {
+        g_tryGoManagementCount = 0;
+    }
+}
+
+// Every (taskIvCnt + executionTime) sec
+void getNfcCode() {
+    const NfcCardData ret = getCardData();
+    if (!ret.isExist) {
+        return;
+    }
+    logPrintln("Nfc card detected " + to_string(ret.cardType) + " " + ret.cardNo,
+               INFO, __FUNCTION__);
+}
+
 
 void onceTask() {
     static int count = 1;
     if (count > 1) return;
     ++count;
+
+    login();
 
     // Init Camera
     CameraFrame::getInstance()->start();
@@ -110,16 +126,7 @@ void onceTask() {
     initFaceRecognition();
 
     // To home
-    stackedWidget->setCurrentIndex(MAIN_PAGE_HOME);
-}
-
-void gotoManagement() {
-    if (tryGoManagementCount >= 5) {
-        tryGoManagementCount = 0;
-        logPrintln("Go to management...", INFO, __FUNCTION__);
-    } else {
-        tryGoManagementCount = 0;
-    }
+    g_stackedWidget->setCurrentIndex(MAIN_PAGE_HOME);
 }
 
 

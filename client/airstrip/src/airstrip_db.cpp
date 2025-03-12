@@ -42,15 +42,8 @@ namespace airstrip {
             SQLite::Statement query(
                 *_db, "SELECT * FROM common_backend_config WHERE config_name = ?");
             query.bind(1, name);
-            query.exec();
 
-            if (query.getChanges() == 0) {
-                SQLite::Statement insert(
-                    *_db, "INSERT INTO common_backend_config (config_name, config_value_json) VALUES (?, ?)");
-                insert.bind(1, name);
-                insert.bind(2, configValueJson);
-                insert.exec();
-            } else {
+            if (query.executeStep()) {
                 SQLite::Statement update(
                     *_db, "UPDATE common_backend_config SET config_value_json = ?, "
                     "update_time = (datetime('now', 'localtime')) "
@@ -58,6 +51,12 @@ namespace airstrip {
                 update.bind(1, configValueJson);
                 update.bind(2, name);
                 update.exec();
+            } else {
+                SQLite::Statement insert(
+                    *_db, "INSERT INTO common_backend_config (config_name, config_value_json) VALUES (?, ?)");
+                insert.bind(1, name);
+                insert.bind(2, configValueJson);
+                insert.exec();
             }
             transaction.commit();
         } catch (const SQLite::Exception &e) {

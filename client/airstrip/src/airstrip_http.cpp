@@ -9,6 +9,17 @@ using namespace std;
 
 
 namespace airstrip {
+    std::string escapeQuotes(const std::string &input) {
+        std::string result;
+        for (const char c: input) {
+            if (c == '"' || c == '\\' || c == '`' || c == '$') {
+                result += '\\';
+            }
+            result += c;
+        }
+        return result;
+    }
+
     Response AirstripHttp::sendRequest(
         const std::string &url,
         RequestMethod method,
@@ -44,7 +55,7 @@ namespace airstrip {
 
         // request body
         if (!bodyJson.empty()) {
-            cmd << " -H \"Content-Type: application/json\" -d '" << bodyJson << "'";
+            cmd << R"( -H "Content-Type: application/json" -d ")" << escapeQuotes(bodyJson) << R"(")";
         }
 
         // url

@@ -101,6 +101,7 @@ message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 set(PROJECT_SOURCES
         src/main.cpp
         src/nfc/nfc_tool.cpp
+        src/api/api.cpp
         src/config/config.cpp
         src/camera/common/sample_common_isp.c
         src/camera/common/sample_fake_isp.c

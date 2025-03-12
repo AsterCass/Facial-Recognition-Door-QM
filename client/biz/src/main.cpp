@@ -7,6 +7,8 @@
 #include "utils/scheduled_task.h"
 #include "ui/main_router.h"
 #include "config/config.h"
+#include <boost/json.hpp>
+
 #ifndef WIN32
 #include "client/linux/handler/exception_handler.h"
 static bool dumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
@@ -39,8 +41,8 @@ int main(int argc, char *argv[]) {
         airstrip::AirstripProgramOptionDetail taskIvCnt;
         taskIvCnt.needContinue = true;
         taskIvCnt.needInput = true;
-        taskIvCnt.optionDesc = "Set common task interval sec count. \nDefault values is 5";
-        taskIvCnt.defaultValue = {std::to_string(5)};
+        taskIvCnt.optionDesc = "Set common task interval sec count. \nDefault values is 1";
+        taskIvCnt.defaultValue = {std::to_string(1)};
         taskIvCnt.valueType = airstrip::INTEGER;
         optSetting.options[std::string(PRO_OPT_TASK_IN_CNT)] = taskIvCnt;
         // App width and height
@@ -83,19 +85,44 @@ int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
     // Init thread poll
-    mainThreadPool = airstrip::ThreadPool::getInstance(3);
+    g_mainThreadPool = airstrip::ThreadPool::getInstance(3);
 
     // Db
     if (!appWorkDir.empty()) {
-        commonDb.initDb(appWorkDir + PRO_DB_ADDRESS);
-        std::string serverAddress = commonDb.getConfig(PRO_DB_COMMON_KEY_SERVER_ADD);
+        g_commonDb.initDb(appWorkDir + PRO_DB_ADDRESS);
+
+        // update common_backend_config set config_value_json="localhost:5525" where config_name="serverAddress";
+        std::string serverAddress = g_commonDb.getConfig(PRO_DB_COMMON_KEY_SERVER_ADD);
         if (serverAddress.empty()) {
-            commonDb.upsertConfig(PRO_DB_COMMON_KEY_SERVER_ADD, "localhost:5525");
+            g_commonDb.upsertConfig(PRO_DB_COMMON_KEY_SERVER_ADD, "localhost:5525");
         }
-        std::string managementPassword = commonDb.getConfig(PRO_DB_COMMON_KEY_MANA_PASS);
+        g_serverAddress = serverAddress;
+
+        // update common_backend_config set config_value_json="123456" where config_name="managementPassword";
+        std::string managementPassword = g_commonDb.getConfig(PRO_DB_COMMON_KEY_MANA_PASS);
         if (managementPassword.empty()) {
-            commonDb.upsertConfig(PRO_DB_COMMON_KEY_MANA_PASS, "123456");
+            g_commonDb.upsertConfig(PRO_DB_COMMON_KEY_MANA_PASS, "123456");
         }
+        g_managementPassword = managementPassword;
+
+        // update common_backend_config set config_value_json="abcdefg" where config_name="signId";
+        std::string signId = g_commonDb.getConfig(PRO_DB_SIGN_ID);
+        if (signId.empty()) {
+            g_commonDb.upsertConfig(PRO_DB_SIGN_ID, "abcdefg");
+        }
+        g_signId = signId;
+
+        boost::json::object commonDataJson;
+        commonDataJson[PRO_DB_FACE_THRESHOLD] = 0.92;
+        commonDataJson[PRO_DB_VOL_NUM] = 50;
+        commonDataJson[PRO_DB_ENABLE_FACE_SPOOF] = 1;
+
+        std::string commonData = g_commonDb.getConfig(PRO_DB_COMMON_DATA);
+        if (commonData.empty()) {
+            std::string commonDataJsonJson = serialize(commonDataJson);
+            g_commonDb.upsertConfig(PRO_DB_COMMON_DATA, commonDataJsonJson);
+        }
+        g_commonData = commonData;
         logPrintln("Db finish", airstrip::INFO, __FUNCTION__);
     }
 

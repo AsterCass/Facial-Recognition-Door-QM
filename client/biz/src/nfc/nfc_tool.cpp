@@ -2,8 +2,9 @@
 
 #ifndef WIN32
 #include "nfc/serial_reader.h"
-#include <stdio.h>
-#include <string.h>
+#include <algorithm>
+#include <cstdio>
+#include <cstring>
 
 #include "enums/general_enums.h"
 

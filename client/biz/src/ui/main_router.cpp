@@ -26,26 +26,26 @@ MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
     this->setFixedSize(width, height);
 
     // Load route
-    stackedWidget = new QStackedWidget(this);
+    g_stackedWidget = new QStackedWidget(this);
     this->setObjectName("stackedWidget");
     this->setStyleSheet("#stackedWidget{background: transparent;}");
-    stackedWidget->setGeometry(QRect(0, 0, width, height));
-    connect(stackedWidget, &QStackedWidget::currentChanged, [](const int newIndex) {
-        routerQueue.push_back(newIndex);
-        if (routerQueue.size() > 10) {
-            routerQueue.pop_front();
+    g_stackedWidget->setGeometry(QRect(0, 0, width, height));
+    connect(g_stackedWidget, &QStackedWidget::currentChanged, [](const int newIndex) {
+        g_routerQueue.push_back(newIndex);
+        if (g_routerQueue.size() > 10) {
+            g_routerQueue.pop_front();
         }
         ostringstream oss;
         oss << "Current widget stack: ";
-        for (const auto index: routerQueue) {
+        for (const auto index: g_routerQueue) {
             oss << index << " ";
         }
         airstrip::logPrintln(oss.str());
     });
-    stackedWidget->insertWidget(MAIN_PAGE_HOME, MainPageHome::getInstance(stackedWidget));
-    stackedWidget->insertWidget(MAIN_PAGE_INIT, MainPageInit::getInstance(stackedWidget));
-    stackedWidget->setCurrentIndex(MAIN_PAGE_INIT);
-    stackedWidget->show();
+    g_stackedWidget->insertWidget(MAIN_PAGE_HOME, MainPageHome::getInstance(g_stackedWidget));
+    g_stackedWidget->insertWidget(MAIN_PAGE_INIT, MainPageInit::getInstance(g_stackedWidget));
+    g_stackedWidget->setCurrentIndex(MAIN_PAGE_INIT);
+    g_stackedWidget->show();
 
     // Load notification
     const auto notification = Notification::getInstance(this);
@@ -60,6 +60,6 @@ MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
 
 
 MainRouter::~MainRouter() {
-    delete stackedWidget;
-    stackedWidget = nullptr;
+    delete g_stackedWidget;
+    g_stackedWidget = nullptr;
 }

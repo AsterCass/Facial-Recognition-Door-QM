@@ -49,7 +49,7 @@ MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
             hideBtn->setStyleSheet("background-color: transparent;border: none;");
             connect(hideBtn, &QPushButton::clicked, this,
                     [=] {
-                        ++tryGoManagementCount;
+                        ++g_tryGoManagementCount;
                     });
             mainLayout->addWidget(hideBtn);
         }

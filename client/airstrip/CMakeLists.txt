@@ -1,4 +1,4 @@
-# airstrip version 1.2.1
+# airstrip version 1.2.2
 cmake_minimum_required(VERSION 3.10)
 
 project(Airstrip)

@@ -1,0 +1,9 @@
+               CREATE TABLE IF NOT EXISTS common_backend_config (
+                    config_name TEXT PRIMARY KEY,
+                    config_value_json TEXT NOT NULL,
+                    update_time DATETIME DEFAULT CURRENT_TIMESTAMP
+                )               CREATE TABLE IF NOT EXISTS common_backend_config (
+                    config_name TEXT PRIMARY KEY,
+                    config_value_json TEXT NOT NULL,
+                    update_time DATETIME DEFAULT CURRENT_TIMESTAMP
+                )
