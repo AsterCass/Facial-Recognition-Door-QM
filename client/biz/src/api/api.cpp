@@ -59,6 +59,7 @@ void playWav(PlayWavType type) {
 // http
 
 void login() {
+    token = "";
     const auto now = chrono::system_clock::now();
     const auto sec = chrono::duration_cast<chrono::seconds>(
         now.time_since_epoch()).count();
@@ -75,22 +76,29 @@ void login() {
     const string certPath = "/etc/ssl/certs/ca-certificates.crt";
 #endif
 
-    auto ret = airstrip::AirstripHttp::sendRequest(
+    const string bodyStr = serialize(loginJson);
+    logPrintln("Api login body string = " + bodyStr, airstrip::INFO, __FUNCTION__);
+    const auto ret = airstrip::AirstripHttp::sendRequest(
         g_serverAddress + "/api/v1/doorGuard/zFang/device/login",
         airstrip::RequestMethod::POST,
         {},
-        serialize(loginJson),
+        bodyStr,
         10,
         certPath
     );
     if (ret.success) {
+        logPrintln("Api login ret = " + ret.body, airstrip::INFO, __FUNCTION__);
         auto parsed = boost::json::parse(ret.body);
         if (HTTP_CODE_OK == parsed.at("code").as_int64()) {
             auto data = parsed.at("data").as_object();
             const auto deviceToken = data.at("deviceToken").as_string().c_str();
             token = deviceToken;
-            airstrip::logPrintln(token);
+            logPrintln("Api login finish", airstrip::INFO, __FUNCTION__);
+        } else {
+            logPrintln("Api login failed in server", airstrip::WARN, __FUNCTION__);
         }
+    } else {
+        logPrintln("Api login failed in local", airstrip::WARN, __FUNCTION__);
     }
 }
 

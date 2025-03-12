@@ -57,7 +57,7 @@ namespace airstrip {
         }
         const size_t pos = result.find_last_of('\n');
         if (pos == string::npos) {
-            logPrintln("Invalid response format command " + cmd, ERROR, __FUNCTION__);
+            body = result;
         } else {
             body = result.substr(0, pos);
         }

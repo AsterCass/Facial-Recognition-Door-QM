@@ -78,7 +78,7 @@ void processWithMb(bool isIr, MEDIA_BUFFER mb) {
                              ? bind(faceRecognitionPreFun, buff, otherBuff)
                              : bind(faceRecognitionPreFun, otherBuff, buff);
 
-    static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue(boundFunction);
+    static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue(boundFunction);
     RK_MPI_MB_ReleaseBuffer(mb);
 }
 
@@ -135,8 +135,8 @@ void processWithMbRga(MEDIA_BUFFER mb) {
 //             void *buffRga = malloc(sizeRga);
 //             memcpy(buffRga, dataRga, sizeRga);
 //
-//             if (mainThreadPool) {
-//                 static_cast<airstrip::ThreadPool *>(mainThreadPool)->enqueue([buffIr, buffRga] {
+//             if (g_mainThreadPool) {
+//                 static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([buffIr, buffRga] {
 //                     // Face Recognition ...
 //                     free(buffIr);
 //                     free(buffRga);
