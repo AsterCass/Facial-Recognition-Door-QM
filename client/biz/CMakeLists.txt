@@ -83,6 +83,7 @@ elseif (UNIX)
             ${RK_ROOT}/lib
             ${OPENCV_ROOT}/lib/opencv4/3rdparty
             ${SDK_PATH}/lib/linux/face
+            ${SDK_PATH}/lib/linux/nfc
     )
 else ()
     message(FATAL_ERROR "Unsupported operating system")
@@ -156,6 +157,8 @@ elseif (UNIX)
             -lRKAP_3A -lRKAP_ANR -lRKAP_Common -lv4l2 -lrga -lmd_share -lod_share -lrkaiq -lz -lv4lconvert -ljpeg
             # Face
             -lfacedetection -fopenmp
+            # Nfc
+            -lserial
     )
 else ()
     message(FATAL_ERROR "Unsupported operating system")

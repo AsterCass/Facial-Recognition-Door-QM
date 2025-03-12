@@ -1,7 +1,5 @@
 #ifndef __SERIAL_PORT_H__
 #define __SERIAL_PORT_H__
-#include <QDebug>
-#ifndef Q_OS_WIN
 
 #ifdef __cplusplus
 extern "C" {
@@ -103,8 +101,6 @@ struct serial_port
 
 #ifdef __cplusplus
 }
-#endif
-
 #endif
 
 #endif
