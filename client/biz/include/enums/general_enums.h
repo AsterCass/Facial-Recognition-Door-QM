@@ -11,4 +11,11 @@ enum MainPage {
     MAIN_PAGE_HOME,
 };
 
+enum ZFCardType
+{
+    ICCard = 50,
+    IdCard = 36,
+};
+
+
 #endif //GENERAL_ENUMS_H

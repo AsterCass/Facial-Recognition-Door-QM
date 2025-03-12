@@ -12,6 +12,7 @@
 #include "airstrip_program_options.h"
 #include "camera/camera_frame.h"
 #include "enums/general_enums.h"
+#include "nfc/nfc_tool.h"
 #include "ui/main_router.h"
 #include "ui/components/main_component_header.h"
 #include "utils/face_recognition.h"
@@ -19,6 +20,16 @@
 using namespace std;
 using namespace airstrip;
 using namespace boost::gregorian;;
+
+// Every (taskIvCnt + executionTime) sec
+void getNfcCode() {
+    const NfcCardData ret = getCardData();
+    if (ret.isExist) {
+        cout << "Nfc card detected" << ret.cardType << " " << ret.cardNo << endl;
+    } else {
+        cout << "Not found NFC card" << endl;
+    }
+}
 
 // Every (2 * taskIvCnt + executionTime) sec
 void updateUIMainComponentHeader(const std::string &appWorkDir) {
@@ -121,6 +132,8 @@ void gotoManagement() {
         updateUIMainComponentHeader(appWorkDir);
         // Try go to hided management
         gotoManagement();
+        // Try to get nfc code
+        getNfcCode();
 
         //...
 

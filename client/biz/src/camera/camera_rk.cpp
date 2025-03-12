@@ -1,4 +1,4 @@
-#ifndef WIN32x
+#ifndef WIN32
 
 #include <rkmedia_api.h>
 #include <mutex>

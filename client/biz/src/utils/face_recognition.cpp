@@ -1,5 +1,9 @@
 #include "utils/face_recognition.h"
 
+bool initialized = false;
+
+#ifndef WIN32
+
 #include "inspireface.h"
 #include "intypedef.h"
 #include <string>
@@ -14,8 +18,6 @@
 using namespace std;
 
 HFSession faceRecognitionSession = nullptr;
-
-bool initialized = false;
 
 void initFaceRecognition() {
     if (initialized) {
@@ -262,3 +264,14 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
 
     HFReleaseImageStream(stream);
 }
+
+#else
+
+void initFaceRecognition() {
+    if (initialized) {
+        return;
+    }
+    initialized = true;
+}
+
+#endif
