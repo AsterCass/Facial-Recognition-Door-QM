@@ -7,7 +7,7 @@
 bool initializedFaceRec = false;
 
 using namespace std;
-#ifndef WIN32x
+#ifndef WIN32
 
 #include "inspireface.h"
 #include "intypedef.h"
@@ -23,20 +23,14 @@ HFSession faceRecognitionSession = nullptr;
 std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
 
 std::string serializeHFFaceFeature(const HFFaceFeature &feature) {
-    // 检查有效性
     if (feature.size <= 0 || !feature.data) {
         return "";
     }
-
     std::ostringstream oss;
-    // 写入 size
     oss << feature.size;
-
-    // 写入每个浮点数值（保留小数点后6位）
     for (int i = 0; i < feature.size; i++) {
         oss << "," << feature.data[i];
     }
-
     return oss.str();
 }
 
@@ -46,26 +40,20 @@ HFFaceFeature deserializeHFFaceFeature(const std::string &str) {
     feature.data = nullptr;
 
     std::istringstream iss(str);
-    char comma; // 用于读取逗号分隔符
+    char comma;
 
-    // 解析 size
     if (!(iss >> feature.size)) {
-        // 读取失败（非数字开头）
         feature.size = 0;
         return feature;
     }
 
-    // 检查 size 有效性
     if (feature.size <= 0) {
         return feature;
     }
 
-    // 解析浮点数据
     feature.data = new float[feature.size];
     for (int i = 0; i < feature.size; i++) {
-        // 必须按格式读取逗号和数值
         if (!(iss >> comma >> feature.data[i])) {
-            // 解析失败时释放内存
             delete[] feature.data;
             feature.data = nullptr;
             feature.size = 0;
@@ -147,7 +135,7 @@ void loadFaceDb() {
         identity.feature = &feat;
 
         const auto ret = HFFeatureHubInsertFeature(identity, &faceId);
-        //freeHFFaceFeature(feat);
+        freeHFFaceFeature(feat);
         if (ret != HSUCCEED) {
             logPrintln("Face insert face error " + ret, airstrip::WARN, __FUNCTION__);
             continue;

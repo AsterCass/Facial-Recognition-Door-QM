@@ -70,7 +70,7 @@ std::vector<FaceUserInfo> getAllFace() {
             userInfo.startTime = extraJson.at("startTime").as_int64();
             userInfo.endTime = extraJson.at("endTime").as_int64();
             userInfo.isEnable = extraJson.at("isEnable").as_bool();
-            userInfo.voiceTemplate = extraJson.at("isEnable").as_string().c_str();
+            userInfo.voiceTemplate = extraJson.at("voiceTemplate").as_string().c_str();
 
             ret.emplace_back(userInfo);
         }
