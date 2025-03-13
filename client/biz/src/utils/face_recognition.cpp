@@ -7,7 +7,7 @@
 bool initializedFaceRec = false;
 
 using namespace std;
-#ifndef WIN32
+#ifndef WIN32x
 
 #include "inspireface.h"
 #include "intypedef.h"
@@ -23,65 +23,53 @@ HFSession faceRecognitionSession = nullptr;
 std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
 
 std::string serializeHFFaceFeature(const HFFaceFeature &feature) {
-    if (feature.size < 0) {
-        // 检查 size 有效性
-        return "";
-    }
-    const size_t data_bytes = feature.size * sizeof(float);
-    const size_t total_bytes = sizeof(feature.size) + data_bytes;
-    std::vector<char> buffer(total_bytes);
+    std::string result;
 
-    // 拷贝 size
-    memcpy(buffer.data(), &feature.size, sizeof(feature.size));
+    result.append(reinterpret_cast<const char *>(&feature.size), sizeof(int));
 
-    // 拷贝 data（仅当 size > 0 时）
-    if (data_bytes > 0) {
-        if (!feature.data) {
-            // data 指针无效
-            return "";
-        }
-        memcpy(buffer.data() + sizeof(feature.size), feature.data, data_bytes);
+    if (feature.size > 0 && feature.data != nullptr) {
+        result.append(reinterpret_cast<const char *>(feature.data),
+                      feature.size * sizeof(float));
     }
 
-    return std::string(buffer.data(), buffer.size());
+    return result;
 }
 
 HFFaceFeature deserializeHFFaceFeature(const std::string &str) {
     HFFaceFeature feature;
-    feature.size = 0;
-    feature.data = nullptr;
+    size_t offset = 0;
 
+    // 确保字符串至少包含size字段
     if (str.size() < sizeof(int)) {
-        // 数据不足以读取 size
+        feature.size = 0;
+        feature.data = nullptr;
         return feature;
     }
 
-    // 提取 size
-    int size;
-    memcpy(&size, str.data(), sizeof(int));
-    if (size < 0) {
-        // 无效的 size
+    // 提取size字段
+    std::memcpy(&feature.size, str.data(), sizeof(int));
+    offset += sizeof(int);
+
+    // 检查数据一致性
+    const size_t expectedDataSize = feature.size * sizeof(float);
+    if (str.size() - offset < expectedDataSize || feature.size <= 0) {
+        feature.size = 0;
+        feature.data = nullptr;
         return feature;
     }
 
-    // 验证数据长度
-    const size_t expected_bytes = sizeof(int) + size * sizeof(float);
-    if (str.size() != expected_bytes) {
-        return feature;
-    }
-
-    feature.size = size;
-    if (size > 0) {
-        feature.data = new float[size];
-        memcpy(feature.data, str.data() + sizeof(int), size * sizeof(float));
-    }
+    // 分配内存并复制数据
+    feature.data = new float[feature.size];
+    std::memcpy(feature.data, str.data() + offset, expectedDataSize);
 
     return feature;
 }
 
 void freeHFFaceFeature(HFFaceFeature &feature) {
-    delete[] feature.data;
-    feature.data = nullptr;
+    if (feature.data != nullptr) {
+        delete[] feature.data;
+        feature.data = nullptr;
+    }
     feature.size = 0;
 }
 
@@ -150,7 +138,7 @@ void loadFaceDb() {
         identity.feature = &feat;
 
         const auto ret = HFFeatureHubInsertFeature(identity, &faceId);
-        freeHFFaceFeature(feat);
+        //freeHFFaceFeature(feat);
         if (ret != HSUCCEED) {
             logPrintln("Face insert face error " + ret, airstrip::WARN, __FUNCTION__);
             continue;
@@ -161,6 +149,8 @@ void loadFaceDb() {
 
         logPrintln("Face loaded userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
     }
+
+    logPrintln("Start loaded face db", airstrip::INFO, __FUNCTION__);
 }
 
 
@@ -353,7 +343,8 @@ bool faceUpdate(const cv::Mat &pic, const FaceUserInfo &userInfo) {
     faceDbExtraJson["endTime"] = userInfo.endTime;
     faceDbExtraJson["isEnable"] = userInfo.isEnable;
     faceDbExtraJson["voiceTemplate"] = userInfo.voiceTemplate;
-    const auto dbRet = updateFaceDB(userInfo.userId, serialize(faceDbExtraJson), "");
+    const auto featureStr = serializeHFFaceFeature(feature);
+    const auto dbRet = updateFaceDB(userInfo.userId, serialize(faceDbExtraJson), featureStr);
     if (!dbRet) {
         HFReleaseImageStream(stream);
         return false;
