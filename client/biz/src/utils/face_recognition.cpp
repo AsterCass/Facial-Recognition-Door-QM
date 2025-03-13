@@ -23,53 +23,62 @@ HFSession faceRecognitionSession = nullptr;
 std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
 
 std::string serializeHFFaceFeature(const HFFaceFeature &feature) {
-    std::string result;
-
-    result.append(reinterpret_cast<const char *>(&feature.size), sizeof(int));
-
-    if (feature.size > 0 && feature.data != nullptr) {
-        result.append(reinterpret_cast<const char *>(feature.data),
-                      feature.size * sizeof(float));
+    // 检查有效性
+    if (feature.size <= 0 || !feature.data) {
+        return "";
     }
 
-    return result;
+    std::ostringstream oss;
+    // 写入 size
+    oss << feature.size;
+
+    // 写入每个浮点数值（保留小数点后6位）
+    for (int i = 0; i < feature.size; i++) {
+        oss << "," << feature.data[i];
+    }
+
+    return oss.str();
 }
 
 HFFaceFeature deserializeHFFaceFeature(const std::string &str) {
     HFFaceFeature feature;
-    size_t offset = 0;
+    feature.size = 0;
+    feature.data = nullptr;
 
-    // 确保字符串至少包含size字段
-    if (str.size() < sizeof(int)) {
+    std::istringstream iss(str);
+    char comma; // 用于读取逗号分隔符
+
+    // 解析 size
+    if (!(iss >> feature.size)) {
+        // 读取失败（非数字开头）
         feature.size = 0;
-        feature.data = nullptr;
         return feature;
     }
 
-    // 提取size字段
-    std::memcpy(&feature.size, str.data(), sizeof(int));
-    offset += sizeof(int);
-
-    // 检查数据一致性
-    const size_t expectedDataSize = feature.size * sizeof(float);
-    if (str.size() - offset < expectedDataSize || feature.size <= 0) {
-        feature.size = 0;
-        feature.data = nullptr;
+    // 检查 size 有效性
+    if (feature.size <= 0) {
         return feature;
     }
 
-    // 分配内存并复制数据
+    // 解析浮点数据
     feature.data = new float[feature.size];
-    std::memcpy(feature.data, str.data() + offset, expectedDataSize);
+    for (int i = 0; i < feature.size; i++) {
+        // 必须按格式读取逗号和数值
+        if (!(iss >> comma >> feature.data[i])) {
+            // 解析失败时释放内存
+            delete[] feature.data;
+            feature.data = nullptr;
+            feature.size = 0;
+            return feature;
+        }
+    }
 
     return feature;
 }
 
 void freeHFFaceFeature(HFFaceFeature &feature) {
-    if (feature.data != nullptr) {
-        delete[] feature.data;
-        feature.data = nullptr;
-    }
+    delete[] feature.data;
+    feature.data = nullptr;
     feature.size = 0;
 }
 
@@ -223,6 +232,7 @@ bool faceInsert(const cv::Mat &pic, const FaceUserInfo &userInfo) {
     faceDbExtraJson["isEnable"] = userInfo.isEnable;
     faceDbExtraJson["voiceTemplate"] = userInfo.voiceTemplate;
     const auto featureStr = serializeHFFaceFeature(feature);
+    logPrintln("Insert db user feature = " + featureStr, airstrip::DEBUG, __FUNCTION__);
     const auto dbRet = insertFaceDB(userInfo.userId, serialize(faceDbExtraJson), featureStr, &faceId);
     if (!dbRet) {
         HFReleaseImageStream(stream);
@@ -344,6 +354,7 @@ bool faceUpdate(const cv::Mat &pic, const FaceUserInfo &userInfo) {
     faceDbExtraJson["isEnable"] = userInfo.isEnable;
     faceDbExtraJson["voiceTemplate"] = userInfo.voiceTemplate;
     const auto featureStr = serializeHFFaceFeature(feature);
+    logPrintln("Update db user feature = " + featureStr, airstrip::DEBUG, __FUNCTION__);
     const auto dbRet = updateFaceDB(userInfo.userId, serialize(faceDbExtraJson), featureStr);
     if (!dbRet) {
         HFReleaseImageStream(stream);
