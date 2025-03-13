@@ -27,5 +27,17 @@ void login();
 
 void checkTask();
 
+void faceGrant();
+
+void appUpdate();
+
+void uploadOpenRecord();
+
+void taskFinish();
+
+void dataBackupUp();
+
+void dataBackupDown();
+
 
 #endif // API_H

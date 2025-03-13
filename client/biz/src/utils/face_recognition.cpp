@@ -1,7 +1,12 @@
 #include "utils/face_recognition.h"
+#include "db/face_db.h"
+#include "airstrip_log.h"
+#include "airstrip_program_options.h"
+#include "config/config.h"
 
-bool initialized = false;
+bool initializedFaceRec = false;
 
+using namespace std;
 #ifndef WIN32
 
 #include "inspireface.h"
@@ -9,18 +14,15 @@ bool initialized = false;
 #include <string>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/core/types.hpp>
-
-#include "airstrip_log.h"
-#include "airstrip_program_options.h"
 #include "facedetectcnn.h"
-#include "config/config.h"
 
-using namespace std;
 
 HFSession faceRecognitionSession = nullptr;
 
+std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
+
 void initFaceRecognition() {
-    if (initialized) {
+    if (initializedFaceRec) {
         return;
     }
 
@@ -50,12 +52,10 @@ void initFaceRecognition() {
     HFSessionSetTrackPreviewSize(faceRecognitionSession, detectPixelLevel);
     HFSessionSetFilterMinimumFacePixelSize(faceRecognitionSession, 30);
 
-    string featureDb = appWorkDir + "face-feature/feature.db";
-
     HFFeatureHubConfiguration configuration;
-    configuration.primaryKeyMode = HF_PK_AUTO_INCREMENT;
-    configuration.enablePersistence = 1;
-    configuration.persistenceDbPath = &featureDb[0];
+    configuration.primaryKeyMode = HF_PK_MANUAL_INPUT;
+    configuration.enablePersistence = 0;
+    configuration.persistenceDbPath = nullptr;
     configuration.searchMode = HF_SEARCH_MODE_EAGER;
     configuration.searchThreshold = 0.48f;
     ret = HFFeatureHubDataEnable(configuration);
@@ -65,28 +65,28 @@ void initFaceRecognition() {
     }
 
     logPrintln("Face model init finish", airstrip::INFO, __FUNCTION__);
-    initialized = true;
+    initializedFaceRec = true;
 }
 
 
-void faceInsert(const std::string &address, const std::string &userId) {
-    if (!initialized) {
-        return;
+bool faceInsert(const std::string &address, const FaceUserInfo &userInfo) {
+    if (!initializedFaceRec) {
+        return false;
     }
     const auto image = cv::imread(address);
     if (image.empty()) {
         logPrintln("Read pic error " + address, airstrip::WARN, __FUNCTION__);
-        return;
+        return false;
     }
-    faceInsert(image, userId);
+    return faceInsert(image, userInfo);
 }
 
-void faceInsert(const cv::Mat &pic, const std::string &userId) {
-    if (!initialized) {
-        return;
+bool faceInsert(const cv::Mat &pic, const FaceUserInfo &userInfo) {
+    if (!initializedFaceRec) {
+        return false;
     }
 
-    logPrintln("Face insert userId = " + userId, airstrip::INFO, __FUNCTION__);
+    logPrintln("Face insert userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
 
     HFImageStream stream = nullptr;
     HFImageData imageData = {};
@@ -107,7 +107,7 @@ void faceInsert(const cv::Mat &pic, const std::string &userId) {
         logPrintln("Face insert track image fail " + ret,
                    airstrip::WARN, __FUNCTION__);
         HFReleaseImageStream(stream);
-        return;
+        return false;
     }
 
     const auto faceNum = multipleFaceData.detectedNum;
@@ -115,7 +115,7 @@ void faceInsert(const cv::Mat &pic, const std::string &userId) {
         // todo error throw
         logPrintln("Face insert face not found ", airstrip::WARN, __FUNCTION__);
         HFReleaseImageStream(stream);
-        return;
+        return false;
     }
 
     HFFaceFeature feature = {};
@@ -125,30 +125,142 @@ void faceInsert(const cv::Mat &pic, const std::string &userId) {
         logPrintln("Face insert feature extract fail " + ret,
                    airstrip::WARN, __FUNCTION__);
         HFReleaseImageStream(stream);
-        return;
+        return false;
     }
 
-    int64_t resultId = 0;
+    // ===================== check finish, start insert =====================
+
+
+    int64_t faceId = 0;
+    insertFaceDB(userInfo.userId, "", "", &faceId);
+
+    logPrintln("Insert db userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
+    logPrintln("Insert db faceId = " + to_string(faceId), airstrip::INFO, __FUNCTION__);
+
     HFFaceFeatureIdentity identity = {};
+    identity.id = faceId;
     identity.feature = &feature;
-    ret = HFFeatureHubInsertFeature(identity, &resultId);
+    ret = HFFeatureHubInsertFeature(identity, &faceId);
     if (ret != HSUCCEED) {
         logPrintln("Face insert face error " + ret, airstrip::WARN, __FUNCTION__);
         HFReleaseImageStream(stream);
-        return;
+        return false;
     }
 
-    logPrintln("Face insert finish for userId = " + userId, airstrip::INFO, __FUNCTION__);
+    faceUserInfoMap[faceId] = userInfo;
+
+    logPrintln("Insert finish userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
+    logPrintln("Insert finish faceId = " + to_string(faceId), airstrip::INFO, __FUNCTION__);
 
     // todo callback
 
     HFReleaseImageStream(stream);
+
+    return true;
+}
+
+bool faceDelete(const FaceUserInfo &userInfo) {
+    if (!initializedFaceRec) {
+        return false;
+    }
+
+    // ===================== check finish, start insert =====================
+
+    logPrintln("Delete db userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
+
+    deleteFaceDB(userInfo.userId);
+
+    vector<int64_t> removeFaceIds = {};
+    for (auto &faceUserInfo: faceUserInfoMap) {
+        if (faceUserInfo.second.userId == userInfo.userId) {
+            HFFeatureHubFaceRemove(userInfo.faceId);
+            removeFaceIds.push_back(faceUserInfo.second.faceId);
+        }
+    }
+
+    for (auto &faceId: removeFaceIds) {
+        faceUserInfoMap.erase(faceId);
+    }
+
+    logPrintln("Delete finish userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
+
+    return true;
+}
+
+
+bool faceUpdate(const cv::Mat &pic, const FaceUserInfo &userInfo) {
+    if (!initializedFaceRec) {
+        return false;
+    }
+
+    logPrintln("Face update userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
+
+    HFImageStream stream = nullptr;
+    HFImageData imageData = {};
+    imageData.data = pic.data;
+    imageData.format = HF_STREAM_BGR;
+    imageData.height = pic.rows;
+    imageData.width = pic.cols;
+    imageData.rotation = HF_CAMERA_ROTATION_0;
+    HResult ret = HFCreateImageStream(&imageData, &stream);
+    if (ret != HSUCCEED) {
+        logPrintln("Face update build image fail " + ret,
+                   airstrip::WARN, __FUNCTION__);
+    }
+
+    HFMultipleFaceData multipleFaceData = {};
+    ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
+    if (ret != HSUCCEED) {
+        logPrintln("Face update track image fail " + ret,
+                   airstrip::WARN, __FUNCTION__);
+        HFReleaseImageStream(stream);
+        return false;
+    }
+
+    const auto faceNum = multipleFaceData.detectedNum;
+    if (faceNum <= 0) {
+        // todo error throw
+        logPrintln("Face update face not found ", airstrip::WARN, __FUNCTION__);
+        HFReleaseImageStream(stream);
+        return false;
+    }
+
+    HFFaceFeature feature = {};
+    ret = HFFaceFeatureExtract(faceRecognitionSession, stream,
+                               multipleFaceData.tokens[0], &feature);
+    if (ret != HSUCCEED) {
+        logPrintln("Face update feature extract fail " + ret,
+                   airstrip::WARN, __FUNCTION__);
+        HFReleaseImageStream(stream);
+        return false;
+    }
+
+    // ===================== check finish, start insert =====================
+
+    logPrintln("Update db userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
+
+    updateFaceDB(userInfo.userId, "", "");
+
+    vector<int64_t> updateFaceIds = {};
+    for (auto &faceUserInfo: faceUserInfoMap) {
+        if (faceUserInfo.second.userId == userInfo.userId) {
+            HFFaceFeatureIdentity identity = {};
+            identity.id = faceUserInfo.second.faceId;
+            identity.feature = &feature;
+            HFFeatureHubFaceUpdate(identity);
+            faceUserInfo.second = userInfo;
+        }
+    }
+
+    logPrintln("Update finish userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
+
+    return true;
 }
 
 
 bool faceDetect(const cv::Mat &frame, cv::Rect &rect, int orgCols, int orgRows) {
     bool ret = false;
-    if (!initialized) {
+    if (!initializedFaceRec) {
         return ret;
     }
 
@@ -196,7 +308,7 @@ bool faceDetect(const cv::Mat &frame, cv::Rect &rect, int orgCols, int orgRows) 
 }
 
 void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
-    if (!initialized) {
+    if (!initializedFaceRec) {
         return;
     }
 
@@ -268,10 +380,51 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
 #else
 
 void initFaceRecognition() {
-    if (initialized) {
+    if (initializedFaceRec) {
         return;
     }
-    initialized = true;
+    initializedFaceRec = true;
 }
+
+
+bool faceInsert(const cv::Mat &pic, const FaceUserInfo &userInfo) {
+    if (!initializedFaceRec) {
+        return false;
+    }
+
+    // ===================== check finish, start insert =====================
+
+    int64_t faceId = 0;
+    insertFaceDB(userInfo.userId, "", "", &faceId);
+
+    logPrintln("Insert db userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
+    logPrintln("Insert db faceId = " + to_string(faceId), airstrip::INFO, __FUNCTION__);
+
+    return true;
+}
+
+bool faceDelete(const FaceUserInfo &userInfo) {
+    if (!initializedFaceRec) {
+        return false;
+    }
+
+    deleteFaceDB(userInfo.userId);
+
+    logPrintln("Delete db userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
+    return true;
+}
+
+bool faceUpdate(const cv::Mat &pic, const FaceUserInfo &userInfo) {
+    if (!initializedFaceRec) {
+        return false;
+    }
+
+
+    updateFaceDB(userInfo.userId, "", "");
+
+    logPrintln("Update db userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
+    return true;
+}
+
 
 #endif

@@ -12,6 +12,7 @@
 #include "airstrip_program_options.h"
 #include "api/api.h"
 #include "camera/camera_frame.h"
+#include "db/face_db.h"
 #include "enums/general_enums.h"
 #include "nfc/nfc_tool.h"
 #include "ui/main_router.h"
@@ -22,7 +23,7 @@ using namespace std;
 using namespace airstrip;
 using namespace boost::gregorian;;
 
-// Every (10 * taskIvCnt + executionTime) sec
+// Every (10 * (taskIvCnt + executionTime)) sec
 void updateUIMainComponentHeader(const std::string &appWorkDir) {
     static int count = 10;
     if (count++ < 10) return;
@@ -88,7 +89,16 @@ void updateUIMainComponentHeader(const std::string &appWorkDir) {
     }
 }
 
-// Every (5 * taskIvCnt + executionTime) sec
+// Every (5 * (taskIvCnt + executionTime)) sec
+void checkTaskAndExecute() {
+    // todo 这里考虑扔到子线程里面去执行，否则会非常大延长executionTime的时间
+    static int count = 1;
+    if (count++ < 5) return;
+    count = 1;
+    checkTask();
+}
+
+// Every (5 * (taskIvCnt + executionTime)) sec
 void gotoManagement() {
     static int count = 5;
     if (count++ < 5) return;
@@ -112,12 +122,10 @@ void getNfcCode() {
 }
 
 
-void onceTask() {
+void onceTaskBefore() {
     static int count = 1;
     if (count > 1) return;
     ++count;
-
-    login();
 
     // Init Camera
     CameraFrame::getInstance()->start();
@@ -125,27 +133,44 @@ void onceTask() {
     // Init Face
     initFaceRecognition();
 
+    // Login
+    login();
+
+    // Init Db
+    initFaceDB();
+}
+
+
+void onceTaskAfter() {
+    static int count = 1;
+    if (count > 1) return;
+    ++count;
+
     // To home
     g_stackedWidget->setCurrentIndex(MAIN_PAGE_HOME);
 }
-
 
 [[noreturn]] void taskExecutor(const chrono::milliseconds interval) {
     std::string appWorkDir;
     getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
 
     while (true) {
+        // Once Task
+        onceTaskBefore();
         // Task updateUIMainComponentHeader
         updateUIMainComponentHeader(appWorkDir);
         // Try go to hided management
         gotoManagement();
         // Try to get nfc code
         getNfcCode();
+        // Try to get task list
+        checkTaskAndExecute();
 
         //...
 
         // Once Task
-        onceTask();
+        onceTaskAfter();
+
         // Interval
         this_thread::sleep_for(interval);
     }

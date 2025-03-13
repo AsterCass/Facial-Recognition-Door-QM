@@ -1,6 +1,19 @@
 #ifndef GENERAL_ENUMS_H
 #define GENERAL_ENUMS_H
 
+enum ZFTaskOperationType {
+    Card = 0x1001,
+    Face = 0x1002,
+    Disable = 0x1006,
+    Voice = 0x1014,
+    Open = 0x3005,
+};
+
+enum ZFTaskOperationAction {
+    Add = 1,
+    Remove = 2,
+    Modify = 3,
+};
 
 enum PlayWavType {
     Di = 0,

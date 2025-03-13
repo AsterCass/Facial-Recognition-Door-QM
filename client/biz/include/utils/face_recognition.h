@@ -3,11 +3,26 @@
 
 #include <opencv2/core.hpp>
 
+struct FaceUserInfo {
+    int64_t faceId;
+    std::string faceAddress;
+    std::string faceFeat;
+    std::string userId;
+    int64_t startTime;
+    int64_t endTime;
+    bool isEnable;
+    std::string voiceTemplate;
+};
+
 void initFaceRecognition();
 
-void faceInsert(const std::string &address, const std::string& userId);
+bool faceInsert(const std::string &address, const FaceUserInfo &userInfo);
 
-void faceInsert(const cv::Mat &pic, const std::string& userId);
+bool faceInsert(const cv::Mat &pic, const FaceUserInfo &userInfo);
+
+bool faceDelete(const FaceUserInfo &userInfo);
+
+bool faceUpdate(const cv::Mat &pic, const FaceUserInfo &userInfo);
 
 bool faceDetect(const cv::Mat &frame, cv::Rect &rect, int orgCols, int orgRows);
 

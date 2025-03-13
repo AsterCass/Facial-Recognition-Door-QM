@@ -2,10 +2,14 @@
 #define GENERAL_UTILS_H
 
 #include <string>
-#include "enums/general_enums.h"
+#include <vector>
+#include <opencv2/opencv.hpp>
 
 
 namespace generalUtils {
+    std::vector<uchar> decodeBase64(const std::string &base64String);
+
+    cv::Mat base64ToMat(const std::string &base64String);
 }
 
 

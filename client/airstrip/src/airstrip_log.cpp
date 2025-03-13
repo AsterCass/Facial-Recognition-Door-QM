@@ -49,16 +49,18 @@ namespace airstrip {
     }
 
     void logPrintln(const string &message, LogLevel level, const string &functionName) {
-        // Time formate
-        const auto now = chrono::system_clock::now();
-        const auto time = chrono::system_clock::to_time_t(now);
-        const auto msec = chrono::duration_cast<chrono::milliseconds>(
-                              now.time_since_epoch()).count() % 1000;
-        ostringstream oss;
         string outputStr;
-        oss << put_time(localtime(&time), "%Y-%m-%d %H:%M:%S") << "." << msec;
+        ostringstream oss;
 
         if (static_cast<int>(level) >= logPrintLevel) {
+            // Time formate
+            const auto now = chrono::system_clock::now();
+            const auto time = chrono::system_clock::to_time_t(now);
+            const auto msec = chrono::duration_cast<chrono::milliseconds>(
+                                  now.time_since_epoch()).count() % 1000;
+
+            oss << put_time(localtime(&time), "%Y-%m-%d %H:%M:%S") << "." << msec;
+
             switch (level) {
                 case TRACE:
                     outputStr.append("[TRACE][").append(oss.str())
