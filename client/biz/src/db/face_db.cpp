@@ -4,6 +4,7 @@
 
 #include "airstrip_log.h"
 #include "airstrip_program_options.h"
+#include <boost/json.hpp>
 #include "config/config.h"
 
 bool initializedFaceDb = false;
@@ -42,6 +43,43 @@ void initFaceDB() {
         exit(-1);
     }
     initializedFaceDb = true;
+}
+
+std::vector<FaceUserInfo> getAllFace() {
+    if (!initializedFaceDb || nullptr == _dbFace) {
+        return {};
+    }
+    std::vector<FaceUserInfo> ret = {};
+    try {
+        SQLite::Statement query(
+            *_dbFace, "SELECT * FROM face");
+
+
+        while (query.executeStep()) {
+            FaceUserInfo userInfo = {};
+            const int64_t faceId = query.getColumn(0);
+            const std::string userId = query.getColumn(1);
+            const std::string extra = query.getColumn(2);
+            const std::string feature = query.getColumn(3);
+
+
+            auto extraJson = boost::json::parse(extra);
+            userInfo.faceId = faceId;
+            userInfo.faceFeat = feature;
+            userInfo.userId = userId;
+            userInfo.startTime = extraJson.at("startTime").as_int64();
+            userInfo.endTime = extraJson.at("endTime").as_int64();
+            userInfo.isEnable = extraJson.at("isEnable").as_bool();
+            userInfo.voiceTemplate = extraJson.at("isEnable").as_string().c_str();
+
+            ret.emplace_back(userInfo);
+        }
+    } catch (const SQLite::Exception &e) {
+        logPrintln("Face db insert failed: " + string(e.what()),
+                   airstrip::ERROR, __FUNCTION__);
+        return ret;
+    }
+    return ret;
 }
 
 bool insertFaceDB(const std::string &userId, const std::string &extra, const std::string &feature, int64_t *faceId) {

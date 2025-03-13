@@ -138,6 +138,9 @@ void onceTaskBefore() {
 
     // Init Db
     initFaceDB();
+
+    // Load all face
+    loadFaceDb();
 }
 
 

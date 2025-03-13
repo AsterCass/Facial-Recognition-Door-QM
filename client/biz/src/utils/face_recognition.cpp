@@ -15,11 +15,75 @@ using namespace std;
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/core/types.hpp>
 #include "facedetectcnn.h"
+#include <boost/json.hpp>
 
 
 HFSession faceRecognitionSession = nullptr;
 
 std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
+
+std::string serializeHFFaceFeature(const HFFaceFeature &feature) {
+    if (feature.size < 0) {
+        // 检查 size 有效性
+        return "";
+    }
+    const size_t data_bytes = feature.size * sizeof(float);
+    const size_t total_bytes = sizeof(feature.size) + data_bytes;
+    std::vector<char> buffer(total_bytes);
+
+    // 拷贝 size
+    memcpy(buffer.data(), &feature.size, sizeof(feature.size));
+
+    // 拷贝 data（仅当 size > 0 时）
+    if (data_bytes > 0) {
+        if (!feature.data) {
+            // data 指针无效
+            return "";
+        }
+        memcpy(buffer.data() + sizeof(feature.size), feature.data, data_bytes);
+    }
+
+    return std::string(buffer.data(), buffer.size());
+}
+
+HFFaceFeature deserializeHFFaceFeature(const std::string &str) {
+    HFFaceFeature feature;
+    feature.size = 0;
+    feature.data = nullptr;
+
+    if (str.size() < sizeof(int)) {
+        // 数据不足以读取 size
+        return feature;
+    }
+
+    // 提取 size
+    int size;
+    memcpy(&size, str.data(), sizeof(int));
+    if (size < 0) {
+        // 无效的 size
+        return feature;
+    }
+
+    // 验证数据长度
+    const size_t expected_bytes = sizeof(int) + size * sizeof(float);
+    if (str.size() != expected_bytes) {
+        return feature;
+    }
+
+    feature.size = size;
+    if (size > 0) {
+        feature.data = new float[size];
+        memcpy(feature.data, str.data() + sizeof(int), size * sizeof(float));
+    }
+
+    return feature;
+}
+
+void freeHFFaceFeature(HFFaceFeature &feature) {
+    delete[] feature.data;
+    feature.data = nullptr;
+    feature.size = 0;
+}
 
 void initFaceRecognition() {
     if (initializedFaceRec) {
@@ -66,6 +130,37 @@ void initFaceRecognition() {
 
     logPrintln("Face model init finish", airstrip::INFO, __FUNCTION__);
     initializedFaceRec = true;
+}
+
+void loadFaceDb() {
+    if (!initializedFaceRec) {
+        return;
+    }
+    logPrintln("Start load face db", airstrip::INFO, __FUNCTION__);
+
+    auto dbData = getAllFace();
+
+    for (auto &userInfo: dbData) {
+        logPrintln("Face load userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
+
+        HFFaceFeatureIdentity identity = {};
+        auto faceId = userInfo.faceId;
+        identity.id = faceId;
+        auto feat = deserializeHFFaceFeature(userInfo.faceFeat);
+        identity.feature = &feat;
+
+        const auto ret = HFFeatureHubInsertFeature(identity, &faceId);
+        freeHFFaceFeature(feat);
+        if (ret != HSUCCEED) {
+            logPrintln("Face insert face error " + ret, airstrip::WARN, __FUNCTION__);
+            continue;
+        }
+
+        userInfo.faceFeat = "";
+        faceUserInfoMap[faceId] = userInfo;
+
+        logPrintln("Face loaded userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
+    }
 }
 
 
@@ -130,9 +225,19 @@ bool faceInsert(const cv::Mat &pic, const FaceUserInfo &userInfo) {
 
     // ===================== check finish, start insert =====================
 
-
     int64_t faceId = 0;
-    insertFaceDB(userInfo.userId, "", "", &faceId);
+    boost::json::object faceDbExtraJson;
+    faceDbExtraJson["userId"] = userInfo.userId;
+    faceDbExtraJson["startTime"] = userInfo.startTime;
+    faceDbExtraJson["endTime"] = userInfo.endTime;
+    faceDbExtraJson["isEnable"] = userInfo.isEnable;
+    faceDbExtraJson["voiceTemplate"] = userInfo.voiceTemplate;
+    const auto featureStr = serializeHFFaceFeature(feature);
+    const auto dbRet = insertFaceDB(userInfo.userId, serialize(faceDbExtraJson), featureStr, &faceId);
+    if (!dbRet) {
+        HFReleaseImageStream(stream);
+        return false;
+    }
 
     logPrintln("Insert db userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
     logPrintln("Insert db faceId = " + to_string(faceId), airstrip::INFO, __FUNCTION__);
@@ -168,13 +273,16 @@ bool faceDelete(const FaceUserInfo &userInfo) {
 
     logPrintln("Delete db userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
 
-    deleteFaceDB(userInfo.userId);
+    const auto dbRet = deleteFaceDB(userInfo.userId);
+    if (!dbRet) {
+        return false;
+    }
 
     vector<int64_t> removeFaceIds = {};
     for (auto &faceUserInfo: faceUserInfoMap) {
         if (faceUserInfo.second.userId == userInfo.userId) {
-            HFFeatureHubFaceRemove(userInfo.faceId);
-            removeFaceIds.push_back(faceUserInfo.second.faceId);
+            HFFeatureHubFaceRemove(faceUserInfo.first);
+            removeFaceIds.push_back(faceUserInfo.first);
         }
     }
 
@@ -239,13 +347,23 @@ bool faceUpdate(const cv::Mat &pic, const FaceUserInfo &userInfo) {
 
     logPrintln("Update db userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
 
-    updateFaceDB(userInfo.userId, "", "");
+    boost::json::object faceDbExtraJson;
+    faceDbExtraJson["userId"] = userInfo.userId;
+    faceDbExtraJson["startTime"] = userInfo.startTime;
+    faceDbExtraJson["endTime"] = userInfo.endTime;
+    faceDbExtraJson["isEnable"] = userInfo.isEnable;
+    faceDbExtraJson["voiceTemplate"] = userInfo.voiceTemplate;
+    const auto dbRet = updateFaceDB(userInfo.userId, serialize(faceDbExtraJson), "");
+    if (!dbRet) {
+        HFReleaseImageStream(stream);
+        return false;
+    }
 
     vector<int64_t> updateFaceIds = {};
     for (auto &faceUserInfo: faceUserInfoMap) {
         if (faceUserInfo.second.userId == userInfo.userId) {
             HFFaceFeatureIdentity identity = {};
-            identity.id = faceUserInfo.second.faceId;
+            identity.id = faceUserInfo.first;
             identity.feature = &feature;
             HFFeatureHubFaceUpdate(identity);
             faceUserInfo.second = userInfo;

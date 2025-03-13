@@ -3,6 +3,7 @@
 
 #include <opencv2/core.hpp>
 
+
 struct FaceUserInfo {
     int64_t faceId;
     std::string faceAddress;
@@ -15,6 +16,8 @@ struct FaceUserInfo {
 };
 
 void initFaceRecognition();
+
+void loadFaceDb();
 
 bool faceInsert(const std::string &address, const FaceUserInfo &userInfo);
 
