@@ -154,19 +154,20 @@ void checkTask() {
                 const auto dataType = taskJson.at("dataType").as_int64();
                 switch (dataType) {
                     case Face: {
-                        auto taskData = taskJson.at("taskData").as_object();
-                        auto action = taskData.at("action").as_int64();
-                        auto taskId = taskData.at("taskId").as_string().c_str();
-                        auto userId = taskData.at("userId").as_string().c_str();
-                        auto startTime = taskData.at("startTime").as_int64();
-                        auto endTime = taskData.at("endTime").as_int64();
-
-                        ostringstream oss;
-                        oss << "Api face get taskId: " << taskId << " userId: " << userId << " action: " << action
-                                << " startTime: " << startTime << " endTime: " << endTime;
-                        cout << oss.str() << endl;
-                        logPrintln(oss.str(), airstrip::INFO, __FUNCTION__);
                         try {
+                            auto taskData = taskJson.at("taskData").as_object();
+                            auto action = taskData.at("action").as_int64();
+                            auto taskId = taskData.at("taskId").as_string().c_str();
+                            auto userId = taskData.at("userId").as_string().c_str();
+                            auto startTime = taskData.at("startTime").as_int64();
+                            auto endTime = taskData.at("endTime").as_int64();
+
+                            ostringstream oss;
+                            oss << "Api face get taskId: " << taskId << " userId: " << userId << " action: " << action
+                                    << " startTime: " << startTime << " endTime: " << endTime;
+                            cout << oss.str() << endl;
+                            logPrintln(oss.str(), airstrip::INFO, __FUNCTION__);
+
                             if (Add == action) {
                                 auto picBase64String = taskData.at("facePhoto").as_string().c_str();
                                 auto pic = generalUtils::base64ToMat(picBase64String);
@@ -197,21 +198,22 @@ void checkTask() {
                         break;
                     }
                     case Card: {
-                        auto taskData = taskJson.at("taskData").as_object();
-                        auto action = taskData.at("action").as_int64();
-                        auto taskId = taskData.at("taskId").as_string().c_str();
-                        auto userId = taskData.at("userId").as_string().c_str();
-                        auto startTime = taskData.at("startTime").as_int64();
-                        auto endTime = taskData.at("endTime").as_int64();
-                        auto cardType = taskData.at("cardType").as_int64();
-                        auto cardNo = taskData.at("cardNo").as_string().c_str();
-
-                        ostringstream oss;
-                        oss << "Api card get taskId: " << taskId << " userId: " << userId << " action: " << action
-                                << " startTime: " << startTime << " endTime: " << endTime << " cardNo: " << cardNo;
-                        cout << oss.str() << endl;
-                        logPrintln(oss.str(), airstrip::INFO, __FUNCTION__);
                         try {
+                            auto taskData = taskJson.at("taskData").as_object();
+                            auto action = taskData.at("action").as_int64();
+                            auto taskId = taskData.at("taskId").as_string().c_str();
+                            auto userId = taskData.at("userId").as_string().c_str();
+                            auto startTime = taskData.at("startTime").as_int64();
+                            auto endTime = taskData.at("endTime").as_int64();
+                            auto cardType = taskData.at("cardType").as_int64();
+                            auto cardNo = taskData.at("cardNo").as_string().c_str();
+
+                            ostringstream oss;
+                            oss << "Api card get taskId: " << taskId << " userId: " << userId << " action: " << action
+                                    << " startTime: " << startTime << " endTime: " << endTime << " cardNo: " << cardNo;
+                            cout << oss.str() << endl;
+                            logPrintln(oss.str(), airstrip::INFO, __FUNCTION__);
+
                             if (Add == action) {
                                 CardUserInfo info = {};
                                 info.userId = userId;
@@ -242,47 +244,60 @@ void checkTask() {
                         break;
                     }
                     case Disable: {
-                        auto taskData = taskJson.at("taskData").as_object();
-                        auto action = taskData.at("action").as_int64();
-                        auto taskId = taskData.at("taskId").as_string().c_str();
-                        auto userId = taskData.at("userId").as_string().c_str();
-                        auto keyType = taskData.at("keyType").as_int64();
-                        auto keyId = taskData.at("keyId").as_string().c_str();
+                        try {
+                            auto taskData = taskJson.at("taskData").as_object();
+                            auto action = taskData.at("action").as_int64();
+                            auto taskId = taskData.at("taskId").as_string().c_str();
+                            auto userId = taskData.at("userId").as_string().c_str();
+                            auto keyType = taskData.at("keyType").as_int64();
+                            auto keyId = taskData.at("keyId").as_string().c_str();
 
-                        ostringstream oss;
-                        oss << "Api disable get taskId: " << taskId << " userId: " << userId << " action: " << action
-                                << " keyType: " << keyType << " keyId: " << keyId;
-                        cout << oss.str() << endl;
-                        logPrintln(oss.str(), airstrip::INFO, __FUNCTION__);
+                            ostringstream oss;
+                            oss << "Api disable get taskId: " << taskId << " userId: " << userId << " action: " <<
+                                    action
+                                    << " keyType: " << keyType << " keyId: " << keyId;
+                            cout << oss.str() << endl;
+                            logPrintln(oss.str(), airstrip::INFO, __FUNCTION__);
 
-                        if (keyType == 0) {
-                            isSuccess = cardDisable(userId, keyId, action ? 0 : 1);
-                            isSuccess &= faceDisable(userId, action ? 0 : 1);
-                        } else if (keyType == 1) {
-                            isSuccess = faceDisable(userId, action ? 0 : 1);
-                        } else if (keyType == 3) {
-                            isSuccess = cardDisable(userId, keyId, action ? 0 : 1);
-                        } else {
-                            isSuccess = false;
+                            if (keyType == 0) {
+                                isSuccess = cardDisable(userId, keyId, action ? 0 : 1);
+                                isSuccess &= faceDisable(userId, action ? 0 : 1);
+                            } else if (keyType == 1) {
+                                isSuccess = faceDisable(userId, action ? 0 : 1);
+                            } else if (keyType == 3) {
+                                isSuccess = cardDisable(userId, keyId, action ? 0 : 1);
+                            } else {
+                                isSuccess = false;
+                            }
+                        } catch (const exception &e) {
+                            ostringstream errMsg;
+                            errMsg << e.what();
+                            logPrintln("Task execute error " + errMsg.str()
+                                       , airstrip::ERROR, __FUNCTION__);
                         }
 
                         break;
                     }
                     case Voice: {
-                        auto taskData = taskJson.at("taskData").as_object();
-                        auto action = taskData.at("action").as_int64();
-                        auto taskId = taskData.at("taskId").as_string().c_str();
-                        auto userId = taskData.at("userId").as_string().c_str();
-                        auto voiceTmp = taskData.at("voiceFeature").as_string().c_str();
+                        try {
+                            auto taskData = taskJson.at("taskData").as_object();
+                            auto taskId = taskData.at("taskId").as_string().c_str();
+                            auto userId = taskData.at("userId").as_string().c_str();
+                            auto voiceTmp = taskData.at("voiceFeature").as_string().c_str();
+                            ostringstream oss;
+                            oss << "Api voice get taskId: " << taskId << " userId: " << userId
+                                    << " voiceFeature: " << voiceTmp;
+                            cout << oss.str() << endl;
+                            logPrintln(oss.str(), airstrip::INFO, __FUNCTION__);
 
-                        ostringstream oss;
-                        oss << "Api voice get taskId: " << taskId << " userId: " << userId << " action: " << action
-                                << " voiceFeature: " << voiceTmp;
-                        cout << oss.str() << endl;
-                        logPrintln(oss.str(), airstrip::INFO, __FUNCTION__);
-
-                        isSuccess = cardVoiceTemplate(userId, voiceTmp);
-                        isSuccess &= faceVoiceTemplate(userId, voiceTmp);
+                            isSuccess = cardVoiceTemplate(userId, voiceTmp);
+                            isSuccess &= faceVoiceTemplate(userId, voiceTmp);
+                        } catch (const exception &e) {
+                            ostringstream errMsg;
+                            errMsg << e.what();
+                            logPrintln("Task execute error " + errMsg.str()
+                                       , airstrip::ERROR, __FUNCTION__);
+                        }
 
                         break;
                     }

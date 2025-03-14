@@ -124,7 +124,7 @@ bool updateCardDB(const CardUserInfo &info) {
 
     try {
         SQLite::Statement update(
-            *dbCard, "UPDATE card SET card_no = ?, card_type = ?, start_time = ?, end_time = ?"
+            *dbCard, "UPDATE card SET card_no = ?, card_type = ?, start_time = ?, end_time = ? ,"
             "update_time = (datetime('now', 'localtime')) "
             "WHERE user_id = ?");;
 
@@ -167,7 +167,7 @@ bool disableCard(const std::string &cardNo, int isEnable) {
 
     try {
         SQLite::Statement update(
-            *dbCard, "UPDATE card SET is_enable = ? "
+            *dbCard, "UPDATE card SET is_enable = ? ,"
             "update_time = (datetime('now', 'localtime')) "
             "WHERE card_no = ?");;
 
@@ -190,7 +190,7 @@ bool disableCardUser(const std::string &userId, int isEnable) {
 
     try {
         SQLite::Statement update(
-            *dbCard, "UPDATE card SET is_enable = ? "
+            *dbCard, "UPDATE card SET is_enable = ? ,"
             "update_time = (datetime('now', 'localtime')) "
             "WHERE user_id = ?");;
 
@@ -213,9 +213,9 @@ bool voiceTmpCardUser(const std::string &userId, const std::string &voiceTmp) {
 
     try {
         SQLite::Statement update(
-            *dbCard, "UPDATE card SET voice_template = ? "
+            *dbCard, "UPDATE card SET voice_template = ? ,"
             "update_time = (datetime('now', 'localtime')) "
-            "WHERE user_id = ?");;
+            "WHERE user_id = ?");
 
         update.bind(1, voiceTmp);
         update.bind(2, userId);

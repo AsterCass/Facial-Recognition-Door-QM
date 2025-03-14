@@ -124,7 +124,7 @@ bool updateFaceDB(const FaceUserInfo &info) {
 
     try {
         SQLite::Statement update(
-            *dbFace, "UPDATE face SET start_time = ?, end_time = ?, face_address = ?, feature = ? "
+            *dbFace, "UPDATE face SET start_time = ?, end_time = ?, face_address = ?, feature = ? ,"
             "update_time = (datetime('now', 'localtime')) "
             "WHERE user_id = ?");;
 
@@ -166,7 +166,7 @@ bool disableFaceUser(const std::string &userId, const int isEnable) {
 
     try {
         SQLite::Statement update(
-            *dbFace, "UPDATE face SET is_enable = ? "
+            *dbFace, "UPDATE face SET is_enable = ? ,"
             "update_time = (datetime('now', 'localtime')) "
             "WHERE user_id = ?");;
 
@@ -189,7 +189,7 @@ bool voiceTmpFaceUser(const std::string &userId, const std::string &voiceTmp) {
 
     try {
         SQLite::Statement update(
-            *dbFace, "UPDATE face SET voice_template = ? "
+            *dbFace, "UPDATE face SET voice_template = ? ,"
             "update_time = (datetime('now', 'localtime')) "
             "WHERE user_id = ?");;
 
