@@ -12,11 +12,13 @@
 #include "airstrip_program_options.h"
 #include "api/api.h"
 #include "camera/camera_frame.h"
+#include "db/card_db.h"
 #include "db/face_db.h"
 #include "enums/general_enums.h"
 #include "nfc/nfc_tool.h"
 #include "ui/main_router.h"
 #include "ui/components/main_component_header.h"
+#include "utils/card_recognition.h"
 #include "utils/face_recognition.h"
 
 using namespace std;
@@ -137,9 +139,9 @@ void onceTaskBefore() {
     login();
 
     // Init Db
+    initCardDB();
     initFaceDB();
-
-    // Load all face
+    loadCardDb();
     loadFaceDb();
 }
 

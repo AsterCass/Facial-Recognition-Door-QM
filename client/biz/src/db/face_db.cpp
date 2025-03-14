@@ -29,8 +29,13 @@ void initFaceDB() {
                 CREATE TABLE IF NOT EXISTS `face` (
                    `face_id` INTEGER  PRIMARY KEY AUTOINCREMENT,
                    `user_id`  varchar(100)  DEFAULT '',
-                   `extra` text  DEFAULT '{}',
+                   `is_enable` INTEGER  DEFAULT 1,
+                   `voice_template`  varchar(100)  DEFAULT '',
+                   `start_time` INTEGER  DEFAULT 0,
+                   `end_time` INTEGER  DEFAULT 0,
+                   `face_address`  varchar(100)  DEFAULT '',
                    `feature` text  DEFAULT '',
+                   `extra` text  DEFAULT '{}',
                    `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
                    `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
                 )
@@ -59,18 +64,21 @@ std::vector<FaceUserInfo> getAllFace() {
             FaceUserInfo userInfo = {};
             const int64_t faceId = query.getColumn(0);
             const std::string userId = query.getColumn(1);
-            const std::string extra = query.getColumn(2);
-            const std::string feature = query.getColumn(3);
+            const int isEnable = query.getColumn(2);
+            const std::string voiceTemplate = query.getColumn(3);
+            const int64_t startTime = query.getColumn(4);
+            const int64_t endTime = query.getColumn(5);
+            const std::string faceAddress = query.getColumn(6);
+            const std::string feature = query.getColumn(7);
 
-
-            auto extraJson = boost::json::parse(extra);
             userInfo.faceId = faceId;
+            userInfo.faceAddress = faceAddress;
             userInfo.faceFeat = feature;
             userInfo.userId = userId;
-            userInfo.startTime = extraJson.at("startTime").as_int64();
-            userInfo.endTime = extraJson.at("endTime").as_int64();
-            userInfo.isEnable = extraJson.at("isEnable").as_bool();
-            userInfo.voiceTemplate = extraJson.at("voiceTemplate").as_string().c_str();
+            userInfo.startTime = startTime;
+            userInfo.endTime = endTime;
+            userInfo.isEnable = isEnable;
+            userInfo.voiceTemplate = voiceTemplate;
 
             ret.emplace_back(userInfo);
         }
@@ -82,16 +90,22 @@ std::vector<FaceUserInfo> getAllFace() {
     return ret;
 }
 
-bool insertFaceDB(const std::string &userId, const std::string &extra, const std::string &feature, int64_t *faceId) {
+bool insertFaceDB(const FaceUserInfo &info, int64_t *faceId) {
     if (!initializedFaceDb || nullptr == dbFace) {
         return false;
     }
     try {
         SQLite::Statement insert(
-            *dbFace, "INSERT INTO face (user_id, extra, feature) VALUES (?, ?, ?)");
-        insert.bind(1, userId);
-        insert.bind(2, extra);
-        insert.bind(3, feature);
+            *dbFace,
+            "INSERT INTO face (user_id, start_time, end_time, face_address, feature)"
+            " VALUES (?, ?, ?, ?, ?)");
+
+        insert.bind(1, info.userId);
+        insert.bind(2, info.startTime);
+        insert.bind(3, info.endTime);
+        insert.bind(4, info.faceAddress);
+        insert.bind(5, info.faceFeat);
+
         insert.exec();
 
         *faceId = dbFace->getLastInsertRowid();
@@ -103,21 +117,23 @@ bool insertFaceDB(const std::string &userId, const std::string &extra, const std
     return true;
 }
 
-bool updateFaceDB(const std::string &userId, const std::string &extra,
-                  const std::string &feature) {
+bool updateFaceDB(const FaceUserInfo &info) {
     if (!initializedFaceDb || nullptr == dbFace) {
         return false;
     }
 
     try {
         SQLite::Statement update(
-            *dbFace, "UPDATE face SET extra = ?, feature = ?,"
+            *dbFace, "UPDATE face SET start_time = ?, end_time = ?, face_address = ?, feature = ? "
             "update_time = (datetime('now', 'localtime')) "
             "WHERE user_id = ?");;
 
-        update.bind(1, extra);
-        update.bind(2, feature);
-        update.bind(3, userId);
+        update.bind(1, info.startTime);
+        update.bind(2, info.endTime);
+        update.bind(3, info.faceAddress);
+        update.bind(4, info.faceFeat);
+        update.bind(5, info.userId);
+
         update.exec();
     } catch (const SQLite::Exception &e) {
         logPrintln("Face db update failed: " + string(e.what()),
@@ -135,6 +151,52 @@ bool deleteFaceDB(const std::string &userId) {
         SQLite::Statement del(*dbFace, "DELETE FROM face WHERE user_id = ?");
         del.bind(1, userId);
         del.exec();
+    } catch (const SQLite::Exception &e) {
+        logPrintln("Face db update failed: " + string(e.what()),
+                   airstrip::ERROR, __FUNCTION__);
+        return false;
+    }
+    return true;
+}
+
+bool disableFaceUser(const std::string &userId, const int isEnable) {
+    if (!initializedFaceDb || nullptr == dbFace) {
+        return false;
+    }
+
+    try {
+        SQLite::Statement update(
+            *dbFace, "UPDATE face SET is_enable = ? "
+            "update_time = (datetime('now', 'localtime')) "
+            "WHERE user_id = ?");;
+
+        update.bind(1, isEnable);
+        update.bind(2, userId);
+
+        update.exec();
+    } catch (const SQLite::Exception &e) {
+        logPrintln("Face db update failed: " + string(e.what()),
+                   airstrip::ERROR, __FUNCTION__);
+        return false;
+    }
+    return true;
+}
+
+bool voiceTmpFaceUser(const std::string &userId, const std::string &voiceTmp) {
+    if (!initializedFaceDb || nullptr == dbFace) {
+        return false;
+    }
+
+    try {
+        SQLite::Statement update(
+            *dbFace, "UPDATE face SET voice_template = ? "
+            "update_time = (datetime('now', 'localtime')) "
+            "WHERE user_id = ?");;
+
+        update.bind(1, voiceTmp);
+        update.bind(2, userId);
+
+        update.exec();
     } catch (const SQLite::Exception &e) {
         logPrintln("Face db update failed: " + string(e.what()),
                    airstrip::ERROR, __FUNCTION__);

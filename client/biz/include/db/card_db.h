@@ -9,13 +9,17 @@ void initCardDB();
 
 std::vector<CardUserInfo> getAllCard();
 
-bool insertCardDB(int cardType, const std::string &cardNo,
-                  const std::string &userId, const std::string &extra, int64_t *cardId);
+bool insertCardDB(const CardUserInfo &info, int64_t *cardId);
 
-bool updateCardDB(int cardType, const std::string &cardNo,
-                  const std::string &userId, const std::string &extra);
+bool updateCardDB(const CardUserInfo &info);
 
 bool deleteCardDB(const std::string &userId);
+
+bool disableCard(const std::string &cardNo, int isEnable);
+
+bool disableCardUser(const std::string &userId, int isEnable);
+
+bool voiceTmpCardUser(const std::string &userId, const std::string &voiceTmp);
 
 
 #endif //CARD_DB_H

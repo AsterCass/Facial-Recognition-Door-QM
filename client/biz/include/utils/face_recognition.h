@@ -11,7 +11,7 @@ struct FaceUserInfo {
     std::string userId;
     int64_t startTime;
     int64_t endTime;
-    bool isEnable;
+    int isEnable;
     std::string voiceTemplate;
 };
 
@@ -19,13 +19,17 @@ void initFaceRecognition();
 
 void loadFaceDb();
 
-bool faceInsert(const std::string &address, const FaceUserInfo &userInfo);
+bool faceInsert(const std::string &address, FaceUserInfo &userInfo);
 
-bool faceInsert(const cv::Mat &pic, const FaceUserInfo &userInfo);
+bool faceInsert(const cv::Mat &pic, FaceUserInfo &userInfo);
 
 bool faceDelete(const FaceUserInfo &userInfo);
 
-bool faceUpdate(const cv::Mat &pic, const FaceUserInfo &userInfo);
+bool faceUpdate(const cv::Mat &pic, FaceUserInfo &userInfo);
+
+bool faceDisable(const std::string &userId, int isEnable);
+
+bool faceVoiceTemplate(const std::string &userId, const std::string &voiceFeature);
 
 bool faceDetect(const cv::Mat &frame, cv::Rect &rect, int orgCols, int orgRows);
 

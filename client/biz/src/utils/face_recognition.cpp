@@ -7,6 +7,8 @@
 bool initializedFaceRec = false;
 
 using namespace std;
+
+std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
 #ifndef WIN32
 
 #include "inspireface.h"
@@ -20,7 +22,7 @@ using namespace std;
 
 HFSession faceRecognitionSession = nullptr;
 
-std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
+
 
 std::string serializeHFFaceFeature(const HFFaceFeature &feature) {
     if (feature.size <= 0 || !feature.data) {
@@ -156,7 +158,7 @@ void loadFaceDb() {
 }
 
 
-bool faceInsert(const std::string &address, const FaceUserInfo &userInfo) {
+bool faceInsert(const std::string &address, FaceUserInfo &userInfo) {
     if (!initializedFaceRec) {
         return false;
     }
@@ -168,7 +170,7 @@ bool faceInsert(const std::string &address, const FaceUserInfo &userInfo) {
     return faceInsert(image, userInfo);
 }
 
-bool faceInsert(const cv::Mat &pic, const FaceUserInfo &userInfo) {
+bool faceInsert(const cv::Mat &pic, FaceUserInfo &userInfo) {
     if (!initializedFaceRec) {
         return false;
     }
@@ -219,14 +221,10 @@ bool faceInsert(const cv::Mat &pic, const FaceUserInfo &userInfo) {
 
     int64_t faceId = 0;
     boost::json::object faceDbExtraJson;
-    faceDbExtraJson["userId"] = userInfo.userId;
-    faceDbExtraJson["startTime"] = userInfo.startTime;
-    faceDbExtraJson["endTime"] = userInfo.endTime;
-    faceDbExtraJson["isEnable"] = userInfo.isEnable;
-    faceDbExtraJson["voiceTemplate"] = userInfo.voiceTemplate;
     const auto featureStr = serializeHFFaceFeature(feature);
     logPrintln("Insert db user feature = " + featureStr, airstrip::DEBUG, __FUNCTION__);
-    const auto dbRet = insertFaceDB(userInfo.userId, serialize(faceDbExtraJson), featureStr, &faceId);
+    userInfo.faceFeat = featureStr;
+    const auto dbRet = insertFaceDB(userInfo, &faceId);
     if (!dbRet) {
         HFReleaseImageStream(stream);
         return false;
@@ -289,7 +287,7 @@ bool faceDelete(const FaceUserInfo &userInfo) {
 }
 
 
-bool faceUpdate(const cv::Mat &pic, const FaceUserInfo &userInfo) {
+bool faceUpdate(const cv::Mat &pic, FaceUserInfo &userInfo) {
     if (!initializedFaceRec) {
         return false;
     }
@@ -340,15 +338,11 @@ bool faceUpdate(const cv::Mat &pic, const FaceUserInfo &userInfo) {
 
     logPrintln("Update db userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
 
-    boost::json::object faceDbExtraJson;
-    faceDbExtraJson["userId"] = userInfo.userId;
-    faceDbExtraJson["startTime"] = userInfo.startTime;
-    faceDbExtraJson["endTime"] = userInfo.endTime;
-    faceDbExtraJson["isEnable"] = userInfo.isEnable;
-    faceDbExtraJson["voiceTemplate"] = userInfo.voiceTemplate;
+
     const auto featureStr = serializeHFFaceFeature(feature);
+    userInfo.faceFeat = featureStr;
     logPrintln("Update db user feature = " + featureStr, airstrip::DEBUG, __FUNCTION__);
-    const auto dbRet = updateFaceDB(userInfo.userId, serialize(faceDbExtraJson), featureStr);
+    const auto dbRet = updateFaceDB(userInfo);
     if (!dbRet) {
         HFReleaseImageStream(stream);
         return false;
@@ -370,6 +364,43 @@ bool faceUpdate(const cv::Mat &pic, const FaceUserInfo &userInfo) {
     return true;
 }
 
+bool faceDisable(const std::string &userId, int isEnable) {
+    if (!initializedFaceRec) {
+        return false;
+    }
+
+    const auto dbRet = disableFaceUser(userId, isEnable);
+    if (!dbRet) {
+        return false;
+    }
+
+    for (auto &cardUserInfo: faceUserInfoMap) {
+        if (cardUserInfo.second.userId == userId) {
+            cardUserInfo.second.isEnable = isEnable;
+        }
+    }
+
+    return true;
+}
+
+bool faceVoiceTemplate(const std::string &userId, const std::string &voiceFeature) {
+    if (!initializedFaceRec) {
+        return false;
+    }
+
+    const auto dbRet = voiceTmpFaceUser(userId, voiceFeature);
+    if (!dbRet) {
+        return false;
+    }
+
+    for (auto &cardUserInfo: faceUserInfoMap) {
+        if (cardUserInfo.second.userId == userId) {
+            cardUserInfo.second.voiceTemplate = voiceFeature;
+        }
+    }
+
+    return true;
+}
 
 bool faceDetect(const cv::Mat &frame, cv::Rect &rect, int orgCols, int orgRows) {
     bool ret = false;
@@ -499,8 +530,33 @@ void initFaceRecognition() {
     initializedFaceRec = true;
 }
 
+void loadFaceDb() {
+    if (!initializedFaceRec) {
+        return;
+    }
+    logPrintln("Start load face db", airstrip::INFO, __FUNCTION__);
 
-bool faceInsert(const cv::Mat &pic, const FaceUserInfo &userInfo) {
+    auto dbData = getAllFace();
+
+    for (auto &userInfo: dbData) {
+        logPrintln("Face load userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
+        try {
+            userInfo.faceFeat = "";
+            faceUserInfoMap[userInfo.faceId] = userInfo;
+        } catch (const exception &e) {
+            ostringstream errMsg;
+            errMsg << e.what();
+            logPrintln("Face load error " + errMsg.str()
+                       , airstrip::ERROR, __FUNCTION__);
+        }
+        logPrintln("Face loaded userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
+    }
+
+    logPrintln("Start loaded face db", airstrip::INFO, __FUNCTION__);
+}
+
+
+bool faceInsert(const cv::Mat &pic, FaceUserInfo &userInfo) {
     if (!initializedFaceRec) {
         return false;
     }
@@ -508,7 +564,10 @@ bool faceInsert(const cv::Mat &pic, const FaceUserInfo &userInfo) {
     // ===================== check finish, start insert =====================
 
     int64_t faceId = 0;
-    insertFaceDB(userInfo.userId, "", "", &faceId);
+    insertFaceDB(userInfo, &faceId);
+
+    userInfo.faceFeat = "";
+    faceUserInfoMap[faceId] = userInfo;
 
     logPrintln("Insert db userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
     logPrintln("Insert db faceId = " + to_string(faceId), airstrip::INFO, __FUNCTION__);
@@ -523,19 +582,74 @@ bool faceDelete(const FaceUserInfo &userInfo) {
 
     deleteFaceDB(userInfo.userId);
 
+    vector<int64_t> removeFaceIds = {};
+    for (auto &faceUserInfo: faceUserInfoMap) {
+        if (faceUserInfo.second.userId == userInfo.userId) {
+            removeFaceIds.push_back(faceUserInfo.first);
+        }
+    }
+
+    for (auto &faceId: removeFaceIds) {
+        faceUserInfoMap.erase(faceId);
+    }
+
     logPrintln("Delete db userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
     return true;
 }
 
-bool faceUpdate(const cv::Mat &pic, const FaceUserInfo &userInfo) {
+bool faceUpdate(const cv::Mat &pic, FaceUserInfo &userInfo) {
     if (!initializedFaceRec) {
         return false;
     }
 
+    updateFaceDB(userInfo);
 
-    updateFaceDB(userInfo.userId, "", "");
+    for (auto &faceUserInfo: faceUserInfoMap) {
+        if (faceUserInfo.second.userId == userInfo.userId) {
+            userInfo.faceFeat = "";
+            faceUserInfo.second = userInfo;
+        }
+    }
 
     logPrintln("Update db userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
+    return true;
+}
+
+bool faceDisable(const std::string &userId, int isEnable) {
+    if (!initializedFaceRec) {
+        return false;
+    }
+
+    const auto dbRet = disableFaceUser(userId, isEnable);
+    if (!dbRet) {
+        return false;
+    }
+
+    for (auto &cardUserInfo: faceUserInfoMap) {
+        if (cardUserInfo.second.userId == userId) {
+            cardUserInfo.second.isEnable = isEnable;
+        }
+    }
+
+    return true;
+}
+
+bool faceVoiceTemplate(const std::string &userId, const std::string &voiceFeature) {
+    if (!initializedFaceRec) {
+        return false;
+    }
+
+    const auto dbRet = voiceTmpFaceUser(userId, voiceFeature);
+    if (!dbRet) {
+        return false;
+    }
+
+    for (auto &cardUserInfo: faceUserInfoMap) {
+        if (cardUserInfo.second.userId == userId) {
+            cardUserInfo.second.voiceTemplate = voiceFeature;
+        }
+    }
+
     return true;
 }
 

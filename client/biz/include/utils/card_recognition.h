@@ -22,6 +22,10 @@ bool cardDelete(const CardUserInfo &userInfo);
 
 bool cardUpdate(const CardUserInfo &userInfo);
 
+bool cardDisable(const std::string &userId, const std::string &cardNo, int isEnable);
+
+bool cardVoiceTemplate(const std::string &userId, const std::string &voiceFeature);
+
 void cardRecognition(const std::string &cardNo);
 
 

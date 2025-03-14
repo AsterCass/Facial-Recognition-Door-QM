@@ -40,17 +40,7 @@ bool cardInsert(const CardUserInfo &userInfo) {
     logPrintln("Insert db cardNo = " + userInfo.cardNo, airstrip::INFO, __FUNCTION__);
 
     int64_t cardId = 0;
-    boost::json::object cardDbExtraJson;
-    cardDbExtraJson["cardNo"] = userInfo.cardNo;
-    cardDbExtraJson["cardType"] = userInfo.cardType;
-    cardDbExtraJson["userId"] = userInfo.userId;
-    cardDbExtraJson["startTime"] = userInfo.startTime;
-    cardDbExtraJson["endTime"] = userInfo.endTime;
-    cardDbExtraJson["isEnable"] = userInfo.isEnable;
-    cardDbExtraJson["voiceTemplate"] = userInfo.voiceTemplate;
-    const auto dbRet = insertCardDB(userInfo.cardType, userInfo.cardNo, userInfo.userId,
-                                    serialize(cardDbExtraJson), &cardId);
-
+    const auto dbRet = insertCardDB(userInfo, &cardId);
     if (!dbRet) {
         return false;
     }
@@ -93,16 +83,7 @@ bool cardUpdate(const CardUserInfo &userInfo) {
 
     logPrintln("Update db userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
 
-    boost::json::object cardDbExtraJson;
-    cardDbExtraJson["cardNo"] = userInfo.cardNo;
-    cardDbExtraJson["cardType"] = userInfo.cardType;
-    cardDbExtraJson["userId"] = userInfo.userId;
-    cardDbExtraJson["startTime"] = userInfo.startTime;
-    cardDbExtraJson["endTime"] = userInfo.endTime;
-    cardDbExtraJson["isEnable"] = userInfo.isEnable;
-    cardDbExtraJson["voiceTemplate"] = userInfo.voiceTemplate;
-    const auto dbRet = updateCardDB(userInfo.cardType, userInfo.cardNo, userInfo.userId,
-                                    serialize(cardDbExtraJson));
+    const auto dbRet = updateCardDB(userInfo);
     if (!dbRet) {
         return false;
     }
@@ -111,6 +92,48 @@ bool cardUpdate(const CardUserInfo &userInfo) {
     for (auto &cardUserInfo: cardUserInfoMap) {
         if (cardUserInfo.second.userId == userInfo.userId) {
             cardUserInfo.second = userInfo;
+        }
+    }
+
+    return true;
+}
+
+bool cardDisable(const std::string &userId, const std::string &cardNo, int isEnable) {
+    if (!initializedCardRec) {
+        return false;
+    }
+
+    const auto dbRet = cardNo.empty() ? disableCardUser(userId, isEnable) : disableCard(cardNo, isEnable);
+    if (!dbRet) {
+        return false;
+    }
+
+    if (cardNo.empty()) {
+        for (auto &cardUserInfo: cardUserInfoMap) {
+            if (cardUserInfo.second.userId == userId) {
+                cardUserInfo.second.isEnable = isEnable;
+            }
+        }
+    } else {
+        cardUserInfoMap[cardNo].isEnable = isEnable;
+    }
+
+    return true;
+}
+
+bool cardVoiceTemplate(const std::string &userId, const std::string &voiceFeature) {
+    if (!initializedCardRec) {
+        return false;
+    }
+
+    const auto dbRet = voiceTmpCardUser(userId, voiceFeature);
+    if (!dbRet) {
+        return false;
+    }
+
+    for (auto &cardUserInfo: cardUserInfoMap) {
+        if (cardUserInfo.second.userId == userId) {
+            cardUserInfo.second.voiceTemplate = voiceFeature;
         }
     }
 

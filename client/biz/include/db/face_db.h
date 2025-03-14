@@ -9,10 +9,14 @@ void initFaceDB();
 
 std::vector<FaceUserInfo> getAllFace();
 
-bool insertFaceDB(const std::string &userId, const std::string &extra, const std::string &feature, int64_t *faceId);
+bool insertFaceDB(const FaceUserInfo &info, int64_t *faceId);
 
-bool updateFaceDB(const std::string &userId, const std::string &extra, const std::string &feature);
+bool updateFaceDB(const FaceUserInfo &info);
 
 bool deleteFaceDB(const std::string &userId);
+
+bool disableFaceUser(const std::string &userId, int isEnable);
+
+bool voiceTmpFaceUser(const std::string &userId, const std::string &voiceTmp);
 
 #endif //FACE_DB_H

@@ -120,6 +120,7 @@ set(PROJECT_SOURCES
         src/ui/pages/main_page_init.cpp
         src/ui/pages/main_page_home.cpp
         src/utils/face_recognition.cpp
+        src/utils/card_recognition.cpp
         src/utils/general_utils.cpp
         src/utils/scheduled_task.cpp
 )
