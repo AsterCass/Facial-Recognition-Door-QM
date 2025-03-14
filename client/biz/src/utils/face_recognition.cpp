@@ -127,23 +127,28 @@ void loadFaceDb() {
 
     for (auto &userInfo: dbData) {
         logPrintln("Face load userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
+        try {
+            HFFaceFeatureIdentity identity = {};
+            auto faceId = userInfo.faceId;
+            identity.id = faceId;
+            auto feat = deserializeHFFaceFeature(userInfo.faceFeat);
+            identity.feature = &feat;
 
-        HFFaceFeatureIdentity identity = {};
-        auto faceId = userInfo.faceId;
-        identity.id = faceId;
-        auto feat = deserializeHFFaceFeature(userInfo.faceFeat);
-        identity.feature = &feat;
+            const auto ret = HFFeatureHubInsertFeature(identity, &faceId);
+            freeHFFaceFeature(feat);
+            if (ret != HSUCCEED) {
+                logPrintln("Face insert face error " + ret, airstrip::WARN, __FUNCTION__);
+                continue;
+            }
 
-        const auto ret = HFFeatureHubInsertFeature(identity, &faceId);
-        freeHFFaceFeature(feat);
-        if (ret != HSUCCEED) {
-            logPrintln("Face insert face error " + ret, airstrip::WARN, __FUNCTION__);
-            continue;
+            userInfo.faceFeat = "";
+            faceUserInfoMap[faceId] = userInfo;
+        } catch (const exception &e) {
+            ostringstream errMsg;
+            errMsg << e.what();
+            logPrintln("Face load error " + errMsg.str()
+                       , airstrip::ERROR, __FUNCTION__);
         }
-
-        userInfo.faceFeat = "";
-        faceUserInfoMap[faceId] = userInfo;
-
         logPrintln("Face loaded userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
     }
 

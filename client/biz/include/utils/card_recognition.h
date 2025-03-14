@@ -4,14 +4,25 @@
 #include <string>
 
 struct CardUserInfo {
-    std::string cardId;
-    std::string cardType;
+    int64_t cardId;
+    std::string cardNo;
+    int cardType;
     std::string userId;
     int64_t startTime;
     int64_t endTime;
-    bool isDisable;
+    bool isEnable;
     std::string voiceTemplate;
 };
+
+void loadCardDb();
+
+bool cardInsert(const CardUserInfo &userInfo);
+
+bool cardDelete(const CardUserInfo &userInfo);
+
+bool cardUpdate(const CardUserInfo &userInfo);
+
+void cardRecognition(const std::string &cardNo);
 
 
 #endif //CARD_RECOGNITION_H
