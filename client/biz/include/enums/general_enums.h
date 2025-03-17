@@ -31,6 +31,11 @@ enum PlayWavType {
     AuthFailFirst = 401,
 };
 
+enum ZFOpenDoorType {
+    FaceOpen = 7,
+    IcCardOpen = 15,
+};
+
 enum RUNTIME_ENV {
     PROD = 0,
     DEV = 1,

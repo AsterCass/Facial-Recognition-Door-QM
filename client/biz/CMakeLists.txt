@@ -105,6 +105,7 @@ set(PROJECT_SOURCES
         src/config/config.cpp
         src/db/card_db.cpp
         src/db/face_db.cpp
+        src/db/open_record_db.cpp
         src/camera/common/sample_common_isp.c
         src/camera/common/sample_fake_isp.c
         src/camera/common/display.c

@@ -14,6 +14,7 @@
 #include "camera/camera_frame.h"
 #include "db/card_db.h"
 #include "db/face_db.h"
+#include "db/open_record_db.h"
 #include "enums/general_enums.h"
 #include "nfc/nfc_tool.h"
 #include "ui/main_router.h"
@@ -129,6 +130,12 @@ void getNfcCode() {
         openDoor();
         doorOpenSec = 1;
         playWav(AuthSuccess);
+        OpenRecordInfo recordInfo;
+        recordInfo.userId = cardInfo.userId;
+        recordInfo.openMode = IcCardOpen;
+        recordInfo.openResult = 0;
+        recordInfo.openTime = chrono::system_clock::to_time_t(chrono::system_clock::now());;
+        insertOpenRecordDB(recordInfo);
     }
 }
 
@@ -209,19 +216,26 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo) {
     static bool lastPass = false;
     const auto currentTime = chrono::system_clock::now();
 
-    if (lastPass && (currentTime - lastTime).count() < 5) {
+    if (lastPass && chrono::duration_cast<std::chrono::seconds>(currentTime - lastTime).count() < 5) {
         logPrintln("Already pass last", DEBUG, __FUNCTION__);
         return;
     }
 
-    if (userInfo.faceId > 0) {
+    if (!userInfo.userId.empty()) {
         openDoor();
+        doorOpenSec = 1;
         playWav(AuthSuccess);
+        OpenRecordInfo recordInfo;
+        recordInfo.userId = userInfo.userId;
+        recordInfo.openMode = FaceOpen;
+        recordInfo.openResult = 0;
+        recordInfo.openTime = chrono::system_clock::to_time_t(currentTime);
+        insertOpenRecordDB(recordInfo);
         lastPass = true;
     } else {
-        static auto lastFailTime = chrono::system_clock::from_time_t(0);;
+        static auto lastFailTime = chrono::system_clock::from_time_t(0);
         if ((currentTime - lastFailTime).count() > 2) {
-            if ((currentTime - lastFailTime).count() < 5) {
+            if (chrono::duration_cast<std::chrono::seconds>(currentTime - lastFailTime).count() < 5) {
                 playWav(AuthFail);
             } else {
                 playWav(AuthFailFirst);
