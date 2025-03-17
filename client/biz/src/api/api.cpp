@@ -163,6 +163,7 @@ void playWav(const PlayWavType type) {
         return;
     }
     const auto toPlayType = playWavQueue.front();
+    playWavQueue.pop_front();
 
     ostringstream playWavMsg;
     playWavMsg << "aplay " << staticSoundsDir;

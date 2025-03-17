@@ -21,6 +21,8 @@
 #include "utils/card_recognition.h"
 #include "utils/face_recognition.h"
 
+int doorOpenSec = 0;
+
 using namespace std;
 using namespace airstrip;
 using namespace boost::gregorian;;
@@ -124,7 +126,35 @@ void getNfcCode() {
                INFO, __FUNCTION__);
     const auto cardInfo = cardRecognition(ret.cardNo);
     if (!cardInfo.userId.empty()) {
+        openDoor();
+        doorOpenSec = 1;
         playWav(AuthSuccess);
+    }
+}
+
+// Every (taskIvCnt + executionTime) sec
+void doorAutoClose() {
+    if (doorOpenSec <= 0) return;
+    if (++doorOpenSec > 5) {
+        closeDoor();
+        doorOpenSec = -1;
+    }
+}
+
+// Every (taskIvCnt + executionTime) sec
+void getFaceRegReport() {
+    static int facePassIv = 5;
+    if (facePassIv++ < 5) return;
+
+    const auto res = reportFaceRecognition();
+    if (res.faceId < 0) {
+        playWav(AuthFail);
+    } else if (res.faceId > 0) {
+        openDoor();
+        doorOpenSec = 1;
+        facePassIv = 0;
+        playWav(AuthSuccess);
+    } else {
     }
 }
 
@@ -179,6 +209,10 @@ void onceTaskAfter() {
         getNfcCode();
         // Try to get task list
         checkTaskAndExecute();
+        // Try to get face
+        getFaceRegReport();
+        // Auto close door
+        doorAutoClose();
 
         //...
 
