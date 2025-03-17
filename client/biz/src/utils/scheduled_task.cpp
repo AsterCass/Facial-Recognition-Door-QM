@@ -141,24 +141,6 @@ void doorAutoClose() {
     }
 }
 
-// Every (taskIvCnt + executionTime) sec
-void getFaceRegReport() {
-    static int facePassIv = 5;
-    if (facePassIv++ < 5) return;
-
-    const auto res = reportFaceRecognition();
-    if (res.faceId < 0) {
-        playWav(AuthFail);
-    } else if (res.faceId > 0) {
-        openDoor();
-        doorOpenSec = 1;
-        facePassIv = 0;
-        playWav(AuthSuccess);
-    } else {
-    }
-}
-
-
 void onceTaskBefore() {
     static int count = 1;
     if (count > 1) return;
@@ -209,8 +191,6 @@ void onceTaskAfter() {
         getNfcCode();
         // Try to get task list
         checkTaskAndExecute();
-        // Try to get face
-        getFaceRegReport();
         // Auto close door
         doorAutoClose();
 
@@ -222,6 +202,36 @@ void onceTaskAfter() {
         // Interval
         this_thread::sleep_for(interval);
     }
+}
+
+void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo) {
+    static auto lastTime = chrono::system_clock::from_time_t(0);
+    static bool lastPass = false;
+    const auto currentTime = chrono::system_clock::now();
+
+    if (lastPass && (currentTime - lastTime).count() < 5) {
+        logPrintln("Already pass last", DEBUG, __FUNCTION__);
+        return;
+    }
+
+    if (userInfo.faceId > 0) {
+        openDoor();
+        playWav(AuthSuccess);
+        lastPass = true;
+    } else {
+        static auto lastFailTime = chrono::system_clock::from_time_t(0);;
+        if ((currentTime - lastFailTime).count() > 2) {
+            if ((currentTime - lastFailTime).count() < 5) {
+                playWav(AuthFail);
+            } else {
+                playWav(AuthFailFirst);
+            }
+            lastFailTime = currentTime;
+        }
+        lastPass = false;
+    }
+
+    lastTime = currentTime;
 }
 
 ScheduledTask::ScheduledTask() {

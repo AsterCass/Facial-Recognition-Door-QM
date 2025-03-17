@@ -3,13 +3,13 @@
 #include "airstrip_log.h"
 #include "airstrip_program_options.h"
 #include "config/config.h"
+#include "utils/scheduled_task.h"
 
 bool initializedFaceRec = false;
 
 using namespace std;
 
 std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
-FaceUserInfo reportUserInfo;
 
 #ifndef WIN32
 
@@ -510,16 +510,14 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
     }
 
     if (searchResult.id <= 0 || faceUserInfoMap.find(searchResult.id) == faceUserInfoMap.end()) {
-        if (0 == reportUserInfo.faceId) {
-            reportUserInfo.faceId = -1;
-        }
+        ScheduledTask::sendFaceRegRes({});
         HFReleaseImageStream(stream);
         return;
     }
 
     logPrintln("Face recognition ret id = " + to_string(searchResult.id) + " " + to_string(confidence),
                airstrip::INFO, __FUNCTION__);
-    reportUserInfo = faceUserInfoMap[searchResult.id];
+    ScheduledTask::sendFaceRegRes(faceUserInfoMap[searchResult.id]);
 
     HFReleaseImageStream(stream);
 }
@@ -658,10 +656,3 @@ bool faceVoiceTemplate(const std::string &userId, const std::string &voiceFeatur
 
 
 #endif
-
-
-FaceUserInfo reportFaceRecognition() {
-    auto retInfo = reportUserInfo;
-    reportUserInfo.faceId = 0;
-    return retInfo;
-}

@@ -1,6 +1,7 @@
 #ifndef SCHEDULED_TASK_H
 #define SCHEDULED_TASK_H
 #include <future>
+#include "face_recognition.h"
 
 
 class ScheduledTask {
@@ -13,6 +14,8 @@ public:
         static ScheduledTask instance;
         return &instance;
     }
+
+    static void sendFaceRegRes(const FaceUserInfo &userInfo);
 
 private:
     ScheduledTask();

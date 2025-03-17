@@ -35,6 +35,4 @@ bool faceDetect(const cv::Mat &frame, cv::Rect &rect, int orgCols, int orgRows);
 
 void faceRecognition(const cv::Mat &frame, const cv::Rect &rect);
 
-FaceUserInfo reportFaceRecognition();
-
 #endif //FACE_RECOGNITION_H
