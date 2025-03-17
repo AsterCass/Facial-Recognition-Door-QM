@@ -45,7 +45,7 @@ bool cardInsert(const CardUserInfo &userInfo) {
         return false;
     }
 
-    cardUserInfoMap[userInfo.userId] = userInfo;
+    cardUserInfoMap[userInfo.cardNo] = userInfo;
 
     logPrintln("Insert finish userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
 
@@ -68,8 +68,8 @@ bool cardDelete(const CardUserInfo &userInfo) {
         }
     }
 
-    for (auto &cardId: removeCardNos) {
-        cardUserInfoMap.erase(cardId);
+    for (auto &cardNo: removeCardNos) {
+        cardUserInfoMap.erase(cardNo);
     }
 
     logPrintln("Delete finish userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);

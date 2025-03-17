@@ -165,7 +165,7 @@ void playWav(const PlayWavType type) {
     const auto toPlayType = playWavQueue.front();
 
     ostringstream playWavMsg;
-    playWavMsg << "aplay ";
+    playWavMsg << "aplay " << staticSoundsDir;
     switch (toPlayType) {
         case Di:
             playWavMsg << "check_di.wav";
