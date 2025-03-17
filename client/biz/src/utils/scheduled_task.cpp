@@ -119,8 +119,13 @@ void getNfcCode() {
     if (!ret.isExist) {
         return;
     }
+    playWav(Di);
     logPrintln("Nfc card detected " + to_string(ret.cardType) + " " + ret.cardNo,
                INFO, __FUNCTION__);
+    const auto cardInfo = cardRecognition(ret.cardNo);
+    if (!cardInfo.userId.empty()) {
+        playWav(AuthSuccess);
+    }
 }
 
 
@@ -152,7 +157,11 @@ void onceTaskAfter() {
     ++count;
 
     // To home
-    g_stackedWidget->setCurrentIndex(MAIN_PAGE_HOME);
+    if (g_stackedWidget != nullptr) {
+        g_stackedWidget->setCurrentIndex(MAIN_PAGE_HOME);
+    } else {
+        --count;
+    }
 }
 
 [[noreturn]] void taskExecutor(const chrono::milliseconds interval) {

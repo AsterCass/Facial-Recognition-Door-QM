@@ -26,7 +26,7 @@ bool cardDisable(const std::string &userId, const std::string &cardNo, int isEna
 
 bool cardVoiceTemplate(const std::string &userId, const std::string &voiceFeature);
 
-void cardRecognition(const std::string &cardNo);
+CardUserInfo cardRecognition(const std::string &cardNo);
 
 
 #endif //CARD_RECOGNITION_H

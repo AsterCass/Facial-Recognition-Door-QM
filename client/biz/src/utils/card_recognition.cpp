@@ -140,13 +140,15 @@ bool cardVoiceTemplate(const std::string &userId, const std::string &voiceFeatur
     return true;
 }
 
-void cardRecognition(const std::string &cardNo) {
+CardUserInfo cardRecognition(const std::string &cardNo) {
     const auto it = cardUserInfoMap.find(cardNo);
 
     if (it == cardUserInfoMap.end()) {
         logPrintln("Not found cardNo = " + cardNo, airstrip::INFO, __FUNCTION__);
-        return;
+        return {};
     }
     logPrintln("Found cardNo = " + cardNo + " userId = " + it->second.userId,
                airstrip::INFO, __FUNCTION__);
+
+    return it->second;
 }

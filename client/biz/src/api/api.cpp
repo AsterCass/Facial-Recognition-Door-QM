@@ -1,6 +1,7 @@
 #include "api/api.h"
 
 #include <iostream>
+#include <thread>
 #include <boost/json.hpp>
 
 #include "airstrip_command.h"
@@ -10,14 +11,34 @@
 #include <boost/algorithm/hex.hpp>
 
 #include "airstrip_log.h"
+#include "airstrip_program_options.h"
 #include "utils/card_recognition.h"
 #include "utils/face_recognition.h"
 #include "utils/general_utils.h"
+
+#ifndef Q_OS_WIN
+#include <fcntl.h>
+#include <sys/ioctl.h>
+
+#define TELPO_IOF_MAGIC 't'
+
+#define TELPO_IOCTL_MAX485_RD _IOW(TELPO_IOF_MAGIC, 0x51, int)
+#define TELPO_IOCTL_IR_LED_POWER _IOW(TELPO_IOF_MAGIC, 0x52, int)
+#define TELPO_IOCTL_RELAY _IOW(TELPO_IOF_MAGIC, 0x53, int)
+#define TELPO_IOCTL_RS232_PWR _IOW(TELPO_IOF_MAGIC, 0x54, int)
+#define TELPO_IOCTL_NFC_PWR _IOW(TELPO_IOF_MAGIC, 0x55, int)
+#define TELPO_IOCTL_WG26 _IOW(TELPO_IOF_MAGIC, 0x26, int)
+#define TELPO_IOCTL_WG34 _IOW(TELPO_IOF_MAGIC, 0x34, int)
+#endif
 
 using namespace std;
 
 string snCode;
 string token;
+string staticSoundsDir;
+mutex lockPlayWav;
+deque<int> playWavQueue = {};
+int fdForDoor = -1;
 
 // local
 string getSn() {
@@ -39,24 +60,164 @@ string getSign() {
     hash.process_bytes(data.data(), data.size());
     hash.get_digest(digest);
 
-    std::string result;
+    string result;
     boost::algorithm::hex(reinterpret_cast<char *>(&digest),
                           reinterpret_cast<char *>(&digest) + sizeof(digest),
-                          std::back_inserter(result));
-    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+                          back_inserter(result));
+    transform(result.begin(), result.end(), result.begin(), ::tolower);
     return result;
 }
 
 void openDoor() {
+#ifndef WIN32
+    if (-1 == fdForDoor) {
+        fdForDoor = open("/dev/telpo_gpio", O_RDWR);
+    }
+    if (fdForDoor < 0) {
+        logPrintln("Failed to open device", airstrip::ERROR, __FUNCTION__);
+        return;
+    }
+    ioctl(fdForDoor, TELPO_IOCTL_RELAY, 1);
+#endif
+    logPrintln("Open door ", airstrip::INFO, __FUNCTION__);
 }
 
 void closeDoor() {
+#ifndef WIN32
+    if (-1 == fdForDoor) {
+        fdForDoor = open("/dev/telpo_gpio", O_RDWR);
+    }
+    if (fdForDoor < 0) {
+        logPrintln("Failed to open device", airstrip::ERROR, __FUNCTION__);
+        return;
+    }
+    ioctl(fdForDoor, TELPO_IOCTL_RELAY, 0);
+#endif
+    logPrintln("Close door ", airstrip::INFO, __FUNCTION__);
 }
 
 void playWav(const string &voiceTemplate) {
+    if (!voiceTemplate.empty()) {
+        try {
+            const int rental = stoi(voiceTemplate.substr(1, 1));
+            switch (rental) {
+                case 1:
+                    playWav(Rental_1);
+                    break;
+                case 2:
+                    playWav(Rental_2);
+                    break;
+                case 3:
+                    playWav(Rental_2);
+                    break;
+                default:
+                    break;
+            }
+
+            const int charge = stoi(voiceTemplate.substr(2, 1));
+            switch (charge) {
+                case 1:
+                    playWav(Charge_1);
+                    break;
+                case 2:
+                    playWav(Charge_2);
+                    break;
+                case 3:
+                    playWav(Charge_3);
+                    break;
+                case 4:
+                    playWav(Charge_4);
+                    break;
+                case 5:
+                    playWav(Charge_5);
+                    break;
+                default:
+                    break;
+            }
+        } catch (const exception &e) {
+            ostringstream errMsg;
+            errMsg << e.what();
+            logPrintln("Play wav operation error " + errMsg.str()
+                       , airstrip::ERROR, __FUNCTION__);
+        }
+    }
 }
 
-void playWav(PlayWavType type) {
+void playWav(const PlayWavType type) {
+    if (staticSoundsDir.empty()) {
+        string appWorkDir;
+        airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
+        staticSoundsDir = appWorkDir + "static/sounds/";
+    }
+
+    // push to queue
+    if (playWavQueue.size() >= 2) {
+        playWavQueue.clear();
+    }
+    playWavQueue.push_back(type);
+
+
+    // get last item play
+    std::lock_guard<std::mutex> lock(lockPlayWav);
+    if (playWavQueue.empty()) {
+        return;
+    }
+    const auto toPlayType = playWavQueue.front();
+
+    ostringstream playWavMsg;
+    playWavMsg << "aplay ";
+    switch (toPlayType) {
+        case Di:
+            playWavMsg << "check_di.wav";
+            break;
+        case AuthSuccess:
+            playWavMsg << "check_success.wav";
+            break;
+        case AuthFail:
+            playWavMsg << "check_fail.wav";
+            break;
+        case AuthFailFirst:
+            playWavMsg << "check_fail_first.wav";
+            break;
+        case Disabled:
+            playWavMsg << "check_disabled.wav";
+            break;
+        case Expired:
+            playWavMsg << "check_expired.wav";
+            break;
+        case Charge_1:
+            playWavMsg << "charge_1.wav";
+            break;
+        case Charge_2:
+            playWavMsg << "charge_2.wav";
+            break;
+        case Charge_3:
+            playWavMsg << "charge_3.wav";
+            break;
+        case Charge_4:
+            playWavMsg << "charge_4.wav";
+            break;
+        case Charge_5:
+            playWavMsg << "charge_5.wav";
+            break;
+        case Rental_1:
+            playWavMsg << "rental_1.wav";
+            break;
+        case Rental_2:
+            playWavMsg << "rental_2.wav";
+            break;
+        default: {
+            logPrintln("Play wav not found type = " + to_string(toPlayType),
+                       airstrip::ERROR, __FUNCTION__);
+        }
+    }
+#ifdef WIN32
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+#else
+    airstrip::execCommand(playWavMsg.str());
+#endif
+    logPrintln("Play wav " + playWavMsg.str() + " queue size = " + to_string(playWavQueue.size())
+               , airstrip::INFO, __FUNCTION__);
 }
 
 
@@ -148,7 +309,11 @@ void checkTask() {
                 logPrintln("Api not task deal with", airstrip::DEBUG, __FUNCTION__);
                 return;
             }
+
+            map<string, int> taskStatusMap = {};
+
             for (const auto &task: taskList) {
+                string taskId;
                 bool isSuccess = false;
                 auto taskJson = task.as_object();
                 const auto dataType = taskJson.at("dataType").as_int64();
@@ -157,7 +322,7 @@ void checkTask() {
                         try {
                             auto taskData = taskJson.at("taskData").as_object();
                             auto action = taskData.at("action").as_int64();
-                            auto taskId = taskData.at("taskId").as_string().c_str();
+                            taskId = taskData.at("taskId").as_string().c_str();
                             auto userId = taskData.at("userId").as_string().c_str();
                             auto startTime = taskData.at("startTime").as_int64();
                             auto endTime = taskData.at("endTime").as_int64();
@@ -201,7 +366,7 @@ void checkTask() {
                         try {
                             auto taskData = taskJson.at("taskData").as_object();
                             auto action = taskData.at("action").as_int64();
-                            auto taskId = taskData.at("taskId").as_string().c_str();
+                            taskId = taskData.at("taskId").as_string().c_str();
                             auto userId = taskData.at("userId").as_string().c_str();
                             auto startTime = taskData.at("startTime").as_int64();
                             auto endTime = taskData.at("endTime").as_int64();
@@ -247,7 +412,7 @@ void checkTask() {
                         try {
                             auto taskData = taskJson.at("taskData").as_object();
                             auto action = taskData.at("action").as_int64();
-                            auto taskId = taskData.at("taskId").as_string().c_str();
+                            taskId = taskData.at("taskId").as_string().c_str();
                             auto userId = taskData.at("userId").as_string().c_str();
                             auto keyType = taskData.at("keyType").as_int64();
                             auto keyId = taskData.at("keyId").as_string().c_str();
@@ -272,7 +437,7 @@ void checkTask() {
                         } catch (const exception &e) {
                             ostringstream errMsg;
                             errMsg << e.what();
-                            logPrintln("Task execute error " + errMsg.str()
+                            logPrintln("Disable execute error " + errMsg.str()
                                        , airstrip::ERROR, __FUNCTION__);
                         }
 
@@ -281,7 +446,7 @@ void checkTask() {
                     case Voice: {
                         try {
                             auto taskData = taskJson.at("taskData").as_object();
-                            auto taskId = taskData.at("taskId").as_string().c_str();
+                            taskId = taskData.at("taskId").as_string().c_str();
                             auto userId = taskData.at("userId").as_string().c_str();
                             auto voiceTmp = taskData.at("voiceFeature").as_string().c_str();
                             ostringstream oss;
@@ -295,7 +460,7 @@ void checkTask() {
                         } catch (const exception &e) {
                             ostringstream errMsg;
                             errMsg << e.what();
-                            logPrintln("Task execute error " + errMsg.str()
+                            logPrintln("Voice execute error " + errMsg.str()
                                        , airstrip::ERROR, __FUNCTION__);
                         }
 
@@ -307,6 +472,11 @@ void checkTask() {
                     default: {
                     }
                 }
+
+                logPrintln("Api task " + taskId + " ret " + to_string(isSuccess),
+                           airstrip::INFO, __FUNCTION__);
+                taskStatusMap[taskId] = isSuccess ? 0 : 1;
+                taskFinish(taskStatusMap);
             }
         } else {
             logPrintln("Api check task failed in server", airstrip::WARN, __FUNCTION__);
@@ -325,7 +495,48 @@ void appUpdate() {
 void uploadOpenRecord() {
 }
 
-void taskFinish() {
+void taskFinish(const map<string, int> &taskStatusMap) {
+    try {
+        boost::json::object retObj;
+        retObj["deviceId"] = getSn();
+        retObj["deviceToken"] = token;
+        boost::json::array tasks;
+        for (const auto &taskStatus: taskStatusMap) {
+            boost::json::object taskObj;
+            taskObj["taskId"] = taskStatus.first;
+            taskObj["taskStatus"] = taskStatus.second;
+            tasks.push_back(taskObj);
+        }
+        retObj["list"] = tasks;
+
+#ifdef  WIN32
+        const string certPath;
+#else
+        const string certPath = "/etc/ssl/certs/ca-certificates.crt";
+#endif
+        const string bodyStr = serialize(retObj);
+        logPrintln("Api check task ret body string = " + bodyStr, airstrip::DEBUG, __FUNCTION__);
+        const auto ret = airstrip::AirstripHttp::sendRequest(
+            g_serverAddress + "/api/v1/doorGuard/zFang/device/taskStatus",
+            airstrip::RequestMethod::POST,
+            {},
+            bodyStr,
+            10,
+            certPath
+        );
+        if (ret.success) {
+            logPrintln("Api task ret body ret = " + ret.body,
+                       airstrip::DEBUG, __FUNCTION__);
+        } else {
+            logPrintln("Api check task ret failed in local",
+                       airstrip::WARN, __FUNCTION__);
+        }
+    } catch (const exception &e) {
+        ostringstream errMsg;
+        errMsg << e.what();
+        logPrintln("Face operation error " + errMsg.str()
+                   , airstrip::ERROR, __FUNCTION__);
+    }
 }
 
 void dataBackupUp() {

@@ -1,6 +1,8 @@
 #ifndef API_H
 #define API_H
 
+
+#include <map>
 #include <string>
 
 #include "enums/general_enums.h"
@@ -33,7 +35,7 @@ void appUpdate();
 
 void uploadOpenRecord();
 
-void taskFinish();
+void taskFinish(const std::map<std::string, int> &taskStatusMap);
 
 void dataBackupUp();
 
