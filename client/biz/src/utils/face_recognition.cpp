@@ -11,7 +11,7 @@ using namespace std;
 
 std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
 
-#ifndef WIN32
+#ifndef WIN32x
 
 #include "inspireface.h"
 #include "intypedef.h"
@@ -245,6 +245,7 @@ bool faceInsert(const cv::Mat &pic, FaceUserInfo &userInfo) {
         return false;
     }
 
+    userInfo.faceId = faceId;
     faceUserInfoMap[faceId] = userInfo;
 
     logPrintln("Insert finish userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
