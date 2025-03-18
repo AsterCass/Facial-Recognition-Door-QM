@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 
+#include "db/open_record_db.h"
 #include "enums/general_enums.h"
 
 
@@ -33,7 +34,7 @@ void faceGrant();
 
 void appUpdate();
 
-void uploadOpenRecord();
+bool uploadOpenRecord(const std::vector<OpenRecordInfo> &records);
 
 void taskFinish(const std::map<std::string, int> &taskStatusMap);
 

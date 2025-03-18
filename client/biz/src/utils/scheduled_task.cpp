@@ -26,7 +26,57 @@ int doorOpenSec = 0;
 
 using namespace std;
 using namespace airstrip;
-using namespace boost::gregorian;;
+using namespace boost::gregorian;
+
+// Every (30 * 60 * (taskIvCnt + executionTime)) sec
+void updatePersistentData() {
+    static int count = 1800;
+    if (count++ < 1800) return;
+    count = 1;
+    // Every 22 hour
+    static auto lastTime = chrono::system_clock::from_time_t(0);
+    const auto currentTime = chrono::system_clock::now();
+    if (chrono::duration_cast<std::chrono::hours>(currentTime - lastTime).count() < 22) {
+        return;
+    }
+    // Operation
+    lastTime = currentTime;
+    logPrintln("Update persistent data", INFO, __FUNCTION__);
+    // Delete db data
+    deleteYearRecordDB();
+    // Delete log
+    // Delete face file
+    // Backup data
+    // Delete system tmp file
+}
+
+
+// Every (30 * 60 * (taskIvCnt + executionTime)) sec
+void uploadAppData() {
+    static int count = 1800;
+    if (count++ < 1800) return;
+    count = 1;
+
+    logPrintln("Start upload app data", INFO, __FUNCTION__);
+
+    // Upload open record
+    const auto data = getAllRecordNotUpload();
+    if (!data.empty()) {
+        const auto uploadRet = uploadOpenRecord(data);
+        if (uploadRet) {
+            vector<int64_t> recordIds = {};
+            for (const auto &record: data) {
+                recordIds.emplace_back(record.openRecordId);
+            }
+            uploadedOpenRecordDB(recordIds);
+        } else {
+            logPrintln("Upload open record fail", WARN, __FUNCTION__);
+        }
+    }
+
+    // else
+}
+
 
 // Every (10 * (taskIvCnt + executionTime)) sec
 void updateUIMainComponentHeader(const std::string &appWorkDir) {
@@ -134,7 +184,9 @@ void getNfcCode() {
         recordInfo.userId = cardInfo.userId;
         recordInfo.openMode = IcCardOpen;
         recordInfo.openResult = 0;
-        recordInfo.openTime = chrono::system_clock::to_time_t(chrono::system_clock::now());;
+        recordInfo.openTime = chrono::system_clock::to_time_t(chrono::system_clock::now());
+        recordInfo.cardNo = cardInfo.cardNo;
+        recordInfo.cardType = cardInfo.cardType;
         insertOpenRecordDB(recordInfo);
     }
 }
@@ -149,10 +201,6 @@ void doorAutoClose() {
 }
 
 void onceTaskBefore() {
-    static int count = 1;
-    if (count > 1) return;
-    ++count;
-
     // Init Camera
     CameraFrame::getInstance()->start();
 
@@ -165,47 +213,49 @@ void onceTaskBefore() {
     // Init Db
     initCardDB();
     initFaceDB();
+    initOpenRecordDB();
     loadCardDb();
     loadFaceDb();
 }
 
 
 void onceTaskAfter() {
-    static int count = 1;
-    if (count > 1) return;
-    ++count;
-
     // To home
     if (g_stackedWidget != nullptr) {
         g_stackedWidget->setCurrentIndex(MAIN_PAGE_HOME);
-    } else {
-        --count;
     }
+}
+
+void repeatOperation(const string &appWorkDir) {
+    // Task updateUIMainComponentHeader
+    updateUIMainComponentHeader(appWorkDir);
+    // Try go to hided management
+    gotoManagement();
+    // Try to get nfc code
+    getNfcCode();
+    // Try to get task list
+    checkTaskAndExecute();
+    // Auto close door
+    doorAutoClose();
+    // Try to deal with persistent data
+    updatePersistentData();
+    // Upload app data
+    uploadAppData();
+
+    // ...
 }
 
 [[noreturn]] void taskExecutor(const chrono::milliseconds interval) {
     std::string appWorkDir;
     getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
 
+    onceTaskBefore();
+    repeatOperation(appWorkDir);
+    onceTaskAfter();
+
     while (true) {
-        // Once Task
-        onceTaskBefore();
-        // Task updateUIMainComponentHeader
-        updateUIMainComponentHeader(appWorkDir);
-        // Try go to hided management
-        gotoManagement();
-        // Try to get nfc code
-        getNfcCode();
-        // Try to get task list
-        checkTaskAndExecute();
-        // Auto close door
-        doorAutoClose();
-
-        //...
-
-        // Once Task
-        onceTaskAfter();
-
+        // Operation
+        repeatOperation(appWorkDir);
         // Interval
         this_thread::sleep_for(interval);
     }
@@ -230,6 +280,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo) {
         recordInfo.openMode = FaceOpen;
         recordInfo.openResult = 0;
         recordInfo.openTime = chrono::system_clock::to_time_t(currentTime);
+        recordInfo.faceId = userInfo.faceId;
         insertOpenRecordDB(recordInfo);
         lastPass = true;
     } else {

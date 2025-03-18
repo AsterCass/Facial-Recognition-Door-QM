@@ -322,8 +322,8 @@ void checkTask() {
                     case Face: {
                         try {
                             auto taskData = taskJson.at("taskData").as_object();
-                            auto action = taskData.at("action").as_int64();
                             taskId = taskData.at("taskId").as_string().c_str();
+                            auto action = taskData.at("action").as_int64();
                             auto userId = taskData.at("userId").as_string().c_str();
                             auto startTime = taskData.at("startTime").as_int64();
                             auto endTime = taskData.at("endTime").as_int64();
@@ -366,8 +366,8 @@ void checkTask() {
                     case Card: {
                         try {
                             auto taskData = taskJson.at("taskData").as_object();
-                            auto action = taskData.at("action").as_int64();
                             taskId = taskData.at("taskId").as_string().c_str();
+                            auto action = taskData.at("action").as_int64();
                             auto userId = taskData.at("userId").as_string().c_str();
                             auto startTime = taskData.at("startTime").as_int64();
                             auto endTime = taskData.at("endTime").as_int64();
@@ -412,8 +412,8 @@ void checkTask() {
                     case Disable: {
                         try {
                             auto taskData = taskJson.at("taskData").as_object();
-                            auto action = taskData.at("action").as_int64();
                             taskId = taskData.at("taskId").as_string().c_str();
+                            auto action = taskData.at("action").as_int64();
                             auto userId = taskData.at("userId").as_string().c_str();
                             auto keyType = taskData.at("keyType").as_int64();
                             auto keyId = taskData.at("keyId").as_string().c_str();
@@ -493,7 +493,63 @@ void faceGrant() {
 void appUpdate() {
 }
 
-void uploadOpenRecord() {
+bool uploadOpenRecord(const std::vector<OpenRecordInfo> &records) {
+    bool uploadSuccessful = false;
+    try {
+        const auto now = chrono::system_clock::now();
+        const auto time = chrono::system_clock::to_time_t(now);
+
+        boost::json::object retObj;
+        retObj["deviceId"] = getSn();
+        retObj["deviceToken"] = token;
+        boost::json::array recordListJsonObj;
+        for (const auto &record: records) {
+            boost::json::object recordJsonObj;
+            recordJsonObj["userId"] = record.userId;
+            recordJsonObj["cardNo"] = record.cardNo;
+            recordJsonObj["cardType"] = record.cardType;
+            recordJsonObj["openMode"] = record.openMode;
+            recordJsonObj["openTime"] = record.openTime;
+            recordJsonObj["openResult"] = record.openResult;
+            recordJsonObj["uploadTime"] = time;
+            recordListJsonObj.push_back(recordJsonObj);
+        }
+        retObj["list"] = recordListJsonObj;
+
+#ifdef  WIN32
+        const string certPath;
+#else
+        const string certPath = "/etc/ssl/certs/ca-certificates.crt";
+#endif
+        const string bodyStr = serialize(retObj);
+        logPrintln("Request body string = " + bodyStr,
+                   airstrip::DEBUG, __FUNCTION__);
+        const auto ret = airstrip::AirstripHttp::sendRequest(
+            g_serverAddress + "/api/v1/doorGuard/zFang/device/openDoorRecords",
+            airstrip::RequestMethod::POST,
+            {},
+            bodyStr,
+            10,
+            certPath
+        );
+        if (ret.success) {
+            logPrintln("Ret body ret = " + ret.body,
+                       airstrip::DEBUG, __FUNCTION__);
+            auto parsed = boost::json::parse(ret.body);
+            if (HTTP_CODE_OK == parsed.at("code").as_int64()) {
+                uploadSuccessful = true;
+            }
+        } else {
+            logPrintln("Ret failed in local",
+                       airstrip::WARN, __FUNCTION__);
+        }
+    } catch (const exception &e) {
+        ostringstream errMsg;
+        errMsg << e.what();
+        logPrintln("Upload open record operation error " + errMsg.str()
+                   , airstrip::ERROR, __FUNCTION__);
+    }
+    return uploadSuccessful;
 }
 
 void taskFinish(const map<string, int> &taskStatusMap) {
@@ -516,7 +572,8 @@ void taskFinish(const map<string, int> &taskStatusMap) {
         const string certPath = "/etc/ssl/certs/ca-certificates.crt";
 #endif
         const string bodyStr = serialize(retObj);
-        logPrintln("Api check task ret body string = " + bodyStr, airstrip::DEBUG, __FUNCTION__);
+        logPrintln("Api check task ret body string = " + bodyStr,
+                   airstrip::DEBUG, __FUNCTION__);
         const auto ret = airstrip::AirstripHttp::sendRequest(
             g_serverAddress + "/api/v1/doorGuard/zFang/device/taskStatus",
             airstrip::RequestMethod::POST,

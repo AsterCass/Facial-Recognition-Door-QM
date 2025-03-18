@@ -83,7 +83,7 @@ std::vector<CardUserInfo> getAllCard() {
             ret.emplace_back(userInfo);
         }
     } catch (const SQLite::Exception &e) {
-        logPrintln("Card db insert failed: " + string(e.what()),
+        logPrintln("Card db get failed: " + string(e.what()),
                    airstrip::ERROR, __FUNCTION__);
         return ret;
     }
@@ -152,7 +152,7 @@ bool deleteCardDB(const std::string &userId) {
         del.bind(1, userId);
         del.exec();
     } catch (const SQLite::Exception &e) {
-        logPrintln("Card db update failed: " + string(e.what()),
+        logPrintln("Card db delete failed: " + string(e.what()),
                    airstrip::ERROR, __FUNCTION__);
         return false;
     }

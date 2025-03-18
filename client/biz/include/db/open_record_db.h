@@ -10,6 +10,9 @@ struct OpenRecordInfo {
     int64_t openTime;
     int openResult;
     int openMode;
+    int64_t faceId;
+    std::string cardNo;
+    int cardType;
     int uploaded;
 };
 
@@ -20,7 +23,7 @@ bool insertOpenRecordDB(const OpenRecordInfo &info);
 
 std::vector<OpenRecordInfo> getAllRecordNotUpload();
 
-void uploadedOpenRecordDB(const std::vector<int64_t> &recordIds);
+bool uploadedOpenRecordDB(const std::vector<int64_t> &recordIds);
 
 void deleteYearRecordDB();
 
