@@ -72,9 +72,9 @@ CameraFrame::CameraFrame(QWidget *parent): QWidget(parent) {
 
 
             bottomWidget = new QWidget(mask); {
-                bottomWidget->setObjectName("cameraFrameMaskBottom");
-                bottomWidget->setStyleSheet("#cameraFrameMaskBottom{background-color: transparent)");
                 bottomLayout = new QHBoxLayout(bottomWidget);
+                bottomLayout->setSpacing(0);
+                bottomLayout->setMargin(0);
                 // Version
                 {
                     versionLabel = new QLabel(QString("Version: %1").arg(APP_VERSION), bottomWidget);

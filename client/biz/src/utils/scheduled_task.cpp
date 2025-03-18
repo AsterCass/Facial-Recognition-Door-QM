@@ -178,7 +178,7 @@ void getNfcCode() {
                INFO, __FUNCTION__);
     const auto cardInfo = cardRecognition(ret.cardNo);
     if (!cardInfo.userId.empty()) {
-        OpenRecordInfo recordInfo;
+        OpenRecordInfo recordInfo = {};
         recordInfo.userId = cardInfo.userId;
         recordInfo.openMode = IcCardOpen;
         recordInfo.openResult = 0;
@@ -282,7 +282,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo) {
     }
 
     if (!userInfo.userId.empty()) {
-        OpenRecordInfo recordInfo;
+        OpenRecordInfo recordInfo {};
         recordInfo.userId = userInfo.userId;
         recordInfo.openMode = FaceOpen;
         recordInfo.openResult = 0;

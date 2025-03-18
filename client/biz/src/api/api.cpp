@@ -481,7 +481,7 @@ void checkTask() {
                             cout << oss.str() << endl;
                             logPrintln(oss.str(), airstrip::INFO, __FUNCTION__);
 
-                            OpenRecordInfo recordInfo;
+                            OpenRecordInfo recordInfo = {};
                             recordInfo.userId = userId;
                             recordInfo.openMode = RemoteOpen;
                             recordInfo.openResult = 0;
