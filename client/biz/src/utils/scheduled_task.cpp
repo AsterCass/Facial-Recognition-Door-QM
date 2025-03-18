@@ -23,6 +23,7 @@
 #include "utils/face_recognition.h"
 
 int doorOpenSec = 0;
+int messageLabelSec = 0;
 
 using namespace std;
 using namespace airstrip;
@@ -198,6 +199,15 @@ void doorAutoClose() {
     }
 }
 
+// Every (taskIvCnt + executionTime) sec
+void messageLabelHide() {
+    if (messageLabelSec <= 0) return;
+    if (++messageLabelSec > 3) {
+        CameraFrame::getInstance()->hideAllMessage();
+        messageLabelSec = -1;
+    }
+}
+
 void onceTaskBefore() {
     // Init Camera
     CameraFrame::getInstance()->start();
@@ -235,6 +245,8 @@ void repeatOperation(const string &appWorkDir) {
     checkTaskAndExecute();
     // Auto close door
     doorAutoClose();
+    // Auto hide message
+    messageLabelHide();
     // Try to deal with persistent data
     updatePersistentData();
     // Upload app data
@@ -284,6 +296,8 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo) {
         static auto lastFailTime = chrono::system_clock::from_time_t(0);
         if ((currentTime - lastFailTime).count() > 2) {
             if (chrono::duration_cast<std::chrono::seconds>(currentTime - lastFailTime).count() < 5) {
+                CameraFrame::getInstance()->negativeMessage();
+                messageLabelSec = 1;
                 playWav(AuthFail);
             } else {
                 playWav(AuthFailFirst);
@@ -299,6 +313,8 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo) {
 bool ScheduledTask::commonOpenDoor(const OpenRecordInfo &openRecordInfo) {
     openDoor();
     doorOpenSec = 1;
+    CameraFrame::getInstance()->positiveMessage();
+    messageLabelSec = 1;
     return insertOpenRecordDB(openRecordInfo);
 }
 

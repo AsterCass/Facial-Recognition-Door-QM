@@ -1,6 +1,8 @@
 #include "camera/camera_frame.h"
 
 #include "airstrip_log.h"
+#include "api/api.h"
+#include "config/config.h"
 #ifdef Q_OS_WIN
 #include <QCameraInfo>
 #include <QCameraViewfinder>
@@ -44,6 +46,57 @@ CameraFrame::CameraFrame(QWidget *parent): QWidget(parent) {
         mask->setStyleSheet("#cameraFrameMask{background-color:qlineargradient("
             "spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(0, 0, 0,0 "
             "),stop:0.85 rgba(0, 0, 0,0 ) ,stop:1 #000000)}");
+        mainLayout = new QVBoxLayout(mask);
+
+        // bottom and info
+        {
+            successLabel = new QLabel("核验通过", mask); {
+                successLabel->
+                        setStyleSheet("border-radius: 32px; font-size: 32px;  background-color: rgb(0, "
+                            "180, 42);color: white;");
+                successLabel->setFixedSize(240, 80);
+                successLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+                successLabel->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+                successLabel->hide();
+            }
+
+            failLabel = new QLabel("识别失败", mask); {
+                failLabel->
+                        setStyleSheet("border-radius: 32px; font-size: 32px;  background-color: rgb(245, "
+                            "63, 63);color: white;");
+                failLabel->setFixedSize(240, 80);
+                failLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+                failLabel->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
+                failLabel->hide();
+            }
+
+
+            bottomWidget = new QWidget(mask); {
+                bottomWidget->setObjectName("cameraFrameMaskBottom");
+                bottomWidget->setStyleSheet("#cameraFrameMaskBottom{background-color: transparent)");
+                bottomLayout = new QHBoxLayout(bottomWidget);
+                // Version
+                {
+                    versionLabel = new QLabel(QString("Version: %1").arg(APP_VERSION), bottomWidget);
+                    versionLabel->setStyleSheet(
+                        "background-color: transparent; color: white; font-size: 7px;");
+                }
+                // SN
+                {
+                    snLabel = new QLabel(QString("SN: %1").arg(getSn().c_str()), bottomWidget);
+                    snLabel->setStyleSheet("background-color: transparent; color: white; font-size: 7px;");
+                }
+                bottomLayout->addWidget(versionLabel);
+                bottomLayout->addStretch();
+                bottomLayout->addWidget(snLabel);
+            }
+        }
+
+        mainLayout->addStretch();
+        mainLayout->addWidget(successLabel, 0, Qt::AlignCenter);
+        mainLayout->addWidget(failLabel, 0, Qt::AlignCenter);
+        mainLayout->addStretch();
+        mainLayout->addWidget(bottomWidget);
     }
 }
 

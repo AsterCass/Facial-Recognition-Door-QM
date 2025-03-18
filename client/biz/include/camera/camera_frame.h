@@ -1,5 +1,6 @@
 #ifndef CAMERA_FRAME_H
 #define CAMERA_FRAME_H
+#include <QLabel>
 #include <QWidget>
 #include <QVBoxLayout>
 #include <opencv2/core.hpp>
@@ -29,6 +30,28 @@ public:
 
     void updateFrameRK(const cv::Mat &frame);
 
+    void positiveMessage() const {
+        if (nullptr == successLabel) {
+            return;
+        }
+        successLabel->show();
+    }
+
+    void negativeMessage() const {
+        if (nullptr == failLabel) {
+            return;
+        }
+        failLabel->show();
+    }
+
+    void hideAllMessage() const {
+        if (nullptr == failLabel || nullptr == successLabel) {
+            return;
+        }
+        successLabel->hide();
+        failLabel->hide();
+    }
+
 private:
     explicit CameraFrame(QWidget *parent = nullptr);
 
@@ -38,6 +61,16 @@ private:
 
     QWidget *mask = nullptr;
     QVBoxLayout *mainLayout = nullptr;
+
+    QVBoxLayout *maskLayout = nullptr;
+    QWidget *bottomWidget = nullptr;
+    QHBoxLayout *bottomLayout = nullptr;
+
+
+    QLabel *successLabel = nullptr;
+    QLabel *failLabel = nullptr;
+    QLabel *snLabel = nullptr;
+    QLabel *versionLabel = nullptr;
 
 #ifdef Q_OS_WIN
     QCamera *camera = nullptr;
