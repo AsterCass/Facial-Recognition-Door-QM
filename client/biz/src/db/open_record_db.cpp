@@ -102,18 +102,17 @@ bool uploadedOpenRecordDB(const std::vector<int64_t> &recordIds) {
     }
 
     try {
-        SQLite::Statement update(
-            *dbOpenRecord, "UPDATE open_record SET uploaded = 1 WHERE id in (?)");
-
         ostringstream oss;
         for (const auto &recordId: recordIds) {
-            oss << to_string(recordId) << ",";
+            oss << recordId << ",";
         }
         string idsStr = oss.str();
         idsStr.pop_back();
 
-        update.bind(1, idsStr);
+        const string sql = "UPDATE open_record SET uploaded = 1 WHERE id IN (" + idsStr + ")";
+        logPrintln("Open record db sql :" + sql, airstrip::DEBUG, __FUNCTION__);
 
+        SQLite::Statement update(*dbOpenRecord, sql);
         update.exec();
     } catch (const SQLite::Exception &e) {
         logPrintln("Open record db update failed: " + string(e.what()),
@@ -131,7 +130,7 @@ bool insertOpenRecordDB(const OpenRecordInfo &info) {
         SQLite::Statement insert(
             *dbOpenRecord,
             "INSERT INTO open_record (user_id, open_time, open_mode, open_result, face_id, card_no, card_type)"
-            " VALUES (?, ?, ?, ?, ?, ?)");
+            " VALUES (?, ?, ?, ?, ?, ?, ?)");
 
         insert.bind(1, info.userId);
         insert.bind(2, info.openTime);

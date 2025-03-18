@@ -79,12 +79,12 @@ CameraFrame::CameraFrame(QWidget *parent): QWidget(parent) {
                 {
                     versionLabel = new QLabel(QString("Version: %1").arg(APP_VERSION), bottomWidget);
                     versionLabel->setStyleSheet(
-                        "background-color: transparent; color: white; font-size: 7px;");
+                        "background-color: transparent; color: white; font-size: 16px;");
                 }
                 // SN
                 {
                     snLabel = new QLabel(QString("SN: %1").arg(getSn().c_str()), bottomWidget);
-                    snLabel->setStyleSheet("background-color: transparent; color: white; font-size: 7px;");
+                    snLabel->setStyleSheet("background-color: transparent; color: white; font-size: 16px;");
                 }
                 bottomLayout->addWidget(versionLabel);
                 bottomLayout->addStretch();
@@ -92,6 +92,7 @@ CameraFrame::CameraFrame(QWidget *parent): QWidget(parent) {
             }
         }
 
+        mainLayout->addStretch();
         mainLayout->addStretch();
         mainLayout->addWidget(successLabel, 0, Qt::AlignCenter);
         mainLayout->addWidget(failLabel, 0, Qt::AlignCenter);

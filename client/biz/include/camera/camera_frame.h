@@ -34,6 +34,7 @@ public:
         if (nullptr == successLabel) {
             return;
         }
+        failLabel->hide();
         successLabel->show();
     }
 
@@ -41,6 +42,7 @@ public:
         if (nullptr == failLabel) {
             return;
         }
+        successLabel->hide();
         failLabel->show();
     }
 
