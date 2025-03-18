@@ -2,6 +2,7 @@
 #define SCHEDULED_TASK_H
 #include <future>
 #include "face_recognition.h"
+#include "db/open_record_db.h"
 
 
 class ScheduledTask {
@@ -16,6 +17,8 @@ public:
     }
 
     static void sendFaceRegRes(const FaceUserInfo &userInfo);
+
+    static bool commonOpenDoor(const OpenRecordInfo& openRecordInfo);
 
 private:
     ScheduledTask();

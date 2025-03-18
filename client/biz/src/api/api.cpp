@@ -15,6 +15,7 @@
 #include "utils/card_recognition.h"
 #include "utils/face_recognition.h"
 #include "utils/general_utils.h"
+#include "utils/scheduled_task.h"
 
 #ifndef Q_OS_WIN
 #include <fcntl.h>
@@ -77,7 +78,8 @@ void openDoor() {
         logPrintln("Failed to open device", airstrip::ERROR, __FUNCTION__);
         return;
     }
-    ioctl(fdForDoor, TELPO_IOCTL_RELAY, 1);
+    auto openRet = ioctl(fdForDoor, TELPO_IOCTL_RELAY, 1);
+    logPrintln("Open door ret " + to_string(openRet), airstrip::DEBUG, __FUNCTION__);
 #endif
     logPrintln("Open door ", airstrip::INFO, __FUNCTION__);
 }
@@ -91,7 +93,8 @@ void closeDoor() {
         logPrintln("Failed to open device", airstrip::ERROR, __FUNCTION__);
         return;
     }
-    ioctl(fdForDoor, TELPO_IOCTL_RELAY, 0);
+    auto openRet = ioctl(fdForDoor, TELPO_IOCTL_RELAY, 0);
+    logPrintln("Close door ret " + to_string(openRet), airstrip::DEBUG, __FUNCTION__);
 #endif
     logPrintln("Close door ", airstrip::INFO, __FUNCTION__);
 }
@@ -468,6 +471,28 @@ void checkTask() {
                         break;
                     }
                     case Open: {
+                        try {
+                            auto taskData = taskJson.at("taskData").as_object();
+                            taskId = taskData.at("taskId").as_string().c_str();
+                            auto userId = taskData.at("userId").as_string().c_str();
+
+                            ostringstream oss;
+                            oss << "Api open get taskId: " << taskId << " userId: " << userId;
+                            cout << oss.str() << endl;
+                            logPrintln(oss.str(), airstrip::INFO, __FUNCTION__);
+
+                            OpenRecordInfo recordInfo;
+                            recordInfo.userId = userId;
+                            recordInfo.openMode = RemoteOpen;
+                            recordInfo.openResult = 0;
+                            recordInfo.openTime = sec;
+                            isSuccess = ScheduledTask::commonOpenDoor(recordInfo);
+                        } catch (const exception &e) {
+                            ostringstream errMsg;
+                            errMsg << e.what();
+                            logPrintln("Open execute error " + errMsg.str()
+                                       , airstrip::ERROR, __FUNCTION__);
+                        }
                         break;
                     }
                     default: {
@@ -525,7 +550,7 @@ bool uploadOpenRecord(const std::vector<OpenRecordInfo> &records) {
         logPrintln("Request body string = " + bodyStr,
                    airstrip::DEBUG, __FUNCTION__);
         const auto ret = airstrip::AirstripHttp::sendRequest(
-            g_serverAddress + "/api/v1/doorGuard/zFang/device/openDoorRecords",
+            g_serverAddress + "/api/v1/doorGuard/zFang/device/openDoorRecordList",
             airstrip::RequestMethod::POST,
             {},
             bodyStr,

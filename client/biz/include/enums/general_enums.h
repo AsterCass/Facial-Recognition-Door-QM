@@ -34,6 +34,7 @@ enum PlayWavType {
 enum ZFOpenDoorType {
     FaceOpen = 7,
     IcCardOpen = 15,
+    RemoteOpen = 5,
 };
 
 enum RUNTIME_ENV {

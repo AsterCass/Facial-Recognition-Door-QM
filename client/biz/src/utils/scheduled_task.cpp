@@ -177,9 +177,6 @@ void getNfcCode() {
                INFO, __FUNCTION__);
     const auto cardInfo = cardRecognition(ret.cardNo);
     if (!cardInfo.userId.empty()) {
-        openDoor();
-        doorOpenSec = 1;
-        playWav(AuthSuccess);
         OpenRecordInfo recordInfo;
         recordInfo.userId = cardInfo.userId;
         recordInfo.openMode = IcCardOpen;
@@ -187,7 +184,8 @@ void getNfcCode() {
         recordInfo.openTime = chrono::system_clock::to_time_t(chrono::system_clock::now());
         recordInfo.cardNo = cardInfo.cardNo;
         recordInfo.cardType = cardInfo.cardType;
-        insertOpenRecordDB(recordInfo);
+        ScheduledTask::commonOpenDoor(recordInfo);
+        playWav(AuthSuccess);
     }
 }
 
@@ -272,16 +270,15 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo) {
     }
 
     if (!userInfo.userId.empty()) {
-        openDoor();
-        doorOpenSec = 1;
-        playWav(AuthSuccess);
         OpenRecordInfo recordInfo;
         recordInfo.userId = userInfo.userId;
         recordInfo.openMode = FaceOpen;
         recordInfo.openResult = 0;
         recordInfo.openTime = chrono::system_clock::to_time_t(currentTime);
         recordInfo.faceId = userInfo.faceId;
-        insertOpenRecordDB(recordInfo);
+        commonOpenDoor(recordInfo);
+        playWav(AuthSuccess);
+
         lastPass = true;
     } else {
         static auto lastFailTime = chrono::system_clock::from_time_t(0);
@@ -297,6 +294,12 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo) {
     }
 
     lastTime = currentTime;
+}
+
+bool ScheduledTask::commonOpenDoor(const OpenRecordInfo &openRecordInfo) {
+    openDoor();
+    doorOpenSec = 1;
+    return insertOpenRecordDB(openRecordInfo);
 }
 
 ScheduledTask::ScheduledTask() {
