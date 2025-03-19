@@ -142,6 +142,7 @@ void updateUIMainComponentHeader(const std::string &appWorkDir) {
 
     // Cloud
     {
+        MainComponentHeader::getInstance()->updateServerStatus(linkedServer());
     }
 }
 
@@ -282,7 +283,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo) {
     }
 
     if (!userInfo.userId.empty()) {
-        OpenRecordInfo recordInfo {};
+        OpenRecordInfo recordInfo{};
         recordInfo.userId = userInfo.userId;
         recordInfo.openMode = FaceOpen;
         recordInfo.openResult = 0;

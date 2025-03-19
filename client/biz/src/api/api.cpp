@@ -224,58 +224,73 @@ void playWav(const PlayWavType type) {
                , airstrip::INFO, __FUNCTION__);
 }
 
+bool linkedServer() {
+    return !token.empty();
+}
+
 
 // http
 
 void login() {
-    token = "";
-    const auto now = chrono::system_clock::now();
-    const auto sec = chrono::duration_cast<chrono::seconds>(
-        now.time_since_epoch()).count();
+    try {
+        token = "";
+        const auto now = chrono::system_clock::now();
+        const auto sec = chrono::duration_cast<chrono::seconds>(
+            now.time_since_epoch()).count();
 
-    boost::json::object loginJson;
-    loginJson["deviceId"] = getSn();
-    loginJson["deviceSign"] = getSign();
-    loginJson["deviceVersion"] = APP_VERSION;
-    loginJson["timestamp"] = sec;
+        boost::json::object loginJson;
+        loginJson["deviceId"] = getSn();
+        loginJson["deviceSign"] = getSign();
+        loginJson["deviceVersion"] = APP_VERSION;
+        loginJson["timestamp"] = sec;
 
 #ifdef  WIN32
-    const string certPath;
+        const string certPath;
 #else
     const string certPath = "/etc/ssl/certs/ca-certificates.crt";
 #endif
-    const string bodyStr = serialize(loginJson);
-    logPrintln("Api login body string = " + bodyStr, airstrip::INFO, __FUNCTION__);
-    const auto ret = airstrip::AirstripHttp::sendRequest(
-        g_serverAddress + "/api/v1/doorGuard/zFang/device/login",
-        airstrip::RequestMethod::POST,
-        {},
-        bodyStr,
-        10,
-        certPath
-    );
+        const string bodyStr = serialize(loginJson);
+        logPrintln("Api login body string = " + bodyStr, airstrip::INFO, __FUNCTION__);
+        const auto ret = airstrip::AirstripHttp::sendRequest(
+            g_serverAddress + "/api/v1/doorGuard/zFang/device/login",
+            airstrip::RequestMethod::POST,
+            {},
+            bodyStr,
+            5,
+            certPath
+        );
 
-    if (ret.success) {
-        logPrintln("Api login ret = " + ret.body, airstrip::INFO, __FUNCTION__);
-        auto parsed = boost::json::parse(ret.body);
-        if (HTTP_CODE_OK == parsed.at("code").as_int64()) {
-            auto data = parsed.at("data").as_object();
-            const auto deviceToken = data.at("deviceToken").as_string().c_str();
-            token = deviceToken;
-            logPrintln("Api login finish", airstrip::INFO, __FUNCTION__);
+        if (ret.success) {
+            logPrintln("Api login ret = " + ret.body, airstrip::INFO, __FUNCTION__);
+            auto parsed = boost::json::parse(ret.body);
+            if (HTTP_CODE_OK == parsed.at("code").as_int64()) {
+                auto data = parsed.at("data").as_object();
+                const auto deviceToken = data.at("deviceToken").as_string().c_str();
+                token = deviceToken;
+                logPrintln("Api login finish", airstrip::INFO, __FUNCTION__);
+            } else {
+                logPrintln("Api login failed in server", airstrip::WARN, __FUNCTION__);
+            }
         } else {
-            logPrintln("Api login failed in server", airstrip::WARN, __FUNCTION__);
+            logPrintln("Api login failed in local", airstrip::WARN, __FUNCTION__);
         }
-    } else {
-        logPrintln("Api login failed in local", airstrip::WARN, __FUNCTION__);
+    } catch (const exception &e) {
+        ostringstream errMsg;
+        errMsg << e.what();
+        logPrintln("Login error " + errMsg.str()
+                   , airstrip::ERROR, __FUNCTION__);
     }
 }
 
 
 void checkTask() {
+    // todo 加锁
+
     if (token.empty()) {
-        // todo re login
-        return;
+        login();
+        if (token.empty()) {
+            return;
+        }
     }
 
     const auto now = chrono::system_clock::now();
@@ -505,20 +520,40 @@ void checkTask() {
                 taskFinish(taskStatusMap);
             }
         } else {
+            token = "";
             logPrintln("Api check task failed in server", airstrip::WARN, __FUNCTION__);
         }
     } else {
+        token = "";
         logPrintln("Api check task failed in local", airstrip::WARN, __FUNCTION__);
     }
 }
 
 void faceGrant() {
+    if (token.empty()) {
+        login();
+        if (token.empty()) {
+            return;
+        }
+    }
 }
 
 void appUpdate() {
+    if (token.empty()) {
+        login();
+        if (token.empty()) {
+            return;
+        }
+    }
 }
 
 bool uploadOpenRecord(const std::vector<OpenRecordInfo> &records) {
+    if (token.empty()) {
+        login();
+        if (token.empty()) {
+            return false;
+        }
+    }
     bool uploadSuccessful = false;
     try {
         const auto now = chrono::system_clock::now();
@@ -563,8 +598,11 @@ bool uploadOpenRecord(const std::vector<OpenRecordInfo> &records) {
             auto parsed = boost::json::parse(ret.body);
             if (HTTP_CODE_OK == parsed.at("code").as_int64()) {
                 uploadSuccessful = true;
+            } else {
+                token = "";
             }
         } else {
+            token = "";
             logPrintln("Ret failed in local",
                        airstrip::WARN, __FUNCTION__);
         }
@@ -578,6 +616,12 @@ bool uploadOpenRecord(const std::vector<OpenRecordInfo> &records) {
 }
 
 void taskFinish(const map<string, int> &taskStatusMap) {
+    if (token.empty()) {
+        login();
+        if (token.empty()) {
+            return;
+        }
+    }
     try {
         boost::json::object retObj;
         retObj["deviceId"] = getSn();
@@ -611,6 +655,7 @@ void taskFinish(const map<string, int> &taskStatusMap) {
             logPrintln("Api task ret body ret = " + ret.body,
                        airstrip::DEBUG, __FUNCTION__);
         } else {
+            token = "";
             logPrintln("Api check task ret failed in local",
                        airstrip::WARN, __FUNCTION__);
         }
@@ -622,8 +667,24 @@ void taskFinish(const map<string, int> &taskStatusMap) {
     }
 }
 
-void dataBackupUp() {
+bool dataBackupUp() {
+    if (token.empty()) {
+        login();
+        if (token.empty()) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
-void dataBackupDown() {
+bool dataBackupDown() {
+    if (token.empty()) {
+        login();
+        if (token.empty()) {
+            return false;
+        }
+    }
+
+    return true;
 }

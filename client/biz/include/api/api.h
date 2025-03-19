@@ -23,6 +23,8 @@ void playWav(const std::string &voiceTemplate);
 
 void playWav(PlayWavType type);
 
+bool linkedServer();
+
 
 // http
 
@@ -38,9 +40,9 @@ bool uploadOpenRecord(const std::vector<OpenRecordInfo> &records);
 
 void taskFinish(const std::map<std::string, int> &taskStatusMap);
 
-void dataBackupUp();
+bool dataBackupUp();
 
-void dataBackupDown();
+bool dataBackupDown();
 
 
 #endif // API_H

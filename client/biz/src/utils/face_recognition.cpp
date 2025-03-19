@@ -11,7 +11,7 @@ using namespace std;
 
 std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
 
-#ifndef WIN32x
+#ifndef WIN32
 
 #include "inspireface.h"
 #include "intypedef.h"

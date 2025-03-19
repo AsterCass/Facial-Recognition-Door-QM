@@ -126,7 +126,7 @@ set(PROJECT_SOURCES
         src/utils/scheduled_task.cpp
 )
 
-add_executable(FacialRecognitionDoor src/main.cpp
+add_executable(FacialRecognitionDoor
         ${PROJECT_SOURCES}
 )
 
