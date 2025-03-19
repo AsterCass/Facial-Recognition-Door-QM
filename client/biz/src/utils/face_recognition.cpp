@@ -45,7 +45,7 @@ void updateExposeAndGain(const bool isUp) {
 
     ostringstream updateExposeGainCmd;
     updateExposeGainCmd << "sh " << g_appWorkDir + "script/linux/reset_expose.sh "
-            << EXPOSE_AND_GAIN_PARAM.at(currentLightLevel).at(0)
+            << EXPOSE_AND_GAIN_PARAM.at(currentLightLevel).at(0) << " "
             << EXPOSE_AND_GAIN_PARAM.at(currentLightLevel).at(1) << " && sh "
             << g_appWorkDir + "script/linux/reset_light.sh "
             << EXPOSE_AND_GAIN_PARAM.at(currentLightLevel).at(2);
