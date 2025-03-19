@@ -28,7 +28,6 @@ private:
     QVBoxLayout *mainLayout = nullptr;
     QWidget *header = nullptr;
     QWidget *body = nullptr;
-    std::string appWorkDir;
 };
 
 

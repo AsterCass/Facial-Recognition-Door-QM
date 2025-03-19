@@ -148,9 +148,7 @@ void playWav(const string &voiceTemplate) {
 
 void playWav(const PlayWavType type) {
     if (staticSoundsDir.empty()) {
-        string appWorkDir;
-        airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
-        staticSoundsDir = appWorkDir + "static/sounds/";
+        staticSoundsDir = g_appWorkDir + "static/sounds/";
     }
 
     // push to queue

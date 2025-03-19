@@ -80,7 +80,7 @@ void uploadAppData() {
 
 
 // Every (10 * (taskIvCnt + executionTime)) sec
-void updateUIMainComponentHeader(const std::string &appWorkDir) {
+void updateUIMainComponentHeader() {
     static int count = 10;
     if (count++ < 10) return;
     count = 1;
@@ -94,7 +94,7 @@ void updateUIMainComponentHeader(const std::string &appWorkDir) {
     oss << put_time(localtime(&time), "%Y.%m.%d %H:%M ") << weekStr;
     MainComponentHeader::getInstance()->updateTimeText(string(oss.str()));
 
-    if (appWorkDir.empty()) {
+    if (g_appWorkDir.empty()) {
         return;
     }
 
@@ -102,9 +102,9 @@ void updateUIMainComponentHeader(const std::string &appWorkDir) {
     {
         static string currentWiredIp;
 #ifdef WIN32
-        const string wiredIp = execScript(appWorkDir + "script/win/get_wired_ip.ps1");
+        const string wiredIp = execScript(g_appWorkDir + "script/win/get_wired_ip.ps1");
 #else
-        const string wiredIp = execScript(appWorkDir + "script/linux/get_wired_ip.sh");
+        const string wiredIp = execScript(g_appWorkDir + "script/linux/get_wired_ip.sh");
 #endif
         if (wiredIp != currentWiredIp) {
             currentWiredIp = wiredIp;
@@ -116,9 +116,9 @@ void updateUIMainComponentHeader(const std::string &appWorkDir) {
     {
         static string currentWirelessIp;
 #ifdef WIN32
-        const string wirelessIp = execScript(appWorkDir + "script/win/get_wireless_ip.ps1");
+        const string wirelessIp = execScript(g_appWorkDir + "script/win/get_wireless_ip.ps1");
 #else
-        const string wirelessIp = execScript(appWorkDir + "script/linux/get_wireless_ip.sh");
+        const string wirelessIp = execScript(g_appWorkDir + "script/linux/get_wireless_ip.sh");
 #endif
         if (wirelessIp != currentWirelessIp) {
             currentWirelessIp = wirelessIp;
@@ -132,7 +132,7 @@ void updateUIMainComponentHeader(const std::string &appWorkDir) {
 #ifdef WIN32
         const string fourGIp;
 #else
-        const string fourGIp = execScript(appWorkDir + "script/linux/get_4g_ip.sh");
+        const string fourGIp = execScript(g_appWorkDir + "script/linux/get_4g_ip.sh");
 #endif
         if (fourGIp != current4gIp) {
             current4gIp = fourGIp;
@@ -235,9 +235,9 @@ void onceTaskAfter() {
     }
 }
 
-void repeatOperation(const string &appWorkDir) {
+void repeatOperation() {
     // Task updateUIMainComponentHeader
-    updateUIMainComponentHeader(appWorkDir);
+    updateUIMainComponentHeader();
     // Try go to hided management
     gotoManagement();
     // Try to get nfc code
@@ -257,16 +257,13 @@ void repeatOperation(const string &appWorkDir) {
 }
 
 [[noreturn]] void taskExecutor(const chrono::milliseconds interval) {
-    std::string appWorkDir;
-    getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
-
     onceTaskBefore();
-    repeatOperation(appWorkDir);
+    repeatOperation();
     onceTaskAfter();
 
     while (true) {
         // Operation
-        repeatOperation(appWorkDir);
+        repeatOperation();
         // Interval
         this_thread::sleep_for(interval);
     }

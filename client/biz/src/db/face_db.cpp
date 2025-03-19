@@ -18,10 +18,7 @@ void initFaceDB() {
     }
     logPrintln("Face database initialization start", airstrip::INFO, __FUNCTION__);
 
-    string appWorkDir;
-    airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
-
-    dbFace = new SQLite::Database(appWorkDir + "db/face.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+    dbFace = new SQLite::Database(g_appWorkDir + "db/face.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
     try {
         SQLite::Transaction transaction(*dbFace);
 

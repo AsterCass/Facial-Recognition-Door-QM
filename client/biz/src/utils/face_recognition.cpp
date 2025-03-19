@@ -18,12 +18,43 @@ std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
 #include <string>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/core/types.hpp>
+#include <opencv2/imgproc.hpp>
+#include "airstrip_command.h"
 #include "facedetectcnn.h"
 #include <boost/json.hpp>
 
 
 HFSession faceRecognitionSession = nullptr;
+int currentLightLevel = 13;
 
+void updateExposeAndGain(const bool isUp) {
+    logPrintln("Current level is " + to_string(currentLightLevel) +
+               " want to up " + to_string(isUp), airstrip::INFO, __FUNCTION__);
+
+    if (currentLightLevel <= 0 && !isUp) {
+        logPrintln("Down fai", airstrip::INFO, __FUNCTION__);
+    } else if (currentLightLevel >= EXPOSE_AND_GAIN_PARAM.size() - 1 && isUp) {
+        logPrintln("Up fai", airstrip::INFO, __FUNCTION__);
+    } else {
+        if (isUp) {
+            ++currentLightLevel;
+        } else {
+            --currentLightLevel;
+        }
+    }
+
+    ostringstream updateExposeGainCmd;
+    updateExposeGainCmd << "sh " << g_appWorkDir + "script/linux/reset_expose.sh "
+            << EXPOSE_AND_GAIN_PARAM.at(currentLightLevel).at(0)
+            << EXPOSE_AND_GAIN_PARAM.at(currentLightLevel).at(1) << " && sh "
+            << g_appWorkDir + "script/linux/reset_light.sh "
+            << EXPOSE_AND_GAIN_PARAM.at(currentLightLevel).at(2);
+
+
+    logPrintln("Current cmd : " + updateExposeGainCmd.str(),
+               airstrip::DEBUG, __FUNCTION__);
+    airstrip::execCommand(updateExposeGainCmd.str());
+}
 
 
 std::string serializeHFFaceFeature(const HFFaceFeature &feature) {
@@ -81,10 +112,7 @@ void initFaceRecognition() {
 
     logPrintln("Start init face model", airstrip::INFO, __FUNCTION__);
 
-    string appWorkDir;
-    airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
-
-    const string modelPath = appWorkDir + "model/Pikachu";
+    const string modelPath = g_appWorkDir + "model/Pikachu";
     HResult ret = HFLaunchInspireFace(modelPath.c_str());
     if (ret != HSUCCEED) {
         logPrintln("Load resource error: " + ret, airstrip::CRITICAL, __FUNCTION__);
@@ -405,7 +433,7 @@ bool faceVoiceTemplate(const std::string &userId, const std::string &voiceFeatur
     return true;
 }
 
-bool faceDetect(const cv::Mat &frame, cv::Rect &rect, int orgCols, int orgRows) {
+bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, int orgCols, int orgRows) {
     bool ret = false;
     if (!initializedFaceRec) {
         return ret;
@@ -447,6 +475,46 @@ bool faceDetect(const cv::Mat &frame, cv::Rect &rect, int orgCols, int orgRows) 
         rect.y = std::min(origY, orgRows);;
         rect.width = std::min(orgCols - origX, origWidth);
         rect.height = std::min(orgRows - origY, origHeight);
+
+        // 计算明暗矫正摄像头
+        const cv::Mat rgaFrameFace = rgaFrame(rect);
+        cv::Mat grayFrameFace;
+        cvtColor(rgaFrameFace, grayFrameFace, cv::COLOR_BGR2GRAY);
+
+
+        //亮暗比例
+        int darkPixels = 0;
+        int brightPixels = 0;
+        double brightnessSum = 0;
+        const int totalPixels = grayFrameFace.rows * grayFrameFace.cols;
+
+        for (int i = 0; i < grayFrameFace.rows; i++) {
+            const uchar *row = grayFrameFace.ptr<uchar>(i);
+            for (int j = 0; j < grayFrameFace.cols; j++) {
+                constexpr double lightThreshold = 200.0;
+                constexpr double darkThreshold = 70.0;
+                const uchar pixel = row[j];
+                brightnessSum += pixel;
+                if (pixel < darkThreshold) {
+                    darkPixels++;
+                }
+                if (pixel > lightThreshold) {
+                    brightPixels++;
+                }
+            }
+        }
+
+        const double lightRatio = static_cast<double>(brightPixels) / totalPixels;
+        const double darkRatio = static_cast<double>(darkPixels) / totalPixels;
+
+        logPrintln("Face Detect light radio: " + to_string(lightRatio)
+                   + " dark radio: " + to_string(darkRatio), airstrip::DEBUG, __FUNCTION__);
+
+        if (lightRatio > 0.5) {
+            updateExposeAndGain(false);
+        } else if (darkRatio > 0.3) {
+            updateExposeAndGain(true);
+        }
     }
 
     free(pBuffer);

@@ -19,10 +19,7 @@ void initOpenRecordDB() {
     }
     logPrintln("Open record database initialization start", airstrip::INFO, __FUNCTION__);
 
-    string appWorkDir;
-    airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
-
-    dbOpenRecord = new SQLite::Database(appWorkDir + "db/open_record.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+    dbOpenRecord = new SQLite::Database(g_appWorkDir + "db/open_record.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
     try {
         SQLite::Transaction transaction(*dbOpenRecord);
 

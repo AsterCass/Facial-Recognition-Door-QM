@@ -31,7 +31,7 @@ bool faceDisable(const std::string &userId, int isEnable);
 
 bool faceVoiceTemplate(const std::string &userId, const std::string &voiceFeature);
 
-bool faceDetect(const cv::Mat &frame, cv::Rect &rect, int orgCols, int orgRows);
+bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, int orgCols, int orgRows);
 
 void faceRecognition(const cv::Mat &frame, const cv::Rect &rect);
 

@@ -7,8 +7,6 @@
 using namespace std;
 
 MainPageInit::MainPageInit(QWidget *parent): QWidget(parent) {
-    airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
-
     mainLayout = new QVBoxLayout(this);
     body = new QWidget(this);
     mainLayout->setSpacing(0);
@@ -22,7 +20,7 @@ void MainPageInit::setElement() {
     body->setObjectName("pageInitBody");
     QString styleSheet;
     styleSheet.append("#pageInitBody{border-image: url(")
-            .append(QString::fromStdString(appWorkDir))
+            .append(QString::fromStdString(g_appWorkDir))
             .append("static/images/bg-launch.png)}");
     body->setStyleSheet(styleSheet);
 

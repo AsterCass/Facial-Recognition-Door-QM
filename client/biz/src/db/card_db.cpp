@@ -18,10 +18,7 @@ void initCardDB() {
     }
     logPrintln("Card database initialization start", airstrip::INFO, __FUNCTION__);
 
-    string appWorkDir;
-    airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
-
-    dbCard = new SQLite::Database(appWorkDir + "db/card.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
+    dbCard = new SQLite::Database(g_appWorkDir + "db/card.db", SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
     try {
         SQLite::Transaction transaction(*dbCard);
 

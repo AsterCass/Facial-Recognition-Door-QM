@@ -48,6 +48,28 @@ constexpr auto MAX_FONT_SIZE = 18;
 constexpr auto MINI_ICON_SIZE = 40;
 #endif
 
+const std::vector<std::vector<int> > EXPOSE_AND_GAIN_PARAM = {
+    {10, 64, 0},
+    {40, 64, 0},
+    {70, 64, 0},
+    {100, 64, 0},
+    {200, 64, 0},
+    {300, 64, 0},
+    {400, 64, 0},
+    {500, 64, 0},
+    {600, 64, 0},
+    {700, 64, 0},
+    {800, 64, 0},
+    {900, 64, 0},
+    {1000, 64, 0},
+    {1121, 64, 0},
+    {1121, 85, 0},
+    {1121, 150, 0},
+    {1121, 200, 0},
+    {1121, 300, 0},
+    {1121, 400, 80},
+};
+
 // variable
 extern void *g_mainThreadPool;
 
@@ -59,6 +81,7 @@ extern airstrip::CommonBackendConfigDbManager g_commonDb;
 
 extern std::deque<int> g_routerQueue;
 
+extern std::string g_appWorkDir;
 extern std::string g_serverAddress;
 extern std::string g_managementPassword;
 extern std::string g_signId;

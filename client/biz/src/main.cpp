@@ -74,10 +74,13 @@ int main(int argc, char *argv[]) {
     enableProgramOptions(optSetting, argc, argv);
 
     // Dump
-    std::string appWorkDir;
-    airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &appWorkDir);
+    airstrip::getProgramOptions(PRO_OPT_APP_WORK_DIR, &g_appWorkDir);
+    if (g_appWorkDir.empty()) {
+        logPrintln("App work dir not found", airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
 #ifndef WIN32
-    google_breakpad::MinidumpDescriptor descriptor(appWorkDir + "dump");
+    google_breakpad::MinidumpDescriptor descriptor(g_appWorkDir + "dump");
     google_breakpad::ExceptionHandler eh(descriptor, NULL, dumpCallback, NULL, true, -1);
 #endif
 
@@ -88,8 +91,8 @@ int main(int argc, char *argv[]) {
     g_mainThreadPool = airstrip::ThreadPool::getInstance(3);
 
     // Db
-    if (!appWorkDir.empty()) {
-        g_commonDb.initDb(appWorkDir + PRO_DB_ADDRESS);
+    {
+        g_commonDb.initDb(g_appWorkDir + PRO_DB_ADDRESS);
 
         // update common_backend_config set config_value_json="localhost:5525" where config_name="serverAddress";
         std::string serverAddress = g_commonDb.getConfig(PRO_DB_COMMON_KEY_SERVER_ADD);
