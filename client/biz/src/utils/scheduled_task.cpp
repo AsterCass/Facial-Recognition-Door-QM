@@ -155,14 +155,16 @@ void checkTaskAndExecute() {
     checkTask();
 }
 
-// Every (5 * (taskIvCnt + executionTime)) sec
+// Every (4 * (taskIvCnt + executionTime)) sec
 void gotoManagement() {
-    static int count = 5;
-    if (count++ < 5) return;
+    static int count = 4;
+    if (count++ < 4) return;
     count = 1;
     if (g_tryGoManagementCount >= 5) {
         g_tryGoManagementCount = 0;
-        logPrintln("Go to management...", INFO, __FUNCTION__);
+        if (g_stackedWidget) {
+            g_stackedWidget->setCurrentIndex(MAIN_PAGE_SETTING_LOGIN);
+        }
     } else {
         g_tryGoManagementCount = 0;
     }

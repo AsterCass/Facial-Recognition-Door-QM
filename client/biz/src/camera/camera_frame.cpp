@@ -51,20 +51,34 @@ CameraFrame::CameraFrame(QWidget *parent): QWidget(parent) {
         // bottom and info
         {
             successLabel = new QLabel("核验通过", mask); {
+#ifdef WIN32
+                successLabel->
+                        setStyleSheet("border-radius: 16px; font-size: 16px;  background-color: rgb(0, "
+                            "180, 42);color: white;");
+                successLabel->setFixedSize(120, 40);
+#else
                 successLabel->
                         setStyleSheet("border-radius: 32px; font-size: 32px;  background-color: rgb(0, "
                             "180, 42);color: white;");
                 successLabel->setFixedSize(240, 80);
+#endif
                 successLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
                 successLabel->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
                 successLabel->hide();
             }
 
             failLabel = new QLabel("识别失败", mask); {
+#ifdef WIN32
+                failLabel->
+                        setStyleSheet("border-radius: 16px; font-size: 16px;  background-color: rgb(245, "
+                            "63, 63);color: white;");
+                failLabel->setFixedSize(120, 40);
+#else
                 failLabel->
                         setStyleSheet("border-radius: 32px; font-size: 32px;  background-color: rgb(245, "
                             "63, 63);color: white;");
                 failLabel->setFixedSize(240, 80);
+#endif
                 failLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
                 failLabel->setAlignment(Qt::AlignVCenter | Qt::AlignHCenter);
                 failLabel->hide();
@@ -78,13 +92,24 @@ CameraFrame::CameraFrame(QWidget *parent): QWidget(parent) {
                 // Version
                 {
                     versionLabel = new QLabel(QString("Version: %1").arg(APP_VERSION), bottomWidget);
+#ifdef WIN32
+                    versionLabel->setStyleSheet(
+                        "background-color: transparent; color: white; font-size: 8px;");
+#else
                     versionLabel->setStyleSheet(
                         "background-color: transparent; color: white; font-size: 16px;");
+#endif
                 }
                 // SN
                 {
                     snLabel = new QLabel(QString("SN: %1").arg(getSn().c_str()), bottomWidget);
-                    snLabel->setStyleSheet("background-color: transparent; color: white; font-size: 16px;");
+#ifdef WIN32
+                    snLabel->setStyleSheet(
+                        "background-color: transparent; color: white; font-size: 8px;");
+#else
+                    snLabel->setStyleSheet(
+                        "background-color: transparent; color: white; font-size: 16px;");
+#endif
                 }
                 bottomLayout->addWidget(versionLabel);
                 bottomLayout->addStretch();

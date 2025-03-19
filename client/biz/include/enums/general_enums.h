@@ -45,6 +45,8 @@ enum RUNTIME_ENV {
 enum MainPage {
     MAIN_PAGE_INIT,
     MAIN_PAGE_HOME,
+    MAIN_PAGE_SETTING_LOGIN,
+    MAIN_PAGE_SETTING_TMP,
 };
 
 enum ZFCardType {

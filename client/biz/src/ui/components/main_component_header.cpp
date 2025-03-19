@@ -26,14 +26,15 @@ MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
         {
             time = new QLabel(this);
             time->setAutoFillBackground(true);
+#ifdef WIN32
+            time->setStyleSheet("font-size: 12px");
+#else
+            time->setStyleSheet("font-size: 24px");
+#endif
             auto pal = time->palette();
             pal.setColor(QPalette::Window, QColor(4, 9, 12));
             pal.setColor(QPalette::WindowText, Qt::white);
             time->setPalette(pal);
-            auto font = time->font();
-            font.setPointSize(MINI_FONT_SIZE);
-            time->setFont(font);
-
             mainLayout->addWidget(time);
         }
 
@@ -41,7 +42,8 @@ MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
         {
             hideBtn = new QPushButton(this);
             hideBtn->setFocusPolicy(Qt::NoFocus);
-            hideBtn->setStyleSheet("background-color: transparent;border: none;");
+            hideBtn->setStyleSheet("background-color: transparent;border: none; width: 100px");
+            hideBtn->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
             connect(hideBtn, &QPushButton::clicked, this,
                     [=] {
                         ++g_tryGoManagementCount;

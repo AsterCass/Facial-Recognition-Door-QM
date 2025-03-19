@@ -5,11 +5,12 @@
 #include "ui/components/virtual_keyboard.h"
 #include "ui/pages/main_page_home.h"
 #include "ui/pages/main_page_init.h"
-#include <QMessageBox>
 #include <sstream>
 
 #include "airstrip_program_options.h"
 #include "ui/components/notification.h"
+#include "ui/pages/main_page_setting_login.h"
+#include "ui/pages/main_page_setting_tmp.h"
 
 using namespace std;
 
@@ -31,8 +32,12 @@ MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
     this->setStyleSheet("#stackedWidget{background: transparent;}");
     g_stackedWidget->setGeometry(QRect(0, 0, width, height));
     connect(g_stackedWidget, &QStackedWidget::currentChanged, [](const int newIndex) {
+        if (!g_routerQueue.empty() && g_routerQueue.back() == newIndex) {
+            airstrip::logPrintln("New index repleat : " + to_string(newIndex));
+            return;
+        }
         g_routerQueue.push_back(newIndex);
-        if (g_routerQueue.size() > 10) {
+        if (g_routerQueue.size() > 20) {
             g_routerQueue.pop_front();
         }
         ostringstream oss;
@@ -43,6 +48,8 @@ MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
         airstrip::logPrintln(oss.str());
     });
     g_stackedWidget->insertWidget(MAIN_PAGE_HOME, MainPageHome::getInstance(g_stackedWidget));
+    g_stackedWidget->insertWidget(MAIN_PAGE_SETTING_LOGIN, MainSettingLogin::getInstance(g_stackedWidget));
+    g_stackedWidget->insertWidget(MAIN_PAGE_SETTING_TMP, MainSettingTmp::getInstance(g_stackedWidget));
     g_stackedWidget->insertWidget(MAIN_PAGE_INIT, MainPageInit::getInstance(g_stackedWidget));
     g_stackedWidget->setCurrentIndex(MAIN_PAGE_INIT);
     g_stackedWidget->show();
