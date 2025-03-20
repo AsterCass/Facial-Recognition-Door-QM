@@ -29,9 +29,8 @@ MainSettingLogin::MainSettingLogin(QWidget *parent): QWidget(parent) {
             [=] {
                 if (passwd->text().toStdString() == g_managementPassword) {
                     MainRouter::getInstance()->addPage(MAIN_PAGE_SETTING_TMP);
-                } else {
-                    passwd->setText("");
                 }
+                passwd->setText("");
             });
 
     mainLayout->setAlignment(Qt::AlignTop);

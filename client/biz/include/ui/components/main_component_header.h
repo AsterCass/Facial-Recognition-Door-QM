@@ -21,9 +21,9 @@ private:
         time->setText(QString::fromStdString(timeStr));
     }
 
-    void updateWiredStatus(const bool connected) const {
+    void updateWiredStatus(const std::string &ip) const {
         if (nullptr == wiredIcon) return;
-        if (connected) {
+        if (!ip.empty()) {
             wiredIcon->setIcon(QIcon(QString::fromStdString(
                 g_appWorkDir + "static/images/status-wired.svg")));
         } else {
@@ -32,9 +32,9 @@ private:
         }
     }
 
-    void updateWirelessStatus(const bool connected) const {
+    void updateWirelessStatus(const std::string &ip) const {
         if (nullptr == wirelessIcon) return;
-        if (connected) {
+        if (!ip.empty()) {
             wirelessIcon->setIcon(QIcon(QString::fromStdString(
                 g_appWorkDir + "static/images/status-wireless.svg")));
         } else {
@@ -43,9 +43,9 @@ private:
         }
     }
 
-    void update4GStatus(const bool connected) const {
+    void update4GStatus(const std::string &ip) const {
         if (nullptr == fourGIcon) return;
-        if (connected) {
+        if (!ip.empty()) {
             fourGIcon->setIcon(QIcon(QString::fromStdString(
                 g_appWorkDir + "static/images/status-4g.svg")));
         } else {

@@ -106,7 +106,7 @@ void updateUIMainComponentHeader() {
 #else
         const string wiredIp = execScript(g_appWorkDir + "script/linux/get_wired_ip.sh");
 #endif
-        GlobalDataManager::getInstance()->updateHeaderWired(!wiredIp.empty());
+        GlobalDataManager::getInstance()->updateHeaderWired(wiredIp);
     }
 
     // Wireless
@@ -116,7 +116,7 @@ void updateUIMainComponentHeader() {
 #else
         const string wirelessIp = execScript(g_appWorkDir + "script/linux/get_wireless_ip.sh");
 #endif
-        GlobalDataManager::getInstance()->updateHeaderWireless(!wirelessIp.empty());
+        GlobalDataManager::getInstance()->updateHeaderWireless(wirelessIp);
     }
 
     // 4g
@@ -126,7 +126,7 @@ void updateUIMainComponentHeader() {
 #else
         const string fourGIp = execScript(g_appWorkDir + "script/linux/get_4g_ip.sh");
 #endif
-        GlobalDataManager::getInstance()->updateHeaderFourG(!fourGIp.empty());
+        GlobalDataManager::getInstance()->updateHeaderFourG(fourGIp);
     }
 
     // Cloud
