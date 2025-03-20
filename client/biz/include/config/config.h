@@ -73,13 +73,9 @@ const std::vector<std::vector<int> > EXPOSE_AND_GAIN_PARAM = {
 // variable
 extern void *g_mainThreadPool;
 
-extern QStackedWidget *g_stackedWidget;
-
 extern int g_tryGoManagementCount;
 
 extern airstrip::CommonBackendConfigDbManager g_commonDb;
-
-extern std::deque<int> g_routerQueue;
 
 extern std::string g_appWorkDir;
 extern std::string g_serverAddress;

@@ -98,6 +98,10 @@ message(STATUS "Breakpad libraries path: ${BREAKPAD_LIBRARY_DIR}")
 message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 
+set(PROJECT_HEADER_FOR_QT_MOC
+        include/utils/global_data_manager.h
+)
+
 set(PROJECT_SOURCES
         src/main.cpp
         src/nfc/nfc_tool.cpp
@@ -126,9 +130,11 @@ set(PROJECT_SOURCES
         src/utils/card_recognition.cpp
         src/utils/general_utils.cpp
         src/utils/scheduled_task.cpp
+        src/utils/global_data_manager.cpp
 )
 
 add_executable(FacialRecognitionDoor
+        ${PROJECT_HEADER_FOR_QT_MOC}
         ${PROJECT_SOURCES}
 )
 

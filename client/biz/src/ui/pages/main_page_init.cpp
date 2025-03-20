@@ -8,15 +8,13 @@ using namespace std;
 
 MainPageInit::MainPageInit(QWidget *parent): QWidget(parent) {
     mainLayout = new QVBoxLayout(this);
-    body = new QWidget(this);
+
     mainLayout->setSpacing(0);
     mainLayout->setMargin(0);
 
-    setElement();
-}
+    header = new MainComponentHeader(this);
+    body = new QWidget(this);
 
-void MainPageInit::setElement() {
-    header = MainComponentHeader::getInstance();
     body->setObjectName("pageInitBody");
     QString styleSheet;
     styleSheet.append("#pageInitBody{border-image: url(")
@@ -26,10 +24,6 @@ void MainPageInit::setElement() {
 
     mainLayout->addWidget(header, 1);
     mainLayout->addWidget(body, 17);
-}
-
-void MainPageInit::showEvent(QShowEvent *) {
-    setElement();
 }
 
 

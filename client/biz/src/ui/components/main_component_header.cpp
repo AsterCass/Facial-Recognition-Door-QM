@@ -2,6 +2,7 @@
 
 #include "airstrip_program_options.h"
 #include "config/config.h"
+#include "utils/global_data_manager.h"
 
 
 MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
@@ -101,6 +102,18 @@ MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
             mainLayout->addWidget(serverIcon);
         }
     }
+
+    // Connect
+    connect(GlobalDataManager::getInstance(), &GlobalDataManager::headerTimeChange,
+            this, &MainComponentHeader::updateTimeText);
+    connect(GlobalDataManager::getInstance(), &GlobalDataManager::headerWiredChange,
+            this, &MainComponentHeader::updateWiredStatus);
+    connect(GlobalDataManager::getInstance(), &GlobalDataManager::headerWirelessChange,
+            this, &MainComponentHeader::updateWirelessStatus);
+    connect(GlobalDataManager::getInstance(), &GlobalDataManager::headerFourGChange,
+            this, &MainComponentHeader::update4GStatus);
+    connect(GlobalDataManager::getInstance(), &GlobalDataManager::headerServerChange,
+            this, &MainComponentHeader::updateServerStatus);
 }
 
 

@@ -11,19 +11,11 @@ MainPageHome::MainPageHome(QWidget *parent): QWidget(parent) {
     mainLayout->setSpacing(0);
     mainLayout->setMargin(0);
 
-    setElement();
-}
-
-void MainPageHome::setElement() {
-    header = MainComponentHeader::getInstance();
+    header = new MainComponentHeader(this);
     body = CameraFrame::getInstance();
 
     mainLayout->addWidget(header, 1);
     mainLayout->addWidget(body, 17);
-}
-
-void MainPageHome::showEvent(QShowEvent *) {
-    setElement();
 }
 
 

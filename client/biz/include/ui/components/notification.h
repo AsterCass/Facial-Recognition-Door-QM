@@ -5,22 +5,13 @@
 
 class Notification final : public QWidget {
 public:
-    Notification(const Notification &) = delete;
-
-    Notification &operator=(const Notification &) = delete;
-
-    static Notification *getInstance(QWidget *parent) {
-        static Notification instance(parent);
-        return &instance;
-    }
-
-    void setMessage(const QString &message);
-
-private:
     explicit Notification(QWidget *parent = nullptr);
 
     ~Notification() override;
 
+    void setMessage(const QString &message);
+
+private:
     QLabel *messageLabel = nullptr;
 };
 

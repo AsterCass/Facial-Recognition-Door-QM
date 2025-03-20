@@ -6,21 +6,16 @@
 #include <QPushButton>
 #include <QWidget>
 #include <QToolButton>
-
 #include "config/config.h"
 
 
 class MainComponentHeader final : public QWidget {
 public:
-    MainComponentHeader(const MainComponentHeader &) = delete;
+    explicit MainComponentHeader(QWidget *parent = nullptr);
 
-    MainComponentHeader &operator=(const MainComponentHeader &) = delete;
+    ~MainComponentHeader() override;
 
-    static MainComponentHeader *getInstance() {
-        static MainComponentHeader instance;
-        return &instance;
-    }
-
+private:
     void updateTimeText(const std::string &timeStr) const {
         if (nullptr == time) return;
         time->setText(QString::fromStdString(timeStr));
@@ -69,11 +64,6 @@ public:
                 g_appWorkDir + "static/images/status-server-no.svg")));
         }
     }
-
-private:
-    explicit MainComponentHeader(QWidget *parent = nullptr);
-
-    ~MainComponentHeader() override;
 
     QHBoxLayout *mainLayout = nullptr;
     QSpacerItem *mainSpacer = nullptr;

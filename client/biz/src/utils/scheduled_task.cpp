@@ -21,6 +21,7 @@
 #include "ui/components/main_component_header.h"
 #include "utils/card_recognition.h"
 #include "utils/face_recognition.h"
+#include "utils/global_data_manager.h"
 
 int doorOpenSec = 0;
 int messageLabelSec = 0;
@@ -92,7 +93,7 @@ void updateUIMainComponentHeader() {
 
     ostringstream oss;
     oss << put_time(localtime(&time), "%Y.%m.%d %H:%M ") << weekStr;
-    MainComponentHeader::getInstance()->updateTimeText(string(oss.str()));
+    GlobalDataManager::getInstance()->updateHeaderTime(string(oss.str()));
 
     if (g_appWorkDir.empty()) {
         return;
@@ -100,49 +101,37 @@ void updateUIMainComponentHeader() {
 
     // Wired
     {
-        static string currentWiredIp;
 #ifdef WIN32
         const string wiredIp = execScript(g_appWorkDir + "script/win/get_wired_ip.ps1");
 #else
         const string wiredIp = execScript(g_appWorkDir + "script/linux/get_wired_ip.sh");
 #endif
-        if (wiredIp != currentWiredIp) {
-            currentWiredIp = wiredIp;
-            MainComponentHeader::getInstance()->updateWiredStatus(!wiredIp.empty());
-        }
+        GlobalDataManager::getInstance()->updateHeaderWired(!wiredIp.empty());
     }
 
     // Wireless
     {
-        static string currentWirelessIp;
 #ifdef WIN32
         const string wirelessIp = execScript(g_appWorkDir + "script/win/get_wireless_ip.ps1");
 #else
         const string wirelessIp = execScript(g_appWorkDir + "script/linux/get_wireless_ip.sh");
 #endif
-        if (wirelessIp != currentWirelessIp) {
-            currentWirelessIp = wirelessIp;
-            MainComponentHeader::getInstance()->updateWirelessStatus(!wirelessIp.empty());
-        }
+        GlobalDataManager::getInstance()->updateHeaderWireless(!wirelessIp.empty());
     }
 
     // 4g
     {
-        static string current4gIp;
 #ifdef WIN32
         const string fourGIp;
 #else
         const string fourGIp = execScript(g_appWorkDir + "script/linux/get_4g_ip.sh");
 #endif
-        if (fourGIp != current4gIp) {
-            current4gIp = fourGIp;
-            MainComponentHeader::getInstance()->update4GStatus(!fourGIp.empty());
-        }
+        GlobalDataManager::getInstance()->updateHeaderFourG(!fourGIp.empty());
     }
 
     // Cloud
     {
-        MainComponentHeader::getInstance()->updateServerStatus(linkedServer());
+        GlobalDataManager::getInstance()->updateHeaderServer(linkedServer());
     }
 }
 
@@ -162,9 +151,7 @@ void gotoManagement() {
     count = 1;
     if (g_tryGoManagementCount >= 5) {
         g_tryGoManagementCount = 0;
-        if (g_stackedWidget) {
-            g_stackedWidget->setCurrentIndex(MAIN_PAGE_SETTING_LOGIN);
-        }
+        MainRouter::getInstance()->addPage(MAIN_PAGE_SETTING_LOGIN);
     } else {
         g_tryGoManagementCount = 0;
     }
@@ -232,9 +219,7 @@ void onceTaskBefore() {
 
 void onceTaskAfter() {
     // To home
-    if (g_stackedWidget != nullptr) {
-        g_stackedWidget->setCurrentIndex(MAIN_PAGE_HOME);
-    }
+    MainRouter::getInstance()->addPage(MAIN_PAGE_HOME);
 }
 
 void repeatOperation() {

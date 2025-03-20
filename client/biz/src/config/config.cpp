@@ -5,13 +5,9 @@ using namespace std;
 // variable
 void *g_mainThreadPool = nullptr;
 
-QStackedWidget *g_stackedWidget = nullptr;
-
 int g_tryGoManagementCount = 0;
 
 airstrip::CommonBackendConfigDbManager g_commonDb;
-
-std::deque<int> g_routerQueue = {};
 
 std::string g_appWorkDir;
 std::string g_serverAddress;

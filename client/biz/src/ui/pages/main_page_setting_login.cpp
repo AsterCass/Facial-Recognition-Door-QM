@@ -1,9 +1,7 @@
 #include "ui/pages/main_page_setting_login.h"
 
-#include <sstream>
-
-#include "airstrip_log.h"
 #include "config/config.h"
+#include "ui/main_router.h"
 #include "ui/components/common_components.h"
 
 
@@ -24,23 +22,17 @@ MainSettingLogin::MainSettingLogin(QWidget *parent): QWidget(parent) {
     cancelBtn = new QPushButton("取消", this);
     connect(cancelBtn, &QPushButton::clicked, this,
             [=] {
-                if (g_routerQueue.empty()) {
-                    return;
-                }
-                g_routerQueue.pop_back();
-                if (g_routerQueue.empty()) {
-                    return;
-                }
-                const auto lastWidget = g_routerQueue.back();
-                g_stackedWidget->setCurrentIndex(lastWidget);
-                ostringstream oss;
-                oss << "Current widget stack: ";
-                for (const auto index: g_routerQueue) {
-                    oss << index << " ";
-                }
-                airstrip::logPrintln(oss.str());
+                MainRouter::getInstance()->backPage();
             });
 
+    connect(loginBtn, &QPushButton::clicked, this,
+            [=] {
+                if (passwd->text().toStdString() == g_managementPassword) {
+                    MainRouter::getInstance()->addPage(MAIN_PAGE_SETTING_TMP);
+                } else {
+                    passwd->setText("");
+                }
+            });
 
     mainLayout->setAlignment(Qt::AlignTop);
     mainLayout->addWidget(passwdLabel);
@@ -48,8 +40,6 @@ MainSettingLogin::MainSettingLogin(QWidget *parent): QWidget(parent) {
     mainLayout->addWidget(loginBtn);
     mainLayout->addWidget(cancelBtn);
     mainLayout->addStretch();
-
-
 }
 
 

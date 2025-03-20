@@ -14,6 +14,112 @@
 
 using namespace std;
 
+
+std::mutex stackChangeMutex;
+deque<int> mainRouterQueue = {};
+
+void printMainRouterQueue(const string &functionName) {
+    ostringstream oss;
+    oss << "Current widget stack: ";
+    for (const auto index: mainRouterQueue) {
+        oss << index << " ";
+    }
+    logPrintln(oss.str(), airstrip::INFO, functionName);
+}
+
+void MainRouter::addPage(const MainPage page) const {
+    if (nullptr == stackedWidget) return;
+
+    lock_guard<mutex> lock(stackChangeMutex);
+
+    stackedWidget->setCurrentIndex(page);
+    mainRouterQueue.push_back(page);
+    if (mainRouterQueue.size() > 100) {
+        mainRouterQueue.pop_front();
+    }
+
+    printMainRouterQueue(__FUNCTION__);
+}
+
+void MainRouter::removePageFromTop(const MainPage page) const {
+    if (nullptr == stackedWidget) return;
+
+    lock_guard<mutex> lock(stackChangeMutex);
+
+    if (mainRouterQueue.empty() || mainRouterQueue.back() != page) {
+        printMainRouterQueue(__FUNCTION__);
+        return;
+    }
+
+    mainRouterQueue.pop_back();
+    if (!mainRouterQueue.empty()) {
+        stackedWidget->setCurrentIndex(mainRouterQueue.back());
+    }
+    printMainRouterQueue(__FUNCTION__);
+}
+
+void MainRouter::removePageAll(const MainPage page) const {
+    if (nullptr == stackedWidget) return;
+
+    lock_guard<mutex> lock(stackChangeMutex);
+
+    if (mainRouterQueue.empty()) {
+        printMainRouterQueue(__FUNCTION__);
+        return;
+    }
+
+    mainRouterQueue.erase(std::remove(
+                              mainRouterQueue.begin(), mainRouterQueue.end(), page),
+                          mainRouterQueue.end());
+
+    if (!mainRouterQueue.empty()) {
+        stackedWidget->setCurrentIndex(mainRouterQueue.back());
+    }
+    printMainRouterQueue(__FUNCTION__);
+}
+
+void MainRouter::backPage() const {
+    if (nullptr == stackedWidget) return;
+
+    lock_guard<mutex> lock(stackChangeMutex);
+
+    if (mainRouterQueue.empty()) {
+        printMainRouterQueue(__FUNCTION__);
+        return;
+    }
+
+    mainRouterQueue.pop_back();
+    if (!mainRouterQueue.empty()) {
+        stackedWidget->setCurrentIndex(mainRouterQueue.back());
+    }
+    printMainRouterQueue(__FUNCTION__);
+}
+
+void MainRouter::backUntilPage(const MainPage page) const {
+    if (nullptr == stackedWidget) return;
+
+    lock_guard<mutex> lock(stackChangeMutex);
+
+    if (mainRouterQueue.empty()) {
+        printMainRouterQueue(__FUNCTION__);
+        return;
+    }
+
+    while (!mainRouterQueue.empty() && mainRouterQueue.back() != page) {
+        mainRouterQueue.pop_back();
+    }
+
+    if (mainRouterQueue.empty()) {
+        mainRouterQueue.push_back(MAIN_PAGE_INIT);
+        mainRouterQueue.push_back(MAIN_PAGE_HOME);
+        stackedWidget->setCurrentIndex(MAIN_PAGE_HOME);
+    } else {
+        stackedWidget->setCurrentIndex(mainRouterQueue.back());
+    }
+
+    printMainRouterQueue(__FUNCTION__);
+}
+
 MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
     // param
     int height = 0;
@@ -27,35 +133,19 @@ MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
     this->setFixedSize(width, height);
 
     // Load route
-    g_stackedWidget = new QStackedWidget(this);
+    stackedWidget = new QStackedWidget(this);
     this->setObjectName("stackedWidget");
     this->setStyleSheet("#stackedWidget{background: transparent;}");
-    g_stackedWidget->setGeometry(QRect(0, 0, width, height));
-    connect(g_stackedWidget, &QStackedWidget::currentChanged, [](const int newIndex) {
-        if (!g_routerQueue.empty() && g_routerQueue.back() == newIndex) {
-            airstrip::logPrintln("New index repleat : " + to_string(newIndex));
-            return;
-        }
-        g_routerQueue.push_back(newIndex);
-        if (g_routerQueue.size() > 20) {
-            g_routerQueue.pop_front();
-        }
-        ostringstream oss;
-        oss << "Current widget stack: ";
-        for (const auto index: g_routerQueue) {
-            oss << index << " ";
-        }
-        airstrip::logPrintln(oss.str());
-    });
-    g_stackedWidget->insertWidget(MAIN_PAGE_HOME, MainPageHome::getInstance(g_stackedWidget));
-    g_stackedWidget->insertWidget(MAIN_PAGE_SETTING_LOGIN, MainSettingLogin::getInstance(g_stackedWidget));
-    g_stackedWidget->insertWidget(MAIN_PAGE_SETTING_TMP, MainSettingTmp::getInstance(g_stackedWidget));
-    g_stackedWidget->insertWidget(MAIN_PAGE_INIT, MainPageInit::getInstance(g_stackedWidget));
-    g_stackedWidget->setCurrentIndex(MAIN_PAGE_INIT);
-    g_stackedWidget->show();
+    stackedWidget->setGeometry(QRect(0, 0, width, height));
+    stackedWidget->insertWidget(MAIN_PAGE_INIT, new MainPageInit(this));
+    stackedWidget->insertWidget(MAIN_PAGE_HOME, new MainPageHome(this));
+    stackedWidget->insertWidget(MAIN_PAGE_SETTING_LOGIN, new MainSettingLogin(this));
+    stackedWidget->insertWidget(MAIN_PAGE_SETTING_TMP, new MainSettingTmp(this));
+    addPage(MAIN_PAGE_INIT);
+    stackedWidget->show();
 
     // Load notification
-    const auto notification = Notification::getInstance(this);
+    const auto notification = new Notification(this);
     notification->setGeometry(QRect(0, 0, width, height));
     notification->hide();
 
@@ -66,7 +156,4 @@ MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
 }
 
 
-MainRouter::~MainRouter() {
-    delete g_stackedWidget;
-    g_stackedWidget = nullptr;
-}
+MainRouter::~MainRouter() = default;
