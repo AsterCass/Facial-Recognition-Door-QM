@@ -11,6 +11,10 @@ public:
     ~MainPageHome() override;
 
 private:
+    void showEvent(QShowEvent *event) override;
+
+    void hideEvent(QHideEvent *event) override;
+
     QVBoxLayout *mainLayout = nullptr;
     QWidget *header = nullptr;
     QWidget *body = nullptr;

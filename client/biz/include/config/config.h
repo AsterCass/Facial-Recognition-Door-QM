@@ -75,6 +75,8 @@ extern void *g_mainThreadPool;
 
 extern int g_tryGoManagementCount;
 
+extern bool g_closeFaceRecognition;
+
 extern airstrip::CommonBackendConfigDbManager g_commonDb;
 
 extern std::string g_appWorkDir;

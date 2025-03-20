@@ -20,3 +20,12 @@ MainPageHome::MainPageHome(QWidget *parent): QWidget(parent) {
 
 
 MainPageHome::~MainPageHome() = default;
+
+
+void MainPageHome::showEvent(QShowEvent *) {
+    g_closeFaceRecognition = false;
+}
+
+void MainPageHome::hideEvent(QHideEvent *) {
+    g_closeFaceRecognition = true;
+}

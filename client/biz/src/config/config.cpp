@@ -7,6 +7,8 @@ void *g_mainThreadPool = nullptr;
 
 int g_tryGoManagementCount = 0;
 
+bool g_closeFaceRecognition = true;
+
 airstrip::CommonBackendConfigDbManager g_commonDb;
 
 std::string g_appWorkDir;
