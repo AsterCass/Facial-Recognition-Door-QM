@@ -1,5 +1,7 @@
 #include "ui/main_router.h"
 
+#include <deque>
+
 #include "config/config.h"
 #include "enums/general_enums.h"
 #include "ui/components/virtual_keyboard.h"

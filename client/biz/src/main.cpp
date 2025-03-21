@@ -8,8 +8,11 @@
 #include "ui/main_router.h"
 #include "config/config.h"
 #include <boost/json.hpp>
+#include <boost/exception/info.hpp>
+#include <sstream>
 
 #ifndef WIN32
+#include "airstrip_command.h"
 #include "client/linux/handler/exception_handler.h"
 static bool dumpCallback(const google_breakpad::MinidumpDescriptor& descriptor,
 void* context, bool succeeded) {
@@ -87,46 +90,144 @@ int main(int argc, char *argv[]) {
     // Db
     {
         g_commonDb.initDb(g_appWorkDir + PRO_DB_ADDRESS);
-
-        // update common_backend_config set config_value_json="localhost:5525" where config_name="serverAddress";
-        std::string serverAddress = g_commonDb.getConfig(PRO_DB_COMMON_KEY_SERVER_ADD);
-        if (serverAddress.empty()) {
-            g_commonDb.upsertConfig(PRO_DB_COMMON_KEY_SERVER_ADD, "localhost:5525");
+        // update common set v="localhost:5525" where k="serverAddress";
+        {
+            std::string serverAddress = g_commonDb.getConfig(PRO_DB_COMMON_KEY_SERVER_ADD);
+            if (serverAddress.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_COMMON_KEY_SERVER_ADD, "localhost:5525");
+            }
+            g_serverAddress = serverAddress;
         }
-        g_serverAddress = serverAddress;
-
-        // update common_backend_config set config_value_json="123456" where config_name="managementPassword";
-        std::string managementPassword = g_commonDb.getConfig(PRO_DB_COMMON_KEY_MANA_PASS);
-        if (managementPassword.empty()) {
-            g_commonDb.upsertConfig(PRO_DB_COMMON_KEY_MANA_PASS, "123456");
+        // update common set v="123456" where k="managementPassword";
+        {
+            std::string managementPassword = g_commonDb.getConfig(PRO_DB_COMMON_KEY_MANA_PASS);
+            if (managementPassword.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_COMMON_KEY_MANA_PASS, "123456");
+            }
+            g_managementPassword = managementPassword;
         }
-        g_managementPassword = managementPassword;
-
-        // update common_backend_config set config_value_json="abcdefg" where config_name="signId";
-        std::string signId = g_commonDb.getConfig(PRO_DB_SIGN_ID);
-        if (signId.empty()) {
-            g_commonDb.upsertConfig(PRO_DB_SIGN_ID, "abcdefg");
+        // update common set v="abcdefg" where k="signId";
+        {
+            std::string signId = g_commonDb.getConfig(PRO_DB_SIGN_ID);
+            if (signId.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_SIGN_ID, "abcdefg");
+            }
+            g_signId = signId;
         }
-        g_signId = signId;
-
-        boost::json::object commonDataJson;
-        commonDataJson[PRO_DB_FACE_THRESHOLD] = 0.46;
-        commonDataJson[PRO_DB_VOL_NUM] = 50;
-        commonDataJson[PRO_DB_FACE_DISTANCE] = 2;
-        commonDataJson[PRO_DB_NET_MODEL] = 1;
-        commonDataJson[PRO_DB_WIFI_ACCOUNT] = "";
-        commonDataJson[PRO_DB_WIFI_PASSWD] = "";
-        commonDataJson[PRO_DB_ENABLE_FACE_SPOOF] = 1;
-        commonDataJson[PRO_DB_ENABLE_LIGHT_ONLY_CHECK] = 0;
-
-        std::string commonData = g_commonDb.getConfig(PRO_DB_COMMON_DATA);
-        if (commonData.empty()) {
-            std::string commonDataJsonJson = serialize(commonDataJson);
-            g_commonDb.upsertConfig(PRO_DB_COMMON_DATA, commonDataJsonJson);
+        // update common set v="0.48" where k="faceThreshold";
+        {
+            std::string faceThreshold = g_commonDb.getConfig(PRO_DB_FACE_THRESHOLD);
+            if (faceThreshold.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_FACE_THRESHOLD, "0.48");
+            }
+            try {
+                g_faceThreshold = stod(faceThreshold);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data faceThreshold error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_faceThreshold = 0.48;
+            }
         }
-        g_commonData = commonData;
+        // update common set v="50" where k="volNum";
+        {
+            std::string volNum = g_commonDb.getConfig(PRO_DB_VOL_NUM);
+            if (volNum.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_VOL_NUM, "50");
+            }
+            try {
+                g_volNum = stoi(volNum);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data volNum error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_volNum = 50;
+            }
+        }
+        // update common set v="2" where k="faceDistance";
+        {
+            std::string faceDistance = g_commonDb.getConfig(PRO_DB_FACE_DISTANCE);
+            if (faceDistance.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_FACE_DISTANCE, "2");
+            }
+            try {
+                g_faceDistance = stoi(faceDistance);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data faceDistance error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_faceDistance = 2;
+            }
+        }
+        // update common set v="1" where k="netModel";
+        {
+            std::string netModel = g_commonDb.getConfig(PRO_DB_NET_MODEL);
+            if (netModel.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_NET_MODEL, "1");
+            }
+            try {
+                g_netModel = stoi(netModel);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data netModel error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_netModel = 1;
+            }
+        }
+        // update common set v="" where k="wifiAccount";
+        {
+            std::string wifiAccount = g_commonDb.getConfig(PRO_DB_WIFI_ACCOUNT);
+            if (wifiAccount.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_WIFI_ACCOUNT, "");
+            }
+            g_wifiAccount = wifiAccount;
+        }
+        // update common set v="" where k="wifiPasswd";
+        {
+            std::string wifiPasswd = g_commonDb.getConfig(PRO_DB_WIFI_PASSWD);
+            if (wifiPasswd.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_WIFI_PASSWD, "");
+            }
+            g_wifiPasswd = wifiPasswd;
+        }
+        // update common set v="1" where k="enableFaceSpoof";
+        {
+            std::string enableFaceSpoof = g_commonDb.getConfig(PRO_DB_ENABLE_FACE_SPOOF);
+            if (enableFaceSpoof.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_ENABLE_FACE_SPOOF, "1");
+            }
+            try {
+                g_enableFaceSpoof = stoi(enableFaceSpoof);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data enableFaceSpoof error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_enableFaceSpoof = 1;
+            }
+        }
+        // update common set v="0" where k="lightOnlyCheck";
+        {
+            std::string lightOnlyCheck = g_commonDb.getConfig(PRO_DB_ENABLE_LIGHT_ONLY_CHECK);
+            if (lightOnlyCheck.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_ENABLE_LIGHT_ONLY_CHECK, "0");
+            }
+            try {
+                g_lightOnlyCheck = stoi(lightOnlyCheck);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data lightOnlyCheck error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_lightOnlyCheck = 0;
+            }
+        }
+
         logPrintln("Db finish", airstrip::INFO, __FUNCTION__);
     }
+
+    // Pre script
+#ifndef WIN32
+    airstrip::execScript(g_appWorkDir + "script/linux/reboot_app.sh " + std::to_string(g_commonDataVolNum));
+#endif
 
     // Init application
     QApplication app(argc, argv);

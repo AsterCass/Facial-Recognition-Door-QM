@@ -17,9 +17,9 @@ namespace airstrip {
             SQLite::Transaction transaction(*_db);
 
             _db->exec(R"(
-                CREATE TABLE IF NOT EXISTS common_backend_config (
-                    config_name TEXT PRIMARY KEY,
-                    config_value_json TEXT NOT NULL,
+                CREATE TABLE IF NOT EXISTS common (
+                    k TEXT PRIMARY KEY,
+                    v TEXT NOT NULL,
                     update_time DATETIME DEFAULT CURRENT_TIMESTAMP
                 )
             )");
@@ -40,20 +40,20 @@ namespace airstrip {
             SQLite::Transaction transaction(*_db);
 
             SQLite::Statement query(
-                *_db, "SELECT * FROM common_backend_config WHERE config_name = ?");
+                *_db, "SELECT * FROM common WHERE k = ?");
             query.bind(1, name);
 
             if (query.executeStep()) {
                 SQLite::Statement update(
-                    *_db, "UPDATE common_backend_config SET config_value_json = ?, "
+                    *_db, "UPDATE common SET v = ?, "
                     "update_time = (datetime('now', 'localtime')) "
-                    "WHERE config_name = ?");
+                    "WHERE k = ?");
                 update.bind(1, configValueJson);
                 update.bind(2, name);
                 update.exec();
             } else {
                 SQLite::Statement insert(
-                    *_db, "INSERT INTO common_backend_config (config_name, config_value_json) VALUES (?, ?)");
+                    *_db, "INSERT INTO common (k, v) VALUES (?, ?)");
                 insert.bind(1, name);
                 insert.bind(2, configValueJson);
                 insert.exec();
@@ -73,7 +73,7 @@ namespace airstrip {
         try {
             SQLite::Transaction transaction(*_db);
 
-            SQLite::Statement query(*_db, "DELETE FROM common_backend_config WHERE config_name = ?");
+            SQLite::Statement query(*_db, "DELETE FROM common WHERE k = ?");
             query.bind(1, name);
             query.exec();
 
@@ -91,7 +91,7 @@ namespace airstrip {
         }
         try {
             SQLite::Statement query(
-                *_db, "SELECT config_value_json FROM common_backend_config WHERE config_name = ?");
+                *_db, "SELECT v FROM common WHERE k = ?");
             query.bind(1, name);
 
             while (query.executeStep()) {

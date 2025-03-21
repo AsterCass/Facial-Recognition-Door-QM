@@ -2,7 +2,6 @@
 #define CONFIG_H
 
 #include <string>
-#include <deque>
 #include <QStackedWidget>
 #include <airstrip_db.h>
 
@@ -23,7 +22,6 @@ constexpr auto PRO_DB_ADDRESS = "db/common.db";
 constexpr auto PRO_DB_COMMON_KEY_SERVER_ADD = "serverAddress";
 constexpr auto PRO_DB_COMMON_KEY_MANA_PASS = "managementPassword";
 constexpr auto PRO_DB_SIGN_ID = "signId";
-constexpr auto PRO_DB_COMMON_DATA = "commonData";
 constexpr auto PRO_DB_FACE_THRESHOLD = "faceThreshold";
 constexpr auto PRO_DB_VOL_NUM = "volNum";
 constexpr auto PRO_DB_FACE_DISTANCE = "faceDistance";
@@ -88,7 +86,14 @@ extern std::string g_appWorkDir;
 extern std::string g_serverAddress;
 extern std::string g_managementPassword;
 extern std::string g_signId;
-extern std::string g_commonData;
+extern double g_faceThreshold;
+extern int g_volNum;
+extern int g_faceDistance;
+extern int g_netModel;
+extern std::string g_wifiAccount;
+extern std::string g_wifiPasswd;
+extern int g_enableFaceSpoof;
+extern int g_lightOnlyCheck;
 
 
 #endif //CONFIG_H

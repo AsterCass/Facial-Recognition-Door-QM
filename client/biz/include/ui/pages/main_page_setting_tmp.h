@@ -15,56 +15,56 @@
 
 class MainSettingTmp final : public QWidget {
 public:
-    explicit MainSettingTmp(QWidget *parent = nullptr);
+    explicit MainSettingTmp(QWidget *parent);
 
     ~MainSettingTmp() override;
 
 private:
-    QVBoxLayout *mainLayout = nullptr;
+    QVBoxLayout *mainLayout;
 
-    QScrollArea *mainScrollArea = nullptr;
-    QVBoxLayout *scrollerAreaLayout = nullptr;
+    QScrollArea *mainScrollArea;
+    QVBoxLayout *scrollerAreaLayout;
 
-    QWidget *scrollContent = nullptr;
+    QWidget *scrollContent;
 
-    QLabel *serverAddressLabel = nullptr;
-    QLineEditPro *serverAddress = nullptr;
-    QLabel *faceThresholdLabel = nullptr;
-    QLineEditPro *faceThreshold = nullptr;
-    QLabel *volLabel = nullptr;
-    QLineEditPro *vol = nullptr;
-    QLabel *faceDistantLabel = nullptr;
-    QWidget *faceDistantWidget = nullptr;
-    QHBoxLayout *faceDistantLayout = nullptr;
-    QRadioButton *faceDistantLess = nullptr;
-    QRadioButton *faceDistantMid = nullptr;
-    QRadioButton *faceDistantMore = nullptr;
-    QButtonGroup *faceDistantGroup = nullptr;
+    QLabel *serverAddressLabel;
+    QLineEditPro *serverAddress;
+    QLabel *faceThresholdLabel;
+    QLineEditPro *faceThreshold;
+    QLabel *volLabel;
+    QLineEditPro *vol;
+    QLabel *faceDistantLabel;
+    QWidget *faceDistantWidget;
+    QHBoxLayout *faceDistantLayout;
+    QRadioButton *faceDistantLess;
+    QRadioButton *faceDistantMid;
+    QRadioButton *faceDistantMore;
+    QButtonGroup *faceDistantGroup;
 
-    QCheckBox *enableFaceSpoof = nullptr;
-    QCheckBox *lightOnlyCheck = nullptr;
+    QCheckBox *enableFaceSpoof;
+    QCheckBox *lightOnlyCheck;
 
-    QLabel *netModelLabel = nullptr;
-    QWidget *netModelWidget = nullptr;
-    QHBoxLayout *netModelLayout = nullptr;
-    QRadioButton *netModelWired = nullptr;
-    QRadioButton *netModelWireless = nullptr;
-    QRadioButton *netModelFourG = nullptr;
-    QButtonGroup *netModelGroup = nullptr;
+    QLabel *netModelLabel;
+    QWidget *netModelWidget;
+    QHBoxLayout *netModelLayout;
+    QRadioButton *netModelWired;
+    QRadioButton *netModelWireless;
+    QRadioButton *netModelFourG;
+    QButtonGroup *netModelGroup;
 
-    QLabel *wifiAccountLabel = nullptr;
-    QLineEditPro *wifiAccount = nullptr;
-    QLabel *wifiPasswdLabel = nullptr;
-    QLineEditPro *wifiPasswdEdit = nullptr;
+    QLabel *wifiAccountLabel;
+    QLineEditPro *wifiAccount;
+    QLabel *wifiPasswdLabel;
+    QLineEditPro *wifiPasswdEdit;
 
 
     QLabel *ipWiredLabel;
     QLabel *ipWirelessLabel;
     QLabel *ipFourGLabel;
 
-    QPushButton *saveRebootBtn = nullptr;
-    QPushButton *checkUpdateBtn = nullptr;
-    QPushButton *cancelBtn = nullptr;
+    QPushButton *saveRebootBtn;
+    QPushButton *checkUpdateBtn;
+    QPushButton *cancelBtn;
 };
 
 

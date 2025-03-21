@@ -138,7 +138,7 @@ void initFaceRecognition() {
     configuration.enablePersistence = 0;
     configuration.persistenceDbPath = nullptr;
     configuration.searchMode = HF_SEARCH_MODE_EAGER;
-    configuration.searchThreshold = 0.48f;
+    configuration.searchThreshold = static_cast<float>(g_faceThreshold);
     ret = HFFeatureHubDataEnable(configuration);
     if (ret != HSUCCEED) {
         logPrintln("Create face db error: " + ret, airstrip::CRITICAL, __FUNCTION__);
@@ -475,6 +475,12 @@ bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, i
         rect.y = std::min(origY, orgRows);;
         rect.width = std::min(orgCols - origX, origWidth);
         rect.height = std::min(orgRows - origY, origHeight);
+
+
+        const auto minSide = min(rect.width, rect.height);
+        if ((1 == g_faceDistance && minSide < 90) || (2 == g_faceDistance && minSide < 60)) {
+            ret = false;
+        }
 
         // 计算明暗矫正摄像头
         const cv::Mat rgaFrameFace = rgaFrame(rect);

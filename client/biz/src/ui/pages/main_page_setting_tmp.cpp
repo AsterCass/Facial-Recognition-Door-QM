@@ -6,6 +6,7 @@
 #include <sstream>
 #include <boost/json.hpp>
 
+#include "airstrip_command.h"
 #include "config/config.h"
 
 
@@ -23,39 +24,44 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     mainScrollArea->setObjectName("mainSettingTmpMain");
     mainScrollArea->setStyleSheet("#mainSettingTmpMain{background-color: white}");
     mainScrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+    mainScrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 #ifdef WIN32
     mainScrollArea->setStyleSheet(R"(
     QScrollBar:vertical {
         width: 15px;
+        background: #f0f0f0;
     }
 
     QScrollBar::handle:vertical {
-        background: #111111;
+        background: #666666;
     }
 
     QScrollBar::handle:vertical:hover {
-        background: #000000;
+        background: #333333;
     }
+
 )");
 #else
     mainScrollArea->setStyleSheet(R"(
     QScrollBar:vertical {
         width: 30px;
+        background: #f0f0f0;
     }
 
     QScrollBar::handle:vertical {
-        background: #111111;
+        background: #666666;
     }
 
     QScrollBar::handle:vertical:hover {
-        background: #000000;
+        background: #333333;
     }
+
 )");
 #endif
 
     mainLayout->addWidget(mainScrollArea);
 
-    scrollContent = new QWidget(scrollContent);
+    scrollContent = new QWidget(mainScrollArea);
     mainScrollArea->setWidget(scrollContent);
 
     // Content
@@ -68,7 +74,7 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     faceThresholdLabel = new QLabel("人脸识别阈值（0 - 0.6）（推荐 0.48）：", scrollContent);
     faceThreshold = new QLineEditPro(scrollContent);
     volLabel = new QLabel("设备音量（0 - 100）：", scrollContent);
-    vol = new QLineEditPro(vol);
+    vol = new QLineEditPro(scrollContent);
     faceDistantLabel = new QLabel("人脸识别距离：", scrollContent);;
     faceDistantWidget = new QWidget(scrollContent);
     faceDistantLayout = new QHBoxLayout(faceDistantWidget);
@@ -115,21 +121,34 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     connect(saveRebootBtn, &QPushButton::clicked, this,
             [=] {
                 try {
-                    // Address
+                    // todo if not equal save db
+
                     g_serverAddress = serverAddress->text().trimmed().toStdString();
                     g_commonDb.upsertConfig(PRO_DB_COMMON_KEY_SERVER_ADD, g_serverAddress);
-                    // Common
-                    boost::json::object commonDataJson;
-                    commonDataJson[PRO_DB_FACE_THRESHOLD] = faceThreshold->text().trimmed().toDouble();
-                    commonDataJson[PRO_DB_VOL_NUM] = vol->text().trimmed().toInt();
-                    commonDataJson[PRO_DB_FACE_DISTANCE] = faceDistantGroup->checkedId();
-                    commonDataJson[PRO_DB_NET_MODEL] = netModelGroup->checkedId();
-                    commonDataJson[PRO_DB_WIFI_ACCOUNT] = wifiAccount->text().trimmed().toStdString();
-                    commonDataJson[PRO_DB_WIFI_PASSWD] = wifiPasswdEdit->text().trimmed().toStdString();
-                    commonDataJson[PRO_DB_ENABLE_FACE_SPOOF] = enableFaceSpoof->isChecked() ? 1 : 0;
-                    commonDataJson[PRO_DB_ENABLE_LIGHT_ONLY_CHECK] = lightOnlyCheck->isChecked() ? 1 : 0;
-                    g_commonData = serialize(commonDataJson);
-                    g_commonDb.upsertConfig(PRO_DB_COMMON_DATA, g_commonData);
+
+                    g_faceThreshold = faceThreshold->text().trimmed().toDouble();
+                    g_commonDb.upsertConfig(PRO_DB_FACE_THRESHOLD, to_string(g_faceThreshold));
+
+                    g_volNum = vol->text().trimmed().toInt();
+                    g_commonDb.upsertConfig(PRO_DB_VOL_NUM, to_string(g_volNum));
+
+                    g_faceDistance = faceDistantGroup->checkedId();
+                    g_commonDb.upsertConfig(PRO_DB_FACE_DISTANCE, to_string(g_faceDistance));
+
+                    g_netModel = netModelGroup->checkedId();
+                    g_commonDb.upsertConfig(PRO_DB_NET_MODEL, to_string(g_netModel));
+
+                    g_wifiAccount = wifiAccount->text().trimmed().toStdString();
+                    g_commonDb.upsertConfig(PRO_DB_WIFI_ACCOUNT, g_wifiAccount);
+
+                    g_wifiPasswd = wifiPasswdEdit->text().trimmed().toStdString();
+                    g_commonDb.upsertConfig(PRO_DB_WIFI_PASSWD, g_wifiPasswd);
+
+                    g_enableFaceSpoof = enableFaceSpoof->isChecked() ? 1 : 0;
+                    g_commonDb.upsertConfig(PRO_DB_ENABLE_FACE_SPOOF, to_string(g_enableFaceSpoof));
+
+                    g_lightOnlyCheck = lightOnlyCheck->isChecked() ? 1 : 0;
+                    g_commonDb.upsertConfig(PRO_DB_ENABLE_LIGHT_ONLY_CHECK, to_string(g_lightOnlyCheck));
                 } catch (const std::exception &e) {
                     ostringstream errMsg;
                     errMsg << "Save config data error :" << e.what();
@@ -138,7 +157,7 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
 #ifdef WIN32
                 logPrintln("Reboot ...", airstrip::INFO, __FUNCTION__);
 #else
-                //todo
+                airstrip::execScript(g_appWorkDir + "script/linux/reboot_app.sh");
 #endif
             });
     checkUpdateBtn = new QPushButton("检查更新", scrollContent);
@@ -187,85 +206,14 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
 
     // Data
     serverAddress->setText(QString::fromStdString(g_serverAddress));
-    try {
-        auto commonDataJson = boost::json::parse(g_commonData);
-        auto data = commonDataJson.at(PRO_DB_FACE_THRESHOLD).as_double();
-        faceThreshold->setText(QString::number(data));
-    } catch (const std::exception &e) {
-        ostringstream errMsg;
-        errMsg << "Load serverAddress data error :" << e.what();
-        logPrintln(errMsg.str(), airstrip::WARN, __FUNCTION__);
-    }
-
-    try {
-        auto commonDataJson = boost::json::parse(g_commonData);
-        auto data = commonDataJson.at(PRO_DB_VOL_NUM).as_int64();
-        vol->setText(QString::number(data));
-    } catch (const std::exception &e) {
-        ostringstream errMsg;
-        errMsg << "Load vol data error :" << e.what();
-        logPrintln(errMsg.str(), airstrip::WARN, __FUNCTION__);
-    }
-
-    try {
-        auto commonDataJson = boost::json::parse(g_commonData);
-        auto data = commonDataJson.at(PRO_DB_FACE_DISTANCE).as_int64();
-        faceDistantGroup->button(data)->setChecked(true);
-    } catch (const std::exception &e) {
-        ostringstream errMsg;
-        errMsg << "Load faceDistantGroup data error :" << e.what();
-        logPrintln(errMsg.str(), airstrip::WARN, __FUNCTION__);
-    }
-
-    try {
-        auto commonDataJson = boost::json::parse(g_commonData);
-        auto data = commonDataJson.at(PRO_DB_ENABLE_FACE_SPOOF).as_int64();
-        enableFaceSpoof->setCheckState(data ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
-    } catch (const std::exception &e) {
-        ostringstream errMsg;
-        errMsg << "Load enableFaceSpoof data error :" << e.what();
-        logPrintln(errMsg.str(), airstrip::WARN, __FUNCTION__);
-    }
-
-    try {
-        auto commonDataJson = boost::json::parse(g_commonData);
-        auto data = commonDataJson.at(PRO_DB_ENABLE_LIGHT_ONLY_CHECK).as_int64();
-        lightOnlyCheck->setCheckState(data ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
-    } catch (const std::exception &e) {
-        ostringstream errMsg;
-        errMsg << "Load lightOnlyCheck data error :" << e.what();
-        logPrintln(errMsg.str(), airstrip::WARN, __FUNCTION__);
-    }
-
-    try {
-        auto commonDataJson = boost::json::parse(g_commonData);
-        auto data = commonDataJson.at(PRO_DB_NET_MODEL).as_int64();
-        netModelGroup->button(data)->setChecked(true);
-    } catch (const std::exception &e) {
-        ostringstream errMsg;
-        errMsg << "Load netModelGroup data error :" << e.what();
-        logPrintln(errMsg.str(), airstrip::WARN, __FUNCTION__);
-    }
-
-    try {
-        auto commonDataJson = boost::json::parse(g_commonData);
-        auto data = commonDataJson.at(PRO_DB_WIFI_ACCOUNT).as_string();
-        wifiAccount->setText(QString::fromStdString(data.data()));
-    } catch (const std::exception &e) {
-        ostringstream errMsg;
-        errMsg << "Load wifiAccount data error :" << e.what();
-        logPrintln(errMsg.str(), airstrip::WARN, __FUNCTION__);
-    }
-
-    try {
-        auto commonDataJson = boost::json::parse(g_commonData);
-        auto data = commonDataJson.at(PRO_DB_WIFI_PASSWD).as_string();
-        wifiPasswdEdit->setText(QString::fromStdString(data.data()));
-    } catch (const std::exception &e) {
-        ostringstream errMsg;
-        errMsg << "Load wifiPasswdEdit data error :" << e.what();
-        logPrintln(errMsg.str(), airstrip::WARN, __FUNCTION__);
-    }
+    faceThreshold->setText(QString::number(g_faceThreshold));
+    vol->setText(QString::number(g_volNum));
+    faceDistantGroup->button(g_faceDistance)->setChecked(true);
+    enableFaceSpoof->setCheckState(g_enableFaceSpoof ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+    lightOnlyCheck->setCheckState(g_lightOnlyCheck ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+    netModelGroup->button(g_netModel)->setChecked(true);
+    wifiAccount->setText(QString::fromStdString(g_wifiAccount));
+    wifiPasswdEdit->setText(QString::fromStdString(g_wifiPasswd));
 
 
     // Connect
