@@ -84,12 +84,6 @@ int main(int argc, char *argv[]) {
     google_breakpad::ExceptionHandler eh(descriptor, NULL, dumpCallback, NULL, true, -1);
 #endif
 
-    // Init application
-    QApplication app(argc, argv);
-
-    // Init thread poll
-    g_mainThreadPool = airstrip::ThreadPool::getInstance(3);
-
     // Db
     {
         g_commonDb.initDb(g_appWorkDir + PRO_DB_ADDRESS);
@@ -116,9 +110,14 @@ int main(int argc, char *argv[]) {
         g_signId = signId;
 
         boost::json::object commonDataJson;
-        commonDataJson[PRO_DB_FACE_THRESHOLD] = 0.92;
+        commonDataJson[PRO_DB_FACE_THRESHOLD] = 0.46;
         commonDataJson[PRO_DB_VOL_NUM] = 50;
+        commonDataJson[PRO_DB_FACE_DISTANCE] = 2;
+        commonDataJson[PRO_DB_NET_MODEL] = 1;
+        commonDataJson[PRO_DB_WIFI_ACCOUNT] = "";
+        commonDataJson[PRO_DB_WIFI_PASSWD] = "";
         commonDataJson[PRO_DB_ENABLE_FACE_SPOOF] = 1;
+        commonDataJson[PRO_DB_ENABLE_LIGHT_ONLY_CHECK] = 0;
 
         std::string commonData = g_commonDb.getConfig(PRO_DB_COMMON_DATA);
         if (commonData.empty()) {
@@ -128,6 +127,12 @@ int main(int argc, char *argv[]) {
         g_commonData = commonData;
         logPrintln("Db finish", airstrip::INFO, __FUNCTION__);
     }
+
+    // Init application
+    QApplication app(argc, argv);
+
+    // Init thread poll
+    g_mainThreadPool = airstrip::ThreadPool::getInstance(3);
 
     // Page router
     const auto router = MainRouter::getInstance();

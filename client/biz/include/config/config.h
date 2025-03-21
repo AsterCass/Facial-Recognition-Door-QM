@@ -26,7 +26,12 @@ constexpr auto PRO_DB_SIGN_ID = "signId";
 constexpr auto PRO_DB_COMMON_DATA = "commonData";
 constexpr auto PRO_DB_FACE_THRESHOLD = "faceThreshold";
 constexpr auto PRO_DB_VOL_NUM = "volNum";
+constexpr auto PRO_DB_FACE_DISTANCE = "faceDistance";
+constexpr auto PRO_DB_NET_MODEL = "netModel";
+constexpr auto PRO_DB_WIFI_ACCOUNT = "wifiAccount";
+constexpr auto PRO_DB_WIFI_PASSWD = "wifiPasswd";
 constexpr auto PRO_DB_ENABLE_FACE_SPOOF = "enableFaceSpoof";
+constexpr auto PRO_DB_ENABLE_LIGHT_ONLY_CHECK = "lightOnlyCheck";
 
 const std::vector<std::string> CHINESE_WEEK = {
     "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日",

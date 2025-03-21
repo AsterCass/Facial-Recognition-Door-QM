@@ -7,6 +7,7 @@
 #include <QWidget>
 #include <QScrollArea>
 #include <QRadioButton>
+#include <QButtonGroup>
 #include <QCheckBox>
 
 #include "ui/components/common_components.h"
@@ -26,6 +27,8 @@ private:
 
     QWidget *scrollContent = nullptr;
 
+    QLabel *serverAddressLabel = nullptr;
+    QLineEditPro *serverAddress = nullptr;
     QLabel *faceThresholdLabel = nullptr;
     QLineEditPro *faceThreshold = nullptr;
     QLabel *volLabel = nullptr;
@@ -36,8 +39,9 @@ private:
     QRadioButton *faceDistantLess = nullptr;
     QRadioButton *faceDistantMid = nullptr;
     QRadioButton *faceDistantMore = nullptr;
+    QButtonGroup *faceDistantGroup = nullptr;
 
-    QCheckBox *enableLiveness = nullptr;
+    QCheckBox *enableFaceSpoof = nullptr;
     QCheckBox *lightOnlyCheck = nullptr;
 
     QLabel *netModelLabel = nullptr;
@@ -46,6 +50,7 @@ private:
     QRadioButton *netModelWired = nullptr;
     QRadioButton *netModelWireless = nullptr;
     QRadioButton *netModelFourG = nullptr;
+    QButtonGroup *netModelGroup = nullptr;
 
     QLabel *wifiAccountLabel = nullptr;
     QLineEditPro *wifiAccount = nullptr;
@@ -56,8 +61,6 @@ private:
     QLabel *ipWiredLabel;
     QLabel *ipWirelessLabel;
     QLabel *ipFourGLabel;
-
-    QWidget *bottomWidget = nullptr;
 
     QPushButton *saveRebootBtn = nullptr;
     QPushButton *checkUpdateBtn = nullptr;
