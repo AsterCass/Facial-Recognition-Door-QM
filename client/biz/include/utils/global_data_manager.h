@@ -72,7 +72,7 @@ private:
     std::string headerWired;
     std::string headerWireless;
     std::string headerFourG;
-    bool headerServer;
+    bool headerServer = false;
 };
 
 #endif //GLOBAL_DATA_MANAGER

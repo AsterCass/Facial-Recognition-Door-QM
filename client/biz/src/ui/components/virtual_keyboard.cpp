@@ -24,6 +24,7 @@ VirtualKeyboard::VirtualKeyboard(QWidget *parent): QWidget(parent) {
     mainScreenWidget->setObjectName("VirtualKeyboardMask");
     mainScreenWidget->setStyleSheet("background-color: rgba(0, 0, 0, 100);");
     keyboardWidget->setObjectName("VirtualKeyboardBody");
+    keyboardWidget->setStyleSheet("background-color: white");
     layout->addWidget(mainScreenWidget, 2);
     layout->addWidget(keyboardWidget, 1);
     layout->setContentsMargins(0, 0, 0, 0);
