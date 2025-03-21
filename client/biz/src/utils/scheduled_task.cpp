@@ -279,7 +279,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo) {
         lastPass = true;
     } else {
         static auto lastFailTime = chrono::system_clock::from_time_t(0);
-        if ((currentTime - lastFailTime).count() > 2) {
+        if ((currentTime - lastFailTime).count() > 3) {
             if (chrono::duration_cast<std::chrono::seconds>(currentTime - lastFailTime).count() < 5) {
                 CameraFrame::getInstance()->negativeMessage();
                 messageLabelSec = 1;

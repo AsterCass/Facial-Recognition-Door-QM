@@ -226,7 +226,7 @@ int main(int argc, char *argv[]) {
 
     // Pre script
 #ifndef WIN32
-    airstrip::execScript(g_appWorkDir + "script/linux/reboot_app.sh " + std::to_string(g_commonDataVolNum));
+    airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_string(g_volNum));
 #endif
 
     // Init application
