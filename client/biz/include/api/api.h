@@ -7,6 +7,7 @@
 
 #include "db/open_record_db.h"
 #include "enums/general_enums.h"
+#include "opencv2/opencv.hpp"
 
 
 // local
@@ -32,7 +33,7 @@ void login();
 
 void checkTask();
 
-void faceGrant();
+bool faceGrant(const cv::Mat &frame, const std::string &userPhone);
 
 void appUpdate();
 

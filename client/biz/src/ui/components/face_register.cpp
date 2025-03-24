@@ -1,5 +1,7 @@
 #include "ui/components/face_register.h"
 
+#include <unistd.h>
+#include "api/api.h"
 #include "config/config.h"
 #include "ui/components/virtual_keyboard_number.h"
 
@@ -38,8 +40,12 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
 #else
     btnWidget->setFixedHeight(120);
 #endif
+    errorTips = new QLabel("");
+    errorTips->setAlignment(Qt::AlignCenter);
+    errorTips->setStyleSheet("margin-top: 5px; font-size: 16px; color: red");
     faceRegisterLayout->addWidget(faceRegisterTitle);
     faceRegisterLayout->addWidget(phoneNumberWidget);
+    faceRegisterLayout->addWidget(errorTips);
     faceRegisterLayout->addWidget(btnWidget);
 
     // Input
@@ -128,15 +134,6 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
     cancelBtn = new QPushButton("取消", btnWidget);
     connect(cancelBtn, &QPushButton::clicked, this,
             [=] {
-                if (nullptr != phoneNumberFirst) {
-                    phoneNumberFirst->setText("");
-                }
-                if (nullptr != phoneNumberSecond) {
-                    phoneNumberSecond->setText("");
-                }
-                if (nullptr != phoneNumberThird) {
-                    phoneNumberThird->setText("");
-                }
                 this->hide();
             });
     cancelBtn->setStyleSheet("background-color: rgb(101, 101, 101);");
@@ -146,6 +143,29 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
     cancelBtn->setFixedSize(240, 60);
 #endif
     registerBtn = new QPushButton("确认", btnWidget);
+    connect(registerBtn, &QPushButton::clicked, this,
+            [=] {
+                const auto phoneNumber = phoneNumberFirst->text() +
+                                         phoneNumberSecond->text() +
+                                         phoneNumberThird->text();
+                if (phoneNumber.size() != 11) {
+                    errorTips->setText("手机号码格式错误");
+                } else {
+                    if (lastFrame.empty()) {
+                        errorTips->setText("图片采集质量不合格，请取消后重试");
+                    } else {
+                        errorTips->setText("信息查询中...");
+                        const auto ret = faceGrant(lastFrame, phoneNumber.toStdString());
+                        if (ret) {
+                            errorTips->setText("录入成功");
+                            sleep(3);
+                            this->hide();
+                        } else {
+                            errorTips->setText("未查询到配租信息，请联系窗口服务");
+                        }
+                    }
+                }
+            });
     registerBtn->setStyleSheet("background-color: rgb(13, 133, 255);");
 #ifdef WIN32
     registerBtn->setFixedSize(120, 30);
@@ -163,6 +183,21 @@ void FaceRegister::showEvent(QShowEvent *) {
 
 void FaceRegister::hideEvent(QHideEvent *) {
     g_closeFaceRecognition = false;
+
+    if (nullptr != phoneNumberThird) {
+        phoneNumberThird->setText("");
+    }
+    if (nullptr != phoneNumberSecond) {
+        phoneNumberSecond->setText("");
+    }
+    if (nullptr != phoneNumberFirst) {
+        phoneNumberFirst->setText("");
+        phoneNumberFirst->setFocus();
+    }
+    if (nullptr != errorTips) {
+        errorTips->setText("");
+    }
+    lastFrame.release();
 }
 
 

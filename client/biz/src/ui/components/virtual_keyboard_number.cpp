@@ -51,9 +51,9 @@ VirtualKeyboardNumber::VirtualKeyboardNumber(QWidget *parent): QWidget(parent) {
         for (int col = 0; col < 3; ++col) {
             if (3 == row) {
                 if (0 == col) {
-                    hideBtn = new QPushButton("⇩");
+                    hideBtn = new QPushButton("X");
                     QFont font = hideBtn->font();
-                    font.setPointSize(15);
+                    font.setPointSize(10);
                     hideBtn->setFont(font);
                     hideBtn->setFixedHeight(minHeight);
                     hideBtn->setStyleSheet("QPushButton {background-color: rgb(101, 101, 101);"
@@ -84,7 +84,7 @@ VirtualKeyboardNumber::VirtualKeyboardNumber(QWidget *parent): QWidget(parent) {
                 } else {
                     deleteBtn = new QPushButton("⌫");
                     QFont font = deleteBtn->font();
-                    font.setPointSize(15);
+                    font.setPointSize(10);
                     deleteBtn->setFont(font);
                     deleteBtn->setFixedHeight(minHeight);
                     deleteBtn->setStyleSheet("QPushButton {background-color: rgb(101, 101, 101);"

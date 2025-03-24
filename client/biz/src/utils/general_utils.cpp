@@ -34,4 +34,25 @@ namespace generalUtils {
 
         return img;
     }
+
+    std::string matToBase64(const cv::Mat &img) {
+        std::vector<uchar> buffer;
+        // 编码图像到内存缓冲区
+        imencode(".jpg", img, buffer);
+
+        // 计算 base64 编码后的大小
+        const size_t encodedSize = boost::beast::detail::base64::encoded_size(buffer.size());
+        std::string base64String(encodedSize, 0);
+
+        // 执行编码
+        const auto result = boost::beast::detail::base64::encode(
+            &base64String[0],
+            buffer.data(),
+            buffer.size()
+        );
+
+        // 调整为实际编码大小
+        base64String.resize(result);
+        return base64String;
+    }
 }

@@ -527,13 +527,77 @@ void checkTask() {
     }
 }
 
-void faceGrant() {
+bool faceGrant(const cv::Mat &frame, const std::string &userPhone) {
     if (token.empty()) {
         login();
         if (token.empty()) {
-            return;
+            return false;
         }
     }
+
+    boost::json::object faceGrantJson;
+    faceGrantJson["deviceId"] = getSn();
+    faceGrantJson["deviceToken"] = token;
+    faceGrantJson["userPhone"] = userPhone;
+    faceGrantJson["facePhoto"] = generalUtils::matToBase64(frame);
+
+
+#ifdef  WIN32
+    const string certPath;
+#else
+    const string certPath = "/etc/ssl/certs/ca-certificates.crt";
+#endif
+    const string bodyStr = serialize(faceGrantJson);
+    logPrintln("Api face grant request string = " + bodyStr, airstrip::DEBUG, __FUNCTION__);
+    const auto ret = airstrip::AirstripHttp::sendRequest(
+        g_serverAddress + "/api/v1/doorGuard/zFang/device/authGrant",
+        airstrip::RequestMethod::POST,
+        {},
+        bodyStr,
+        30,
+        certPath
+    );
+
+    bool faceGrantRet = false;
+
+    try {
+        if (ret.success) {
+            logPrintln("Api face grant ret = " + ret.body, airstrip::DEBUG, __FUNCTION__);
+            auto parsed = boost::json::parse(ret.body);
+
+            if (HTTP_CODE_OK == parsed.at("code").as_int64()) {
+                const auto userData = parsed.at("data").as_object();
+                const auto userId = userData.at("userId").as_string().c_str();
+                const auto startTime = userData.at("startTime").as_int64();
+                const auto endTime = userData.at("endTime").as_int64();
+
+                ostringstream oss;
+                oss << "Add user : " << userId << " startTime: " << startTime << " endTime: " << endTime;
+                cout << oss.str() << endl;
+                logPrintln(oss.str(), airstrip::INFO, __FUNCTION__);
+
+                FaceUserInfo info = {};
+                info.userId = userId;
+                info.startTime = startTime;
+                info.endTime = endTime;
+                faceGrantRet = faceInsert(frame, info);
+            } else {
+                token = "";
+                logPrintln("Api face grant failed in local", airstrip::WARN, __FUNCTION__);
+            }
+        } else {
+            token = "";
+            logPrintln("Api face grant failed in local", airstrip::WARN, __FUNCTION__);
+        }
+    } catch (const std::exception &e) {
+        ostringstream errMsg;
+        errMsg << e.what();
+        logPrintln("Api face grant failed exception: " + errMsg.str()
+                   , airstrip::ERROR, __FUNCTION__);
+    }
+
+
+    return faceGrantRet;
 }
 
 void appUpdate() {

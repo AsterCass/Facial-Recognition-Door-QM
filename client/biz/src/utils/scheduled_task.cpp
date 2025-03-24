@@ -309,7 +309,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
                 // todo save frame
                 if (consecutiveFailCount >= 3) {
                     consecutiveFailCount = 0;
-                    MainRouter::getInstance()->showFaceRegister();
+                    MainRouter::getInstance()->showFaceRegister(frame);
                 }
             } else {
                 consecutiveFailCount = 0;

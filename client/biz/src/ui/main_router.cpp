@@ -29,8 +29,9 @@ void printMainRouterQueue(const string &functionName) {
     logPrintln(oss.str(), airstrip::INFO, functionName);
 }
 
-void MainRouter::showFaceRegister() const {
+void MainRouter::showFaceRegister(const cv::Mat &frame) const {
     if (nullptr != faceRegister) {
+        faceRegister->setLastFrame(frame);
         faceRegister->show();
     }
 }
@@ -156,7 +157,7 @@ MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
     // Face register
     faceRegister = new FaceRegister(this);
     faceRegister->setGeometry(QRect(0, 0, width, height));
-    faceRegister->show();
+    faceRegister->hide();
 
     // Load notification
     notification = new Notification(this);

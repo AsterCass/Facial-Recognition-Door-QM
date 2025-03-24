@@ -28,7 +28,7 @@ public:
 
     void backUntilPage(MainPage page) const;
 
-    void showFaceRegister() const;
+    void showFaceRegister(const cv::Mat &frame) const;
 
 private:
     explicit MainRouter(QWidget *parent = nullptr);
