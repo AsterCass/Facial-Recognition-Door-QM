@@ -62,7 +62,8 @@ private:
     QLabel *ipWirelessLabel;
     QLabel *ipFourGLabel;
 
-    QPushButton *saveRebootBtn;
+    QPushButton *saveBtn;
+    QPushButton *rebootBtn;
     QPushButton *checkUpdateBtn;
     QPushButton *cancelBtn;
 };

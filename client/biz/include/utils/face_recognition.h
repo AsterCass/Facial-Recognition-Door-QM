@@ -15,6 +15,8 @@ struct FaceUserInfo {
     std::string voiceTemplate;
 };
 
+void closeLight();
+
 void initFaceRecognition();
 
 void loadFaceDb();

@@ -79,6 +79,18 @@ void uploadAppData() {
     // else
 }
 
+// Every (60 * (taskIvCnt + executionTime)) sec
+void updateCommonAppData() {
+    static int count = 60;
+    if (count++ < 60) return;
+    count = 1;
+    if (g_lightOnlyCheck) {
+#ifndef WIN32
+        closeLight();
+#endif
+    }
+}
+
 
 // Every (10 * (taskIvCnt + executionTime)) sec
 void updateUIMainComponentHeader() {
@@ -239,6 +251,8 @@ void repeatOperation() {
     updatePersistentData();
     // Upload app data
     uploadAppData();
+    // Try to update common data
+    updateCommonAppData();
 
     // ...
 }
@@ -275,7 +289,11 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo) {
         recordInfo.faceId = userInfo.faceId;
         commonOpenDoor(recordInfo);
         playWav(AuthSuccess);
-
+        if (g_lightOnlyCheck) {
+#ifndef WIN32
+            closeLight();
+#endif
+        }
         lastPass = true;
     } else {
         static auto lastFailTime = chrono::system_clock::from_time_t(0);

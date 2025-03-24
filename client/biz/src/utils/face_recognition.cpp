@@ -27,14 +27,26 @@ std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
 HFSession faceRecognitionSession = nullptr;
 int currentLightLevel = 13;
 
+void closeLight() {
+    if (currentLightLevel >= EXPOSE_AND_GAIN_PARAM.size() - 1) {
+        logPrintln("To Close light", airstrip::INFO, __FUNCTION__);
+        --currentLightLevel;
+
+        ostringstream closeLight;
+        closeLight << "sh " << g_appWorkDir + "script/linux/reset_light.sh 0";
+        airstrip::execCommand(closeLight.str());
+    }
+}
+
+
 void updateExposeAndGain(const bool isUp) {
     logPrintln("Current level is " + to_string(currentLightLevel) +
                " want to up " + to_string(isUp), airstrip::INFO, __FUNCTION__);
 
     if (currentLightLevel <= 0 && !isUp) {
-        logPrintln("Down fai", airstrip::INFO, __FUNCTION__);
+        logPrintln("Down fail", airstrip::INFO, __FUNCTION__);
     } else if (currentLightLevel >= EXPOSE_AND_GAIN_PARAM.size() - 1 && isUp) {
-        logPrintln("Up fai", airstrip::INFO, __FUNCTION__);
+        logPrintln("Up fail", airstrip::INFO, __FUNCTION__);
     } else {
         if (isUp) {
             ++currentLightLevel;

@@ -71,7 +71,8 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
 
     serverAddressLabel = new QLabel("服务器地址：", scrollContent);
     serverAddress = new QLineEditPro(scrollContent);
-    faceThresholdLabel = new QLabel("人脸识别阈值（0 - 0.6）（推荐 0.48）：", scrollContent);
+    faceThresholdLabel = new QLabel("人脸识别阈值（0 - 0.6）（推荐 0.48）（重启生效）：", scrollContent);
+    faceThresholdLabel->setWordWrap(true);
     faceThreshold = new QLineEditPro(scrollContent);
     volLabel = new QLabel("设备音量（0 - 100）：", scrollContent);
     vol = new QLineEditPro(scrollContent);
@@ -90,7 +91,7 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     faceDistantGroup->addButton(faceDistantMore, 3);
 
 
-    netModelLabel = new QLabel("网络模式：", scrollContent);
+    netModelLabel = new QLabel("网络模式（重启生效）：", scrollContent);
     netModelWidget = new QWidget(scrollContent);
     netModelLayout = new QHBoxLayout(netModelWidget);
     netModelWired = new QRadioButton("有线", netModelWidget);
@@ -104,56 +105,92 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     netModelGroup->addButton(netModelWireless, 2);
     netModelGroup->addButton(netModelFourG, 3);
 
-    wifiAccountLabel = new QLabel("WIFI账号：", scrollContent);
+    wifiAccountLabel = new QLabel("WIFI账号（重启生效）：", scrollContent);
     wifiAccount = new QLineEditPro(scrollContent);
-    wifiPasswdLabel = new QLabel("WIFI密码：", scrollContent);
+    wifiPasswdLabel = new QLabel("WIFI密码（重启生效）：", scrollContent);
     wifiPasswdEdit = new QLineEditPro(scrollContent);
     wifiPasswdEdit->setEchoMode(QLineEdit::Password);
 
-    enableFaceSpoof = new QCheckBox("开启活体验证", scrollContent);
+    enableFaceSpoof = new QCheckBox("活体验证（仅供调试，用户需开启）", scrollContent);
     lightOnlyCheck = new QCheckBox("仅在核验时开启补光灯", scrollContent);
 
     ipWiredLabel = new QLabel("有线IP地址：", scrollContent);
     ipWirelessLabel = new QLabel("无线IP地址：", scrollContent);
     ipFourGLabel = new QLabel("4GIP地址：", scrollContent);
 
-    saveRebootBtn = new QPushButton("保存并重启", scrollContent);
-    connect(saveRebootBtn, &QPushButton::clicked, this,
+    saveBtn = new QPushButton("保存", scrollContent);
+    connect(saveBtn, &QPushButton::clicked, this,
             [=] {
                 try {
-                    // todo if not equal save db
+                    const auto newServerAddress = serverAddress->text().trimmed().toStdString();
+                    if (g_serverAddress != newServerAddress) {
+                        g_serverAddress = newServerAddress;
+                        g_commonDb.upsertConfig(PRO_DB_COMMON_KEY_SERVER_ADD, g_serverAddress);
+                    }
 
-                    g_serverAddress = serverAddress->text().trimmed().toStdString();
-                    g_commonDb.upsertConfig(PRO_DB_COMMON_KEY_SERVER_ADD, g_serverAddress);
+                    const auto newFaceThreshold = faceThreshold->text().trimmed().toDouble();
+                    if (g_faceThreshold != newFaceThreshold) {
+                        g_faceThreshold = newFaceThreshold;
+                        g_commonDb.upsertConfig(PRO_DB_FACE_THRESHOLD, to_string(g_faceThreshold));
+                    }
 
-                    g_faceThreshold = faceThreshold->text().trimmed().toDouble();
-                    g_commonDb.upsertConfig(PRO_DB_FACE_THRESHOLD, to_string(g_faceThreshold));
+                    const auto newVolNum = vol->text().trimmed().toInt();
+                    if (g_volNum != newVolNum) {
+                        g_volNum = newVolNum;
+#ifndef WIN32
+airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_string(g_volNum));
+#endif
+                        g_commonDb.upsertConfig(PRO_DB_VOL_NUM, to_string(g_volNum));
+                    }
 
-                    g_volNum = vol->text().trimmed().toInt();
-                    g_commonDb.upsertConfig(PRO_DB_VOL_NUM, to_string(g_volNum));
+                    const auto newFaceDistance = faceDistantGroup->checkedId();
+                    if (g_faceDistance != newFaceDistance) {
+                        g_faceDistance = newFaceDistance;
+                        g_commonDb.upsertConfig(PRO_DB_FACE_DISTANCE, to_string(g_faceDistance));
+                    }
 
-                    g_faceDistance = faceDistantGroup->checkedId();
-                    g_commonDb.upsertConfig(PRO_DB_FACE_DISTANCE, to_string(g_faceDistance));
+                    const auto newNetModel = netModelGroup->checkedId();
+                    if (g_netModel != newNetModel) {
+                        g_netModel = newNetModel;
+                        g_commonDb.upsertConfig(PRO_DB_NET_MODEL, to_string(g_netModel));
+                    }
 
-                    g_netModel = netModelGroup->checkedId();
-                    g_commonDb.upsertConfig(PRO_DB_NET_MODEL, to_string(g_netModel));
+                    const auto newWifiAccount = wifiAccount->text().trimmed().toStdString();
+                    if (g_wifiAccount != newWifiAccount) {
+                        g_wifiAccount = newWifiAccount;
+                        g_commonDb.upsertConfig(PRO_DB_WIFI_ACCOUNT, g_wifiAccount);
+                    }
 
-                    g_wifiAccount = wifiAccount->text().trimmed().toStdString();
-                    g_commonDb.upsertConfig(PRO_DB_WIFI_ACCOUNT, g_wifiAccount);
 
-                    g_wifiPasswd = wifiPasswdEdit->text().trimmed().toStdString();
-                    g_commonDb.upsertConfig(PRO_DB_WIFI_PASSWD, g_wifiPasswd);
+                    const auto newWifiPasswd = wifiPasswdEdit->text().trimmed().toStdString();
+                    if (g_wifiPasswd != newWifiPasswd) {
+                        g_wifiPasswd = newWifiPasswd;
+                        g_commonDb.upsertConfig(PRO_DB_WIFI_PASSWD, g_wifiPasswd);
+                    }
 
-                    g_enableFaceSpoof = enableFaceSpoof->isChecked() ? 1 : 0;
-                    g_commonDb.upsertConfig(PRO_DB_ENABLE_FACE_SPOOF, to_string(g_enableFaceSpoof));
 
-                    g_lightOnlyCheck = lightOnlyCheck->isChecked() ? 1 : 0;
-                    g_commonDb.upsertConfig(PRO_DB_ENABLE_LIGHT_ONLY_CHECK, to_string(g_lightOnlyCheck));
+                    const auto newEnableFaceSpoof = enableFaceSpoof->isChecked() ? 1 : 0;
+                    if (g_enableFaceSpoof != newEnableFaceSpoof) {
+                        g_enableFaceSpoof = newEnableFaceSpoof;
+                        g_commonDb.upsertConfig(
+                            PRO_DB_ENABLE_FACE_SPOOF, to_string(g_enableFaceSpoof));
+                    }
+
+                    const auto newLightOnlyCheck = lightOnlyCheck->isChecked() ? 1 : 0;
+                    if (g_lightOnlyCheck != newLightOnlyCheck) {
+                        g_lightOnlyCheck = newLightOnlyCheck;
+                        g_commonDb.upsertConfig(
+                            PRO_DB_ENABLE_LIGHT_ONLY_CHECK, to_string(g_lightOnlyCheck));
+                    }
                 } catch (const std::exception &e) {
                     ostringstream errMsg;
                     errMsg << "Save config data error :" << e.what();
                     logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
                 }
+            });
+    rebootBtn = new QPushButton("重启", scrollContent);
+    connect(rebootBtn, &QPushButton::clicked, this,
+            [=] {
 #ifdef WIN32
                 logPrintln("Reboot ...", airstrip::INFO, __FUNCTION__);
 #else
@@ -200,7 +237,8 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     scrollerAreaLayout->addWidget(ipWirelessLabel);
     scrollerAreaLayout->addWidget(ipFourGLabel);
 
-    scrollerAreaLayout->addWidget(saveRebootBtn);
+    scrollerAreaLayout->addWidget(saveBtn);
+    scrollerAreaLayout->addWidget(rebootBtn);
     scrollerAreaLayout->addWidget(checkUpdateBtn);
     scrollerAreaLayout->addWidget(cancelBtn);
 
