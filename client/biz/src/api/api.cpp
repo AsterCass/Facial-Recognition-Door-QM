@@ -535,11 +535,23 @@ bool faceGrant(const cv::Mat &frame, const std::string &userPhone) {
         }
     }
 
+    // Compress
+    cv::Size newSize(frame.cols / 2, frame.rows / 2);
+    cv::Mat resizedImage;
+    resize(frame, resizedImage, newSize, 0, 0, cv::INTER_AREA);
+    std::vector<uchar> buffer;
+    std::vector<int> compressionParams;
+    compressionParams.push_back(cv::IMWRITE_JPEG_QUALITY);
+    compressionParams.push_back(50);
+    imencode(".jpg", resizedImage, buffer, compressionParams);
+    cv::Mat compressedImage = imdecode(buffer, cv::IMREAD_COLOR);
+
+    // Build
     boost::json::object faceGrantJson;
     faceGrantJson["deviceId"] = getSn();
     faceGrantJson["deviceToken"] = token;
     faceGrantJson["userPhone"] = userPhone;
-    faceGrantJson["facePhoto"] = generalUtils::matToBase64(frame);
+    faceGrantJson["facePhoto"] = generalUtils::matToBase64(compressedImage);
 
 
 #ifdef  WIN32
