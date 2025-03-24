@@ -15,7 +15,7 @@ public:
     ~FaceRegister() override;
 
     void setLastFrame(const cv::Mat &frame) {
-        lastFrame = frame;
+        lastFrame = frame.clone();
     }
 
 private:
