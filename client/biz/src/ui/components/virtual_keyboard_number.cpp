@@ -45,8 +45,8 @@ VirtualKeyboardNumber::VirtualKeyboardNumber(QWidget *parent): QWidget(parent) {
     // Keyboard body
     const int minHeight = parent->height() / 3 / 5;
     keyboardLayout = new QGridLayout(keyboardWidget);
-    keyboardLayout->setSpacing(8);
-    keyboardLayout->setContentsMargins(8, 8, 8, 8);
+    keyboardLayout->setSpacing(16);
+    keyboardLayout->setContentsMargins(16, 8, 16, 8);
     for (int row = 0; row < 4; ++row) {
         for (int col = 0; col < 3; ++col) {
             if (3 == row) {

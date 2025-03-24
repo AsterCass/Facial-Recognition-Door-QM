@@ -1,6 +1,7 @@
 #include "ui/components/face_register.h"
 
 #include "config/config.h"
+#include "ui/components/virtual_keyboard_number.h"
 
 
 FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
@@ -80,29 +81,39 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
 
     connect(phoneNumberFirst, &QLineEdit::textChanged, this,
             [=] {
-                if (phoneNumberFirst->text().size() >= 3) {
-                    phoneNumberSecond->setFocus();
-                }
                 if (phoneNumberFirst->text().size() > 3) {
+                    phoneNumberSecond->setFocus();
+                    VirtualKeyboardNumber::getInstance()->switchCurrentInput(phoneNumberSecond);
+
+                    const auto ch = phoneNumberFirst->text().at(3);
                     phoneNumberFirst->backspace();
+                    if (phoneNumberSecond->text().isEmpty()) {
+                        phoneNumberSecond->setText(ch);
+                    }
                 }
             });
     connect(phoneNumberSecond, &QLineEdit::textChanged, this,
             [=] {
-                if (phoneNumberSecond->text().size() >= 4) {
-                    phoneNumberThird->setFocus();
-                }
                 if (phoneNumberSecond->text().isEmpty()) {
                     phoneNumberFirst->setFocus();
+                    VirtualKeyboardNumber::getInstance()->switchCurrentInput(phoneNumberFirst);
                 }
                 if (phoneNumberSecond->text().size() > 4) {
+                    phoneNumberThird->setFocus();
+                    VirtualKeyboardNumber::getInstance()->switchCurrentInput(phoneNumberThird);
+
+                    const auto ch = phoneNumberSecond->text().at(3);
                     phoneNumberSecond->backspace();
+                    if (phoneNumberThird->text().isEmpty()) {
+                        phoneNumberThird->setText(ch);
+                    }
                 }
             });
     connect(phoneNumberThird, &QLineEdit::textChanged, this,
             [=] {
                 if (phoneNumberThird->text().isEmpty()) {
                     phoneNumberSecond->setFocus();
+                    VirtualKeyboardNumber::getInstance()->switchCurrentInput(phoneNumberSecond);
                 }
                 if (phoneNumberThird->text().size() > 4) {
                     phoneNumberThird->backspace();

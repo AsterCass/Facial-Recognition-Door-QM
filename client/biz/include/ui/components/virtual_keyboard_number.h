@@ -32,6 +32,10 @@ public:
         this->show();
     }
 
+    void switchCurrentInput(QLineEdit *input) {
+        currentInput = input;
+    }
+
 private:
     explicit VirtualKeyboardNumber(QWidget *parent = nullptr);
 
