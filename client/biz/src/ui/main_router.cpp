@@ -10,7 +10,7 @@
 #include <sstream>
 
 #include "airstrip_program_options.h"
-#include "ui/components/notification.h"
+#include "ui/components/virtual_keyboard_number.h"
 #include "ui/pages/main_page_setting_login.h"
 #include "ui/pages/main_page_setting_tmp.h"
 
@@ -28,6 +28,13 @@ void printMainRouterQueue(const string &functionName) {
     }
     logPrintln(oss.str(), airstrip::INFO, functionName);
 }
+
+void MainRouter::showFaceRegister() const {
+    if (nullptr != faceRegister) {
+        faceRegister->show();
+    }
+}
+
 
 void MainRouter::addPage(const MainPage page) const {
     if (nullptr == stackedWidget) return;
@@ -146,8 +153,13 @@ MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
     addPage(MAIN_PAGE_INIT);
     stackedWidget->show();
 
+    // Face register
+    faceRegister = new FaceRegister(this);
+    faceRegister->setGeometry(QRect(0, 0, width, height));
+    faceRegister->show();
+
     // Load notification
-    const auto notification = new Notification(this);
+    notification = new Notification(this);
     notification->setGeometry(QRect(0, 0, width, height));
     notification->hide();
 
@@ -155,6 +167,10 @@ MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
     const auto virtualKeyboard = VirtualKeyboard::getInstance(this);
     virtualKeyboard->setGeometry(QRect(0, 0, width, height));
     virtualKeyboard->hide();
+
+    const auto virtualKeyboardNumber = VirtualKeyboardNumber::getInstance(this);
+    virtualKeyboardNumber->setGeometry(QRect(0, 0, width, height));
+    virtualKeyboardNumber->hide();
 }
 
 

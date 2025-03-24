@@ -1,9 +1,9 @@
 #ifndef MAIN_ROUTER_H
 #define MAIN_ROUTER_H
 
-#include <mutex>
 #include <QStackedWidget>
-
+#include "components/face_register.h"
+#include "components/notification.h"
 #include "enums/general_enums.h"
 
 
@@ -28,12 +28,17 @@ public:
 
     void backUntilPage(MainPage page) const;
 
+    void showFaceRegister() const;
+
 private:
     explicit MainRouter(QWidget *parent = nullptr);
 
     ~MainRouter() override;
 
     QStackedWidget *stackedWidget = nullptr;
+
+    FaceRegister *faceRegister = nullptr;
+    Notification *notification = nullptr;
 };
 
 

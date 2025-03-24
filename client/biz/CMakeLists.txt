@@ -120,8 +120,10 @@ set(PROJECT_SOURCES
         src/ui/main_router.cpp
         src/ui/components/main_component_header.cpp
         src/ui/components/virtual_keyboard.cpp
+        src/ui/components/virtual_keyboard_number.cpp
         src/ui/components/notification.cpp
         src/ui/components/common_components.cpp
+        src/ui/components/face_register.cpp
         src/ui/pages/main_page_init.cpp
         src/ui/pages/main_page_home.cpp
         src/ui/pages/main_page_setting_login.cpp

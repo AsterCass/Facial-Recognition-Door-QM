@@ -4,7 +4,7 @@ using namespace std;
 
 bool VirtualKeyboardMaskEventFilter::eventFilter(QObject *watched, QEvent *event) {
     if (event->type() == QEvent::MouseButtonPress) {
-        const auto *mouseEvent = static_cast<QMouseEvent *>(event);
+        const auto *mouseEvent = dynamic_cast<QMouseEvent *>(event);
         if (mouseEvent->button() == Qt::LeftButton) {
             VirtualKeyboard::getInstance()->hideKeyboard();
         }

@@ -288,10 +288,10 @@ bool faceInsert(const cv::Mat &pic, FaceUserInfo &userInfo) {
     userInfo.faceId = faceId;
     faceUserInfoMap[faceId] = userInfo;
 
+    // todo add photo
+
     logPrintln("Insert finish userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
     logPrintln("Insert finish faceId = " + to_string(faceId), airstrip::INFO, __FUNCTION__);
-
-    // todo callback
 
     HFReleaseImageStream(stream);
 
@@ -323,6 +323,9 @@ bool faceDelete(const FaceUserInfo &userInfo) {
     for (auto &faceId: removeFaceIds) {
         faceUserInfoMap.erase(faceId);
     }
+
+
+    // todo delete photo
 
     logPrintln("Delete finish userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
 
@@ -401,6 +404,8 @@ bool faceUpdate(const cv::Mat &pic, FaceUserInfo &userInfo) {
             faceUserInfo.second = userInfo;
         }
     }
+
+    // todo update photo
 
     logPrintln("Update finish userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
 
@@ -490,6 +495,8 @@ bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, i
 
 
         const auto minSide = min(rect.width, rect.height);
+        logPrintln("Size min side =  " + to_string(minSide) +
+                   " faceDistance = " + to_string(g_faceDistance), airstrip::DEBUG, __FUNCTION__);
         if ((1 == g_faceDistance && minSide < 90) || (2 == g_faceDistance && minSide < 60)) {
             ret = false;
         }
@@ -597,14 +604,14 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
     }
 
     if (searchResult.id <= 0 || faceUserInfoMap.find(searchResult.id) == faceUserInfoMap.end()) {
-        ScheduledTask::sendFaceRegRes({});
+        ScheduledTask::sendFaceRegRes({}, frame);
         HFReleaseImageStream(stream);
         return;
     }
 
     logPrintln("Face recognition ret id = " + to_string(searchResult.id) + " " + to_string(confidence),
                airstrip::INFO, __FUNCTION__);
-    ScheduledTask::sendFaceRegRes(faceUserInfoMap[searchResult.id]);
+    ScheduledTask::sendFaceRegRes(faceUserInfoMap[searchResult.id], frame);
 
     HFReleaseImageStream(stream);
 }

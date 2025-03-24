@@ -13,4 +13,14 @@ protected:
 };
 
 
+class QLineEditProNumber final : public QLineEdit {
+public:
+    explicit QLineEditProNumber(QWidget *parent = nullptr) : QLineEdit(parent) {
+    }
+
+protected:
+    void mousePressEvent(QMouseEvent *) override;
+};
+
+
 #endif // COMMON_COMPONENTS_H

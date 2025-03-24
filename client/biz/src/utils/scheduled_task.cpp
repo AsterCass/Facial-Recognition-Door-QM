@@ -270,9 +270,10 @@ void repeatOperation() {
     }
 }
 
-void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo) {
+void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &frame) {
     static auto lastTime = chrono::system_clock::from_time_t(0);
     static bool lastPass = false;
+    static int consecutiveFailCount = 0;
     const auto currentTime = chrono::system_clock::now();
 
     if (lastPass && chrono::duration_cast<std::chrono::seconds>(currentTime - lastTime).count() < 5) {
@@ -288,7 +289,9 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo) {
         recordInfo.openTime = chrono::system_clock::to_time_t(currentTime);
         recordInfo.faceId = userInfo.faceId;
         commonOpenDoor(recordInfo);
+        consecutiveFailCount = 0;
         playWav(AuthSuccess);
+        // todo save frame
         if (g_lightOnlyCheck) {
 #ifndef WIN32
             closeLight();
@@ -301,8 +304,15 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo) {
             if (chrono::duration_cast<std::chrono::seconds>(currentTime - lastFailTime).count() < 5) {
                 CameraFrame::getInstance()->negativeMessage();
                 messageLabelSec = 1;
+                ++consecutiveFailCount;
                 playWav(AuthFail);
+                // todo save frame
+                if (consecutiveFailCount >= 3) {
+                    consecutiveFailCount = 0;
+                    MainRouter::getInstance()->showFaceRegister();
+                }
             } else {
+                consecutiveFailCount = 0;
                 playWav(AuthFailFirst);
             }
             lastFailTime = currentTime;
