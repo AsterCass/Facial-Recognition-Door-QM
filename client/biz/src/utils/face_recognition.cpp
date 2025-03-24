@@ -497,7 +497,7 @@ bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, i
         const auto minSide = min(rect.width, rect.height);
         logPrintln("Size min side =  " + to_string(minSide) +
                    " faceDistance = " + to_string(g_faceDistance), airstrip::DEBUG, __FUNCTION__);
-        if ((1 == g_faceDistance && minSide < 90) || (2 == g_faceDistance && minSide < 60)) {
+        if ((1 == g_faceDistance && minSide < 320) || (2 == g_faceDistance && minSide < 180)) {
             ret = false;
         }
 

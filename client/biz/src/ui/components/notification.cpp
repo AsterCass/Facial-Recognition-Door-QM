@@ -1,7 +1,6 @@
 #include "ui/components/notification.h"
 
 #include <QLabel>
-#include <QVBoxLayout>
 #include <QWidget>
 
 

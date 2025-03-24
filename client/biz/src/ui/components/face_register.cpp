@@ -48,32 +48,32 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
 #ifdef WIN32
     phoneNumberFirst = new QLineEditProNumber(phoneNumberWidget);
     phoneNumberFirst->setStyleSheet(
-        "background-color: rgb(28, 50, 79); font-size: 24px; letter-spacing: 6px; padding-left: 12px");
+        "background-color: rgb(28, 50, 79); font-size: 24px; padding-left: 18px");
     phoneNumberFirst->setFixedSize(75, 35);
 
     phoneNumberSecond = new QLineEditProNumber(phoneNumberWidget);
     phoneNumberSecond->setStyleSheet(
-        "background-color: rgb(28, 50, 79); font-size: 24px; letter-spacing: 6px; padding-left: 10px");
+        "background-color: rgb(28, 50, 79); font-size: 24px; padding-left: 18px");
     phoneNumberSecond->setFixedSize(90, 35);
 
     phoneNumberThird = new QLineEditProNumber(phoneNumberWidget);
     phoneNumberThird->setStyleSheet(
-        "background-color: rgb(28, 50, 79); font-size: 24px; letter-spacing: 6px; padding-left: 10px");
+        "background-color: rgb(28, 50, 79); font-size: 24px; padding-left: 18px");
     phoneNumberThird->setFixedSize(90, 35);
 #else
     phoneNumberFirst = new QLineEditProNumber(phoneNumberWidget);
     phoneNumberFirst->setStyleSheet(
-        "background-color: rgb(28, 50, 79); font-size: 48px; letter-spacing: 12px; padding-left: 24px");
+        "background-color: rgb(28, 50, 79); font-size: 48px; padding-left: 36px");
     phoneNumberFirst->setFixedSize(150, 70);
 
     phoneNumberSecond = new QLineEditProNumber(phoneNumberWidget);
     phoneNumberSecond->setStyleSheet(
-        "background-color: rgb(28, 50, 79); font-size: 48px; letter-spacing: 12px; padding-left: 20px");
+        "background-color: rgb(28, 50, 79); font-size: 48px; padding-left: 36px");
     phoneNumberSecond->setFixedSize(180, 70);
 
     phoneNumberThird = new QLineEditProNumber(phoneNumberWidget);
     phoneNumberThird->setStyleSheet(
-        "background-color: rgb(28, 50, 79); font-size: 48px; letter-spacing: 12px; padding-left: 20px");
+        "background-color: rgb(28, 50, 79); font-size: 48px; padding-left: 36px");
     phoneNumberThird->setFixedSize(180, 70);
 #endif
 
@@ -86,6 +86,15 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
     cancelBtn = new QPushButton("取消", btnWidget);
     connect(cancelBtn, &QPushButton::clicked, this,
             [=] {
+                if (nullptr != phoneNumberFirst) {
+                    phoneNumberFirst->setText("");
+                }
+                if (nullptr != phoneNumberSecond) {
+                    phoneNumberSecond->setText("");
+                }
+                if (nullptr != phoneNumberThird) {
+                    phoneNumberThird->setText("");
+                }
                 this->hide();
             });
     cancelBtn->setStyleSheet("background-color: rgb(101, 101, 101);");
