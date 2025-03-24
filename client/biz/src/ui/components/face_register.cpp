@@ -29,7 +29,7 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
     faceRegisterLayout->setAlignment(Qt::AlignCenter);
     faceRegisterTitle = new QLabel("请输入手机号", faceRegisterWidget);
     faceRegisterTitle->setAlignment(Qt::AlignCenter);
-    faceRegisterTitle->setStyleSheet("margin: 10px");
+    faceRegisterTitle->setStyleSheet("margin: 20px");
     phoneNumberWidget = new QWidget(faceRegisterWidget);
     btnWidget = new QWidget(faceRegisterWidget);
 #ifdef WIN32
@@ -63,20 +63,51 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
 #else
     phoneNumberFirst = new QLineEditProNumber(phoneNumberWidget);
     phoneNumberFirst->setStyleSheet(
-        "background-color: rgb(28, 50, 79); font-size: 48px; padding-left: 36px");
+        "background-color: rgb(28, 50, 79); font-size: 48px; padding-left: 24px");
     phoneNumberFirst->setFixedSize(150, 70);
 
     phoneNumberSecond = new QLineEditProNumber(phoneNumberWidget);
     phoneNumberSecond->setStyleSheet(
-        "background-color: rgb(28, 50, 79); font-size: 48px; padding-left: 36px");
+        "background-color: rgb(28, 50, 79); font-size: 48px; padding-left: 24px");
     phoneNumberSecond->setFixedSize(180, 70);
 
     phoneNumberThird = new QLineEditProNumber(phoneNumberWidget);
     phoneNumberThird->setStyleSheet(
-        "background-color: rgb(28, 50, 79); font-size: 48px; padding-left: 36px");
+        "background-color: rgb(28, 50, 79); font-size: 48px; padding-left: 24px");
     phoneNumberThird->setFixedSize(180, 70);
 #endif
 
+
+    connect(phoneNumberFirst, &QLineEdit::textChanged, this,
+            [=] {
+                if (phoneNumberFirst->text().size() >= 3) {
+                    phoneNumberSecond->setFocus();
+                }
+                if (phoneNumberFirst->text().size() > 3) {
+                    phoneNumberFirst->backspace();
+                }
+            });
+    connect(phoneNumberSecond, &QLineEdit::textChanged, this,
+            [=] {
+                if (phoneNumberSecond->text().size() >= 4) {
+                    phoneNumberThird->setFocus();
+                }
+                if (phoneNumberSecond->text().isEmpty()) {
+                    phoneNumberFirst->setFocus();
+                }
+                if (phoneNumberSecond->text().size() > 4) {
+                    phoneNumberSecond->backspace();
+                }
+            });
+    connect(phoneNumberThird, &QLineEdit::textChanged, this,
+            [=] {
+                if (phoneNumberThird->text().isEmpty()) {
+                    phoneNumberSecond->setFocus();
+                }
+                if (phoneNumberThird->text().size() > 4) {
+                    phoneNumberThird->backspace();
+                }
+            });
     phoneNumberLayout->addWidget(phoneNumberFirst);
     phoneNumberLayout->addWidget(phoneNumberSecond);
     phoneNumberLayout->addWidget(phoneNumberThird);

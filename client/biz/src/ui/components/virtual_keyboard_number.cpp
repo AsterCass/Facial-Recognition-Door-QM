@@ -45,15 +45,15 @@ VirtualKeyboardNumber::VirtualKeyboardNumber(QWidget *parent): QWidget(parent) {
     // Keyboard body
     const int minHeight = parent->height() / 3 / 5;
     keyboardLayout = new QGridLayout(keyboardWidget);
-    keyboardLayout->setSpacing(4);
-    keyboardLayout->setContentsMargins(4, 4, 4, 4);
+    keyboardLayout->setSpacing(8);
+    keyboardLayout->setContentsMargins(8, 8, 8, 8);
     for (int row = 0; row < 4; ++row) {
         for (int col = 0; col < 3; ++col) {
             if (3 == row) {
                 if (0 == col) {
                     hideBtn = new QPushButton("⇩");
                     QFont font = hideBtn->font();
-                    font.setPointSize(20);
+                    font.setPointSize(15);
                     hideBtn->setFont(font);
                     hideBtn->setFixedHeight(minHeight);
                     hideBtn->setStyleSheet("QPushButton {background-color: rgb(101, 101, 101);"
@@ -84,7 +84,7 @@ VirtualKeyboardNumber::VirtualKeyboardNumber(QWidget *parent): QWidget(parent) {
                 } else {
                     deleteBtn = new QPushButton("⌫");
                     QFont font = deleteBtn->font();
-                    font.setPointSize(20);
+                    font.setPointSize(15);
                     deleteBtn->setFont(font);
                     deleteBtn->setFixedHeight(minHeight);
                     deleteBtn->setStyleSheet("QPushButton {background-color: rgb(101, 101, 101);"
