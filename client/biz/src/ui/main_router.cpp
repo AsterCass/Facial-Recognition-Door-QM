@@ -36,6 +36,12 @@ void MainRouter::showFaceRegister(const cv::Mat &frame) const {
     }
 }
 
+void MainRouter::hideFaceRegister() const {
+    if (nullptr != faceRegister) {
+        faceRegister->hide();
+    }
+}
+
 
 void MainRouter::addPage(const MainPage page) const {
     if (nullptr == stackedWidget) return;

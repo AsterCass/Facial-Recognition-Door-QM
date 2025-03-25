@@ -25,6 +25,7 @@
 
 int doorOpenSec = 0;
 int messageLabelSec = 0;
+int64_t lastShowFaceRegisterTime = 0;
 
 using namespace std;
 using namespace airstrip;
@@ -144,6 +145,14 @@ void updateUIMainComponentHeader() {
     // Cloud
     {
         GlobalDataManager::getInstance()->updateHeaderServer(linkedServer());
+    }
+
+    // Auto close face register
+    {
+        if (lastShowFaceRegisterTime > 0 && time - lastShowFaceRegisterTime > 60) {
+            MainRouter::getInstance()->hideFaceRegister();
+            lastShowFaceRegisterTime = 0;
+        }
     }
 }
 
@@ -275,6 +284,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
     static bool lastPass = false;
     static int consecutiveFailCount = 0;
     const auto currentTime = chrono::system_clock::now();
+    const auto currentTimeSec = chrono::system_clock::to_time_t(currentTime);
 
     if (lastPass && chrono::duration_cast<std::chrono::seconds>(currentTime - lastTime).count() < 5) {
         logPrintln("Already pass last", DEBUG, __FUNCTION__);
@@ -310,6 +320,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
                 if (consecutiveFailCount >= 3) {
                     consecutiveFailCount = 0;
                     MainRouter::getInstance()->showFaceRegister(frame);
+                    lastShowFaceRegisterTime = currentTimeSec;
                 }
             } else {
                 consecutiveFailCount = 0;

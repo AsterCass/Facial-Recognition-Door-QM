@@ -30,6 +30,8 @@ public:
 
     void showFaceRegister(const cv::Mat &frame) const;
 
+    void hideFaceRegister() const;
+
 private:
     explicit MainRouter(QWidget *parent = nullptr);
 
