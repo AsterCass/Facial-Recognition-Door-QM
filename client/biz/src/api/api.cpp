@@ -594,8 +594,7 @@ bool faceGrant(const cv::Mat &frame, const std::string &userPhone) {
                 info.endTime = endTime;
                 faceGrantRet = faceInsert(frame, info);
             } else {
-                token = "";
-                logPrintln("Api face grant failed in local", airstrip::WARN, __FUNCTION__);
+                logPrintln("Api face grant failed in server", airstrip::WARN, __FUNCTION__);
             }
         } else {
             token = "";

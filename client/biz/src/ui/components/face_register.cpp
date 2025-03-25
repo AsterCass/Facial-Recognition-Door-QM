@@ -108,7 +108,7 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
                     phoneNumberThird->setFocus();
                     VirtualKeyboardNumber::getInstance()->switchCurrentInput(phoneNumberThird);
 
-                    const auto ch = phoneNumberSecond->text().at(3);
+                    const auto ch = phoneNumberSecond->text().at(4);
                     phoneNumberSecond->backspace();
                     if (phoneNumberThird->text().isEmpty()) {
                         phoneNumberThird->setText(ch);
