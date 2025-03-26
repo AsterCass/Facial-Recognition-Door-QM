@@ -292,7 +292,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
     }
 
     if (!userInfo.userId.empty()) {
-        OpenRecordInfo recordInfo{};
+        OpenRecordInfo recordInfo = {};
         recordInfo.userId = userInfo.userId;
         recordInfo.openMode = FaceOpen;
         recordInfo.openResult = 0;
