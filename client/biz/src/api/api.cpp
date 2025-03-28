@@ -308,14 +308,25 @@ void checkTask() {
 #endif
     const string bodyStr = serialize(taskListJson);
     logPrintln("Api check task body string = " + bodyStr, airstrip::DEBUG, __FUNCTION__);
-    const auto ret = airstrip::AirstripHttp::sendRequest(
-        g_serverAddress + "/api/v1/doorGuard/zFang/device/taskList",
-        airstrip::RequestMethod::POST,
-        {},
-        bodyStr,
-        10,
-        certPath
-    );
+
+
+    airstrip::Response ret = {};
+    try {
+        ret = airstrip::AirstripHttp::sendRequest(
+            g_serverAddress + "/api/v1/doorGuard/zFang/device/taskList",
+            airstrip::RequestMethod::POST,
+            {},
+            bodyStr,
+            10,
+            certPath
+        );
+    } catch (const exception &e) {
+        ostringstream errMsg;
+        errMsg << e.what();
+        logPrintln("Task request operation error " + errMsg.str()
+                   , airstrip::ERROR, __FUNCTION__);
+    }
+
 
     if (ret.success) {
         logPrintln("Api task body ret = " + ret.body, airstrip::DEBUG, __FUNCTION__);
@@ -561,18 +572,19 @@ bool faceGrant(const cv::Mat &frame, const std::string &userPhone) {
 #endif
     const string bodyStr = serialize(faceGrantJson);
     logPrintln("Api face grant request string = " + bodyStr, airstrip::DEBUG, __FUNCTION__);
-    const auto ret = airstrip::AirstripHttp::sendRequest(
-        g_serverAddress + "/api/v1/doorGuard/zFang/device/authGrant",
-        airstrip::RequestMethod::POST,
-        {},
-        bodyStr,
-        30,
-        certPath
-    );
 
     bool faceGrantRet = false;
 
     try {
+        const auto ret = airstrip::AirstripHttp::sendRequest(
+            g_serverAddress + "/api/v1/doorGuard/zFang/device/authGrant",
+            airstrip::RequestMethod::POST,
+            {},
+            bodyStr,
+            30,
+            certPath
+        );
+
         if (ret.success) {
             logPrintln("Api face grant ret = " + ret.body, airstrip::DEBUG, __FUNCTION__);
             auto parsed = boost::json::parse(ret.body);
