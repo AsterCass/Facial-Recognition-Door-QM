@@ -501,6 +501,7 @@ void checkTask() {
         token = "";
         ostringstream errMsg;
         errMsg << e.what();
+        logPrintln("Task rest text " + ret.body, airstrip::ERROR, __FUNCTION__);
         logPrintln("Task execute error " + errMsg.str(), airstrip::ERROR, __FUNCTION__);
     }
 }
