@@ -310,44 +310,35 @@ void checkTask() {
     logPrintln("Api check task body string = " + bodyStr, airstrip::DEBUG, __FUNCTION__);
 
 
-    airstrip::Response ret = {};
+    airstrip::Response ret = airstrip::AirstripHttp::sendRequest(
+        g_serverAddress + "/api/v1/doorGuard/zFang/device/taskList",
+        airstrip::RequestMethod::POST,
+        {},
+        bodyStr,
+        10,
+        certPath
+    );
+
     try {
-        ret = airstrip::AirstripHttp::sendRequest(
-            g_serverAddress + "/api/v1/doorGuard/zFang/device/taskList",
-            airstrip::RequestMethod::POST,
-            {},
-            bodyStr,
-            10,
-            certPath
-        );
-    } catch (const exception &e) {
-        ostringstream errMsg;
-        errMsg << e.what();
-        logPrintln("Task request operation error " + errMsg.str()
-                   , airstrip::ERROR, __FUNCTION__);
-    }
+        if (ret.success) {
+            logPrintln("Api task body ret = " + ret.body, airstrip::DEBUG, __FUNCTION__);
+            auto parsed = boost::json::parse(ret.body);
+            if (HTTP_CODE_OK == parsed.at("code").as_int64()) {
+                const auto taskList = parsed.at("data").as_array();
+                if (taskList.empty()) {
+                    logPrintln("Api not task deal with", airstrip::DEBUG, __FUNCTION__);
+                    return;
+                }
 
+                map<string, int> taskStatusMap = {};
 
-    if (ret.success) {
-        logPrintln("Api task body ret = " + ret.body, airstrip::DEBUG, __FUNCTION__);
-        auto parsed = boost::json::parse(ret.body);
-        if (HTTP_CODE_OK == parsed.at("code").as_int64()) {
-            const auto taskList = parsed.at("data").as_array();
-            if (taskList.empty()) {
-                logPrintln("Api not task deal with", airstrip::DEBUG, __FUNCTION__);
-                return;
-            }
-
-            map<string, int> taskStatusMap = {};
-
-            for (const auto &task: taskList) {
-                string taskId;
-                bool isSuccess = false;
-                auto taskJson = task.as_object();
-                const auto dataType = taskJson.at("dataType").as_int64();
-                switch (dataType) {
-                    case Face: {
-                        try {
+                for (const auto &task: taskList) {
+                    string taskId;
+                    bool isSuccess = false;
+                    auto taskJson = task.as_object();
+                    const auto dataType = taskJson.at("dataType").as_int64();
+                    switch (dataType) {
+                        case Face: {
                             auto taskData = taskJson.at("taskData").as_object();
                             taskId = taskData.at("taskId").as_string().c_str();
                             auto action = taskData.at("action").as_int64();
@@ -356,7 +347,8 @@ void checkTask() {
                             auto endTime = taskData.at("endTime").as_int64();
 
                             ostringstream oss;
-                            oss << "Api face get taskId: " << taskId << " userId: " << userId << " action: " << action
+                            oss << "Api face get taskId: " << taskId << " userId: " << userId << " action: " <<
+                                    action
                                     << " startTime: " << startTime << " endTime: " << endTime;
                             cout << oss.str() << endl;
                             logPrintln(oss.str(), airstrip::INFO, __FUNCTION__);
@@ -382,16 +374,10 @@ void checkTask() {
                                 info.endTime = endTime;
                                 isSuccess = faceUpdate(pic, info);
                             }
-                        } catch (const exception &e) {
-                            ostringstream errMsg;
-                            errMsg << e.what();
-                            logPrintln("Face operation error " + errMsg.str()
-                                       , airstrip::ERROR, __FUNCTION__);
+
+                            break;
                         }
-                        break;
-                    }
-                    case Card: {
-                        try {
+                        case Card: {
                             auto taskData = taskJson.at("taskData").as_object();
                             taskId = taskData.at("taskId").as_string().c_str();
                             auto action = taskData.at("action").as_int64();
@@ -402,8 +388,10 @@ void checkTask() {
                             auto cardNo = taskData.at("cardNo").as_string().c_str();
 
                             ostringstream oss;
-                            oss << "Api card get taskId: " << taskId << " userId: " << userId << " action: " << action
-                                    << " startTime: " << startTime << " endTime: " << endTime << " cardNo: " << cardNo;
+                            oss << "Api card get taskId: " << taskId << " userId: " << userId << " action: " <<
+                                    action
+                                    << " startTime: " << startTime << " endTime: " << endTime << " cardNo: " <<
+                                    cardNo;
                             cout << oss.str() << endl;
                             logPrintln(oss.str(), airstrip::INFO, __FUNCTION__);
 
@@ -428,16 +416,9 @@ void checkTask() {
                                 info.endTime = endTime;
                                 isSuccess = cardUpdate(info);
                             }
-                        } catch (const exception &e) {
-                            ostringstream errMsg;
-                            errMsg << e.what();
-                            logPrintln("Card operation error " + errMsg.str()
-                                       , airstrip::ERROR, __FUNCTION__);
+                            break;
                         }
-                        break;
-                    }
-                    case Disable: {
-                        try {
+                        case Disable: {
                             auto taskData = taskJson.at("taskData").as_object();
                             taskId = taskData.at("taskId").as_string().c_str();
                             auto action = taskData.at("action").as_int64();
@@ -462,17 +443,10 @@ void checkTask() {
                             } else {
                                 isSuccess = false;
                             }
-                        } catch (const exception &e) {
-                            ostringstream errMsg;
-                            errMsg << e.what();
-                            logPrintln("Disable execute error " + errMsg.str()
-                                       , airstrip::ERROR, __FUNCTION__);
-                        }
 
-                        break;
-                    }
-                    case Voice: {
-                        try {
+                            break;
+                        }
+                        case Voice: {
                             auto taskData = taskJson.at("taskData").as_object();
                             taskId = taskData.at("taskId").as_string().c_str();
                             auto userId = taskData.at("userId").as_string().c_str();
@@ -485,17 +459,10 @@ void checkTask() {
 
                             isSuccess = cardVoiceTemplate(userId, voiceTmp);
                             isSuccess &= faceVoiceTemplate(userId, voiceTmp);
-                        } catch (const exception &e) {
-                            ostringstream errMsg;
-                            errMsg << e.what();
-                            logPrintln("Voice execute error " + errMsg.str()
-                                       , airstrip::ERROR, __FUNCTION__);
-                        }
 
-                        break;
-                    }
-                    case Open: {
-                        try {
+                            break;
+                        }
+                        case Open: {
                             auto taskData = taskJson.at("taskData").as_object();
                             taskId = taskData.at("taskId").as_string().c_str();
                             auto userId = taskData.at("userId").as_string().c_str();
@@ -511,30 +478,30 @@ void checkTask() {
                             recordInfo.openResult = 0;
                             recordInfo.openTime = sec;
                             isSuccess = ScheduledTask::commonOpenDoor(recordInfo);
-                        } catch (const exception &e) {
-                            ostringstream errMsg;
-                            errMsg << e.what();
-                            logPrintln("Open execute error " + errMsg.str()
-                                       , airstrip::ERROR, __FUNCTION__);
+                            break;
                         }
-                        break;
+                        default: {
+                        }
                     }
-                    default: {
-                    }
-                }
 
-                logPrintln("Api task " + taskId + " ret " + to_string(isSuccess),
-                           airstrip::INFO, __FUNCTION__);
-                taskStatusMap[taskId] = isSuccess ? 0 : 1;
-                taskFinish(taskStatusMap);
+                    logPrintln("Api task " + taskId + " ret " + to_string(isSuccess),
+                               airstrip::INFO, __FUNCTION__);
+                    taskStatusMap[taskId] = isSuccess ? 0 : 1;
+                    taskFinish(taskStatusMap);
+                }
+            } else {
+                token = "";
+                logPrintln("Api check task failed in server", airstrip::WARN, __FUNCTION__);
             }
         } else {
             token = "";
-            logPrintln("Api check task failed in server", airstrip::WARN, __FUNCTION__);
+            logPrintln("Api check task failed in local", airstrip::WARN, __FUNCTION__);
         }
-    } else {
+    } catch (const exception &e) {
         token = "";
-        logPrintln("Api check task failed in local", airstrip::WARN, __FUNCTION__);
+        ostringstream errMsg;
+        errMsg << e.what();
+        logPrintln("Task execute error " + errMsg.str(), airstrip::ERROR, __FUNCTION__);
     }
 }
 
