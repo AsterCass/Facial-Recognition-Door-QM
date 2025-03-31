@@ -52,6 +52,16 @@ private:
     QRadioButton *netModelFourG;
     QButtonGroup *netModelGroup;
 
+    QLabel *lightThresholdLabel;
+    QLineEditPro *lightThresholdInput;
+    QLabel *darkThresholdLabel;
+    QLineEditPro *darkThresholdInput;
+    QLabel *lightRatioLabel;
+    QLineEditPro *lightRatioInput;
+    QLabel *darkRatioLabel;
+    QLineEditPro *darkRatioInput;
+
+
     QLabel *wifiAccountLabel;
     QLineEditPro *wifiAccount;
     QLabel *wifiPasswdLabel;

@@ -105,6 +105,15 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     netModelGroup->addButton(netModelWireless, 2);
     netModelGroup->addButton(netModelFourG, 3);
 
+    lightThresholdLabel = new QLabel("判亮阈值（0-255）：", scrollContent);
+    lightThresholdInput = new QLineEditPro(scrollContent);
+    darkThresholdLabel = new QLabel("判暗阈值（0-255）：", scrollContent);
+    darkThresholdInput = new QLineEditPro(scrollContent);
+    lightRatioLabel = new QLabel("升亮点（0-1）：", scrollContent);
+    lightRatioInput = new QLineEditPro(scrollContent);
+    darkRatioLabel = new QLabel("降亮点（0-1）：", scrollContent);
+    darkRatioInput = new QLineEditPro(scrollContent);
+
     wifiAccountLabel = new QLabel("WIFI账号（重启生效）：", scrollContent);
     wifiAccount = new QLineEditPro(scrollContent);
     wifiPasswdLabel = new QLabel("WIFI密码（重启生效）：", scrollContent);
@@ -153,6 +162,30 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
                     if (g_netModel != newNetModel) {
                         g_netModel = newNetModel;
                         g_commonDb.upsertConfig(PRO_DB_NET_MODEL, to_string(g_netModel));
+                    }
+
+                    const auto lightThreshold = lightThresholdInput->text().trimmed().toDouble();
+                    if (g_lightThreshold != lightThreshold) {
+                        g_lightThreshold = lightThreshold;
+                        g_commonDb.upsertConfig(PRO_DB_ENABLE_LIGHT_THRESHOLD, to_string(g_lightThreshold));
+                    }
+
+                    const auto darkThreshold = darkThresholdInput->text().trimmed().toDouble();
+                    if (g_darkThreshold != darkThreshold) {
+                        g_darkThreshold = darkThreshold;
+                        g_commonDb.upsertConfig(PRO_DB_ENABLE_DARK_THRESHOLD, to_string(g_darkThreshold));
+                    }
+
+                    const auto lightRatio = lightRatioInput->text().trimmed().toDouble();
+                    if (g_lightRatio != lightRatio) {
+                        g_lightRatio = lightRatio;
+                        g_commonDb.upsertConfig(PRO_DB_ENABLE_LIGHT_RATIO, to_string(g_lightRatio));
+                    }
+
+                    const auto darkRatio = darkRatioInput->text().trimmed().toDouble();
+                    if (g_darkRatio != darkRatio) {
+                        g_darkRatio = darkRatio;
+                        g_commonDb.upsertConfig(PRO_DB_ENABLE_DARK_RATIO, to_string(g_darkRatio));
                     }
 
                     const auto newWifiAccount = wifiAccount->text().trimmed().toStdString();
@@ -223,6 +256,15 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     scrollerAreaLayout->addWidget(faceDistantWidget);
 
 
+    scrollerAreaLayout->addWidget(lightThresholdLabel);
+    scrollerAreaLayout->addWidget(lightThresholdInput);
+    scrollerAreaLayout->addWidget(darkThresholdLabel);
+    scrollerAreaLayout->addWidget(darkThresholdInput);
+    scrollerAreaLayout->addWidget(lightRatioLabel);
+    scrollerAreaLayout->addWidget(lightRatioInput);
+    scrollerAreaLayout->addWidget(darkRatioLabel);
+    scrollerAreaLayout->addWidget(darkRatioInput);
+
     scrollerAreaLayout->addWidget(netModelLabel);
     scrollerAreaLayout->addWidget(netModelWidget);
     scrollerAreaLayout->addWidget(wifiAccountLabel);
@@ -252,6 +294,11 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     netModelGroup->button(g_netModel)->setChecked(true);
     wifiAccount->setText(QString::fromStdString(g_wifiAccount));
     wifiPasswdEdit->setText(QString::fromStdString(g_wifiPasswd));
+    lightThresholdInput->setText(QString::number(g_lightThreshold));
+    darkThresholdInput->setText(QString::number(g_darkThreshold));
+    lightRatioInput->setText(QString::number(g_lightRatio));
+    darkRatioInput->setText(QString::number(g_darkRatio));
+
 
 
     // Connect

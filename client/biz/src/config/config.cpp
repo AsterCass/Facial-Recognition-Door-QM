@@ -23,3 +23,7 @@ std::string g_wifiAccount;
 std::string g_wifiPasswd;
 int g_enableFaceSpoof;
 int g_lightOnlyCheck;
+double g_lightThreshold;
+double g_darkThreshold;
+double g_lightRatio;
+double g_darkRatio;

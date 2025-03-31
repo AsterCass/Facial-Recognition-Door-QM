@@ -516,14 +516,12 @@ bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, i
         for (int i = 0; i < grayFrameFace.rows; i++) {
             const uchar *row = grayFrameFace.ptr<uchar>(i);
             for (int j = 0; j < grayFrameFace.cols; j++) {
-                constexpr double lightThreshold = 200.0;
-                constexpr double darkThreshold = 70.0;
                 const uchar pixel = row[j];
                 brightnessSum += pixel;
-                if (pixel < darkThreshold) {
+                if (pixel < g_darkThreshold) {
                     darkPixels++;
                 }
-                if (pixel > lightThreshold) {
+                if (pixel > g_lightThreshold) {
                     brightPixels++;
                 }
             }
@@ -535,9 +533,9 @@ bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, i
         logPrintln("Face Detect light radio: " + to_string(lightRatio)
                    + " dark radio: " + to_string(darkRatio), airstrip::DEBUG, __FUNCTION__);
 
-        if (lightRatio > 0.5) {
+        if (lightRatio > g_lightRatio) {
             updateExposeAndGain(false);
-        } else if (darkRatio > 0.3) {
+        } else if (darkRatio > g_darkRatio) {
             updateExposeAndGain(true);
         }
     }

@@ -231,6 +231,70 @@ int main(int argc, char *argv[]) {
                 g_lightOnlyCheck = 0;
             }
         }
+        // update common set v="200" where k="lightThreshold";
+        {
+            std::string lightThreshold = g_commonDb.getConfig(PRO_DB_ENABLE_LIGHT_THRESHOLD);
+            if (lightThreshold.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_ENABLE_LIGHT_THRESHOLD, "200");
+                lightThreshold = "200";
+            }
+            try {
+                g_lightThreshold = stod(lightThreshold);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data lightThreshold error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_lightThreshold = 200.0;
+            }
+        }
+        // update common set v="70" where k="darkThreshold";
+        {
+            std::string darkThreshold = g_commonDb.getConfig(PRO_DB_ENABLE_DARK_THRESHOLD);
+            if (darkThreshold.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_ENABLE_DARK_THRESHOLD, "70");
+                darkThreshold = "70";
+            }
+            try {
+                g_darkThreshold = stod(darkThreshold);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data darkThreshold error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_darkThreshold = 70.0;
+            }
+        }
+        // update common set v="0.5" where k="lightRatio";
+        {
+            std::string lightRatio = g_commonDb.getConfig(PRO_DB_ENABLE_LIGHT_RATIO);
+            if (lightRatio.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_ENABLE_LIGHT_RATIO, "0.5");
+                lightRatio = "0.5";
+            }
+            try {
+                g_lightRatio = stod(lightRatio);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data lightRatio error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_lightRatio = 0.5;
+            }
+        }
+        // update common set v="0.3" where k="darkRatio";
+        {
+            std::string darkRatio = g_commonDb.getConfig(PRO_DB_ENABLE_DARK_RATIO);
+            if (darkRatio.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_ENABLE_DARK_RATIO, "0.3");
+                darkRatio = "0.3";
+            }
+            try {
+                g_darkRatio = stod(darkRatio);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data darkRatio error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_darkRatio = 0.3;
+            }
+        }
 
         logPrintln("Db finish", airstrip::INFO, __FUNCTION__);
     }

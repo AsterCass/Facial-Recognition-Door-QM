@@ -30,6 +30,10 @@ constexpr auto PRO_DB_WIFI_ACCOUNT = "wifiAccount";
 constexpr auto PRO_DB_WIFI_PASSWD = "wifiPasswd";
 constexpr auto PRO_DB_ENABLE_FACE_SPOOF = "enableFaceSpoof";
 constexpr auto PRO_DB_ENABLE_LIGHT_ONLY_CHECK = "lightOnlyCheck";
+constexpr auto PRO_DB_ENABLE_LIGHT_THRESHOLD = "lightThreshold";
+constexpr auto PRO_DB_ENABLE_DARK_THRESHOLD = "darkThreshold";
+constexpr auto PRO_DB_ENABLE_LIGHT_RATIO = "lightRatio";
+constexpr auto PRO_DB_ENABLE_DARK_RATIO = "darkRatio";
 
 const std::vector<std::string> CHINESE_WEEK = {
     "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日",
@@ -94,6 +98,10 @@ extern std::string g_wifiAccount;
 extern std::string g_wifiPasswd;
 extern int g_enableFaceSpoof;
 extern int g_lightOnlyCheck;
+extern double g_lightThreshold;
+extern double g_darkThreshold;
+extern double g_lightRatio;
+extern double g_darkRatio;
 
 
 #endif //CONFIG_H
