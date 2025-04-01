@@ -356,11 +356,13 @@ void checkTask() {
                             if (Add == action) {
                                 auto picBase64String = taskData.at("facePhoto").as_string().c_str();
                                 auto pic = generalUtils::base64ToMat(picBase64String);
-                                FaceUserInfo info = {};
-                                info.userId = userId;
-                                info.startTime = startTime;
-                                info.endTime = endTime;
-                                isSuccess = faceInsert(pic, info);
+                                if (!pic.empty()) {
+                                    FaceUserInfo info = {};
+                                    info.userId = userId;
+                                    info.startTime = startTime;
+                                    info.endTime = endTime;
+                                    isSuccess = faceInsert(pic, info);
+                                }
                             } else if (Remove == action) {
                                 FaceUserInfo info = {};
                                 info.userId = userId;;

@@ -1,5 +1,6 @@
 #include "utils/general_utils.h"
 
+#include <airstrip_log.h>
 #include <boost/beast/core/detail/base64.hpp>
 
 
@@ -29,8 +30,28 @@ namespace generalUtils {
         // 解码Base64字符串
         const std::vector<uchar> decodedData = decodeBase64(base64String);
 
+        // 检查解码后的数据是否为空
+        if (decodedData.empty()) {
+            logPrintln("Base64 decoding failed or resulted in empty data",
+                       airstrip::ERROR, __FUNCTION__);
+            return cv::Mat();
+        }
+
         // 从二进制数据创建Mat对象
         cv::Mat img = imdecode(decodedData, cv::IMREAD_COLOR);
+
+        // 检查Mat是否为空或者无效
+        if (img.empty()) {
+            logPrintln("Failed to decode image data", airstrip::ERROR, __FUNCTION__);
+            return cv::Mat();
+        }
+
+        // 检查图像的基本属性
+        if (img.rows <= 0 || img.cols <= 0 || img.channels() != 3) {
+            logPrintln("Error: Invalid image dimensions or channels",
+                       airstrip::ERROR, __FUNCTION__);
+            return cv::Mat();
+        }
 
         return img;
     }
