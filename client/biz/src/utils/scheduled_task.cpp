@@ -192,24 +192,26 @@ void getNfcCode() {
     const auto now = chrono::system_clock::now();
     const auto currentTimeSec = chrono::system_clock::to_time_t(now);
 
-    if (!cardInfo.isEnable) {
-        CameraFrame::getInstance()->negativeMessage();
-        playWav(Disabled);
-        playWav(cardInfo.voiceTemplate);
-    } else if (currentTimeSec < cardInfo.startTime || currentTimeSec > cardInfo.endTime) {
-        CameraFrame::getInstance()->negativeMessage();
-        playWav(Expired);
-        playWav(cardInfo.voiceTemplate);
-    } else {
-        OpenRecordInfo recordInfo = {};
-        recordInfo.userId = cardInfo.userId;
-        recordInfo.openMode = IcCardOpen;
-        recordInfo.openResult = 0;
-        recordInfo.openTime = chrono::system_clock::to_time_t(chrono::system_clock::now());
-        recordInfo.cardNo = cardInfo.cardNo;
-        recordInfo.cardType = cardInfo.cardType;
-        ScheduledTask::commonOpenDoor(recordInfo);
-        playWav(AuthSuccess);
+    if (!cardInfo.userId.empty()) {
+        if (!cardInfo.isEnable) {
+            CameraFrame::getInstance()->negativeMessage();
+            playWav(Disabled);
+            playWav(cardInfo.voiceTemplate);
+        } else if (currentTimeSec < cardInfo.startTime || currentTimeSec > cardInfo.endTime) {
+            CameraFrame::getInstance()->negativeMessage();
+            playWav(Expired);
+            playWav(cardInfo.voiceTemplate);
+        } else {
+            OpenRecordInfo recordInfo = {};
+            recordInfo.userId = cardInfo.userId;
+            recordInfo.openMode = IcCardOpen;
+            recordInfo.openResult = 0;
+            recordInfo.openTime = chrono::system_clock::to_time_t(chrono::system_clock::now());
+            recordInfo.cardNo = cardInfo.cardNo;
+            recordInfo.cardType = cardInfo.cardType;
+            ScheduledTask::commonOpenDoor(recordInfo);
+            playWav(AuthSuccess);
+        }
     }
 }
 
