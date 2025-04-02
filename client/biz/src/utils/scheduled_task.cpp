@@ -195,10 +195,12 @@ void getNfcCode() {
     if (!cardInfo.userId.empty()) {
         if (!cardInfo.isEnable) {
             CameraFrame::getInstance()->negativeMessage();
+            messageLabelSec = 1;
             playWav(Disabled);
             playWav(cardInfo.voiceTemplate);
         } else if (currentTimeSec < cardInfo.startTime || currentTimeSec > cardInfo.endTime) {
             CameraFrame::getInstance()->negativeMessage();
+            messageLabelSec = 1;
             playWav(Expired);
             playWav(cardInfo.voiceTemplate);
         } else {
@@ -308,10 +310,12 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
     if (!userInfo.userId.empty()) {
         if (!userInfo.isEnable) {
             CameraFrame::getInstance()->negativeMessage();
+            messageLabelSec = 1;
             playWav(Disabled);
             playWav(userInfo.voiceTemplate);
         } else if (currentTimeSec < userInfo.startTime || currentTimeSec > userInfo.endTime) {
             CameraFrame::getInstance()->negativeMessage();
+            messageLabelSec = 1;
             playWav(Expired);
             playWav(userInfo.voiceTemplate);
         } else {
