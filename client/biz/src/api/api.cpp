@@ -359,6 +359,7 @@ void checkTask() {
                                 if (!pic.empty()) {
                                     FaceUserInfo info = {};
                                     info.userId = userId;
+                                    info.isEnable = true;
                                     info.startTime = startTime;
                                     info.endTime = endTime;
                                     isSuccess = faceInsert(pic, info);
@@ -372,6 +373,7 @@ void checkTask() {
                                 auto pic = generalUtils::base64ToMat(picBase64String);
                                 FaceUserInfo info = {};
                                 info.userId = userId;
+                                info.isEnable = true;
                                 info.startTime = startTime;
                                 info.endTime = endTime;
                                 isSuccess = faceUpdate(pic, info);
@@ -400,6 +402,7 @@ void checkTask() {
                             if (Add == action) {
                                 CardUserInfo info = {};
                                 info.userId = userId;
+                                info.isEnable = true;
                                 info.cardNo = cardNo;
                                 info.cardType = static_cast<int>(cardType);
                                 info.startTime = startTime;
@@ -412,6 +415,7 @@ void checkTask() {
                             } else if (Modify == action) {
                                 CardUserInfo info = {};
                                 info.userId = userId;
+                                info.isEnable = true;
                                 info.cardNo = cardNo;
                                 info.cardType = static_cast<int>(cardType);
                                 info.startTime = startTime;
