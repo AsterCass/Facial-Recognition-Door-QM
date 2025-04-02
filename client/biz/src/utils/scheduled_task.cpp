@@ -188,7 +188,19 @@ void getNfcCode() {
     logPrintln("Nfc card detected " + to_string(ret.cardType) + " " + ret.cardNo,
                INFO, __FUNCTION__);
     const auto cardInfo = cardRecognition(ret.cardNo);
-    if (!cardInfo.userId.empty()) {
+
+    const auto now = chrono::system_clock::now();
+    const auto currentTimeSec = chrono::system_clock::to_time_t(now);
+
+    if (!cardInfo.isEnable) {
+        CameraFrame::getInstance()->negativeMessage();
+        playWav(Disabled);
+        playWav(cardInfo.voiceTemplate);
+    } else if (currentTimeSec < cardInfo.startTime || currentTimeSec > cardInfo.endTime) {
+        CameraFrame::getInstance()->negativeMessage();
+        playWav(Expired);
+        playWav(cardInfo.voiceTemplate);
+    } else {
         OpenRecordInfo recordInfo = {};
         recordInfo.userId = cardInfo.userId;
         recordInfo.openMode = IcCardOpen;
@@ -292,20 +304,31 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
     }
 
     if (!userInfo.userId.empty()) {
-        OpenRecordInfo recordInfo = {};
-        recordInfo.userId = userInfo.userId;
-        recordInfo.openMode = FaceOpen;
-        recordInfo.openResult = 0;
-        recordInfo.openTime = chrono::system_clock::to_time_t(currentTime);
-        recordInfo.faceId = userInfo.faceId;
-        commonOpenDoor(recordInfo);
-        consecutiveFailCount = 0;
-        playWav(AuthSuccess);
-        // todo save frame
-        if (g_lightOnlyCheck) {
+        if (!userInfo.isEnable) {
+            CameraFrame::getInstance()->negativeMessage();
+            playWav(Disabled);
+            playWav(userInfo.voiceTemplate);
+        } else if (currentTimeSec < userInfo.startTime || currentTimeSec > userInfo.endTime) {
+            CameraFrame::getInstance()->negativeMessage();
+            playWav(Expired);
+            playWav(userInfo.voiceTemplate);
+        } else {
+            OpenRecordInfo recordInfo = {};
+            recordInfo.userId = userInfo.userId;
+            recordInfo.openMode = FaceOpen;
+            recordInfo.openResult = 0;
+            recordInfo.openTime = chrono::system_clock::to_time_t(currentTime);
+            recordInfo.faceId = userInfo.faceId;
+            commonOpenDoor(recordInfo);
+            consecutiveFailCount = 0;
+            playWav(AuthSuccess);
+            playWav(userInfo.voiceTemplate);
+            // todo save frame
+            if (g_lightOnlyCheck) {
 #ifndef WIN32
-            closeLight();
+                closeLight();
 #endif
+            }
         }
         lastPass = true;
     } else {
@@ -330,7 +353,6 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
         }
         lastPass = false;
     }
-
     lastTime = currentTime;
 }
 
