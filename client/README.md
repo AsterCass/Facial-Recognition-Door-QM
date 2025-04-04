@@ -5,7 +5,7 @@
 * 本客户端包括两个部分：一个是业务部分`biz`，用于实现实际的业务代码，一个是脚手架部分`airstrip`，
   用于存储boilerplate以及常用的工具代码，其他类似项目也可以从这个脚手架开始
 * 本客户端可以在`Windows`和`Linux`环境下编译运行。以下内容，默认`Windows`为开发环境，`Linux`为交叉编译生产环境。当然，你可以将
-  `Linux`也作为开发环境，这样更简单
+  `Linux`也作为开发环境，这样更简单，但是需要改变部分预编译代码
 * 编译`airstrip`和`biz`前，记得修改`CMakeList.txt`中关于所需库位置的环境变量
 * 本代码在X86_64 Windows（测试）和ARM Linux（正式）正常运行，其他平台未测试，可能需要修改部分预编译代码
 
@@ -16,6 +16,7 @@
 * 下载[Boost]((https://www.boost.org/))到本地，并构建
 * 下载[SQLiteCpp](https://github.com/SRombauts/SQLiteCpp)到本地，并构建
 * 下载[OpenCV](https://opencv.org/)到本地，并构建
+* 下载[libfacedetection](https://github.com/ShiqiYu/libfacedetection)到本地，这里目前Windows没有用到，可以只使用头文件
 * 下载[InspireFace](https://github.com/HyperInspire/InspireFace)到本地，这里目前Windows没有用到，可以只使用头文件
 * 编译脚手架`airstrip`
 * 再编译业务部分`biz`
