@@ -1,4 +1,5 @@
 #include "utils/face_recognition.h"
+#include <utils/general_utils.h>
 #include "db/face_db.h"
 #include "airstrip_log.h"
 #include "airstrip_program_options.h"
@@ -11,7 +12,7 @@ using namespace std;
 
 std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
 
-#ifndef WIN32
+#ifndef WIN32x
 
 #include "inspireface.h"
 #include "intypedef.h"
@@ -288,7 +289,7 @@ bool faceInsert(const cv::Mat &pic, FaceUserInfo &userInfo) {
     userInfo.faceId = faceId;
     faceUserInfoMap[faceId] = userInfo;
 
-    // todo add photo
+    imwrite(g_appWorkDir + "face/" + userInfo.userId + ".jpg", generalUtils::matCompress(pic));
 
     logPrintln("Insert finish userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
     logPrintln("Insert finish faceId = " + to_string(faceId), airstrip::INFO, __FUNCTION__);
@@ -324,8 +325,7 @@ bool faceDelete(const FaceUserInfo &userInfo) {
         faceUserInfoMap.erase(faceId);
     }
 
-
-    // todo delete photo
+    airstrip::execCommand("rm " + g_appWorkDir + "face/" + userInfo.userId + ".jpg");
 
     logPrintln("Delete finish userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
 
