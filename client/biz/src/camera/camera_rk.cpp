@@ -181,6 +181,8 @@ void startCameraRk() {
     closeProcess = false;
     int ret = 0;
 
+    this_thread::sleep_for(chrono::seconds(3));
+
     // Init
     RK_MPI_SYS_Init();
 
