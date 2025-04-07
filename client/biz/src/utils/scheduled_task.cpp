@@ -23,6 +23,7 @@
 #include "utils/face_recognition.h"
 #include "utils/global_data_manager.h"
 #include <boost/filesystem.hpp>
+#include <utils/general_utils.h>
 
 int doorOpenSec = 0;
 int messageLabelSec = 0;
@@ -365,7 +366,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
             oss << g_appWorkDir << "log-face/" <<
                     put_time(localtime(&currentTimeSec), "%Y-%m-%d-%H-%M-%S")
                     << "-" << userInfo.userId << ".jpg";
-            imwrite(oss.str(), frame);
+            imwrite(oss.str(), generalUtils::matCompress(frame));
             OpenRecordInfo recordInfo = {};
             recordInfo.userId = userInfo.userId;
             recordInfo.openMode = FaceOpen;
@@ -391,7 +392,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
                 ostringstream oss;
                 oss << g_appWorkDir << "log-face/" <<
                         put_time(localtime(&currentTimeSec), "%Y-%m-%d-%H-%M-%S") << "-Fail" << ".jpg";
-                imwrite(oss.str(), frame);
+                imwrite(oss.str(), generalUtils::matCompress(frame));
                 CameraFrame::getInstance()->negativeMessage();
                 messageLabelSec = 1;
                 ++consecutiveFailCount;

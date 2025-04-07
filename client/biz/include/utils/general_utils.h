@@ -12,6 +12,8 @@ namespace generalUtils {
     cv::Mat base64ToMat(const std::string &base64String);
 
     std::string matToBase64(const cv::Mat &img);
+
+    cv::Mat matCompress(const cv::Mat &img);
 }
 
 

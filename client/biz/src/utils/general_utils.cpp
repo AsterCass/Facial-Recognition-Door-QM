@@ -76,4 +76,16 @@ namespace generalUtils {
         base64String.resize(result);
         return base64String;
     }
+
+    cv::Mat matCompress(const cv::Mat &img) {
+        const cv::Size newSize(img.cols / 2, img.rows / 2);
+        cv::Mat resizedImage;
+        resize(img, resizedImage, newSize, 0, 0, cv::INTER_AREA);
+        std::vector<uchar> buffer;
+        std::vector<int> compressionParams;
+        compressionParams.push_back(cv::IMWRITE_JPEG_QUALITY);
+        compressionParams.push_back(50);
+        imencode(".jpg", resizedImage, buffer, compressionParams);
+        return imdecode(buffer, cv::IMREAD_COLOR);
+    }
 }
