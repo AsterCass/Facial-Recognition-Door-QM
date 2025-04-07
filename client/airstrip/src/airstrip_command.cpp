@@ -63,4 +63,8 @@ namespace airstrip {
         }
         return body;
     }
+
+    void execCommandNoReturn(const string &cmd) {
+        system(cmd.c_str());
+    }
 }

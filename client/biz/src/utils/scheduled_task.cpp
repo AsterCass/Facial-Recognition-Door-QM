@@ -123,10 +123,11 @@ void updateUIMainComponentHeader() {
     }
 
     // Wireless
-    const string wirelessIp = execScript(g_appWorkDir + "script/win/get_wireless_ip.ps1"); {
+    string wirelessIp; {
 #ifdef WIN32
+        wirelessIp = execScript(g_appWorkDir + "script/win/get_wireless_ip.ps1");
 #else
-        const string wirelessIp = execScript(g_appWorkDir + "script/linux/get_wireless_ip.sh");
+         wirelessIp = execScript(g_appWorkDir + "script/linux/get_wireless_ip.sh");
 #endif
         GlobalDataManager::getInstance()->updateHeaderWireless(wirelessIp);
     }
@@ -160,21 +161,21 @@ void updateUIMainComponentHeader() {
         // wireless
         if (g_netModel == 2 && reconnectCount++ > 0) {
             reconnectCount = 0;
-            static string lastPasswd = g_managementPassword;
+            static string lastPasswd = g_wifiPasswd;
             static string lastSSid = g_wifiAccount;
-            if (wirelessIp.empty() || lastSSid != g_wifiAccount || lastPasswd != g_managementPassword) {
+            if (wirelessIp.empty() || lastSSid != g_wifiAccount || lastPasswd != g_wifiPasswd) {
                 logPrintln("Connect to wifi ...", INFO, __FUNCTION__);
                 lastSSid = g_wifiAccount;
-                lastPasswd = g_managementPassword;
+                lastPasswd = g_wifiPasswd;
 #ifndef WIN32
-                execCommand("sh " + g_appWorkDir + "script/linux/reset_wifi.sh on '" +
-                            g_wifiAccount + "' '" + g_managementPassword + "'");
+                execCommandNoReturn("sh " + g_appWorkDir + "script/linux/reset_wifi.sh on '" +
+                            g_wifiAccount + "' '" + g_wifiPasswd + "'");
 #endif
             }
         } else if (g_netModel != 2 && !wirelessIp.empty()) {
             logPrintln("Disconnect wifi ...", INFO, __FUNCTION__);
 #ifndef WIN32
-            execCommand("sh " + g_appWorkDir + "script/linux/reset_wifi.sh off");
+            execCommandNoReturn("sh " + g_appWorkDir + "script/linux/reset_wifi.sh off");
 #endif
         }
     }
