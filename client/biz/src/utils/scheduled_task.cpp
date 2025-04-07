@@ -36,6 +36,7 @@ namespace fs = boost::filesystem;
 
 // Every (30 * 60 * (taskIvCnt + executionTime)) sec
 void updatePersistentData() {
+    // todo 这里需要压缩，比较消耗时间，最好放到线程池中执行
     static int count = 1800;
     if (count++ < 1800) return;
     count = 1;
@@ -67,7 +68,25 @@ void updatePersistentData() {
             }
         }
     }
+    // Delete dump file
+    {
+        const std::time_t cutoff = time - (30 * 24 * 60 * 60);
+        const fs::directory_iterator end_iter;
+        const string faceLogDic = g_appWorkDir + "dump/";
+        for (fs::directory_iterator iter(faceLogDic); iter != end_iter; ++iter) {
+            if (is_regular_file(iter->status())) {
+                if (iter->path().extension() == ".dmp") {
+                    const std::time_t fileTime = last_write_time(iter->path());
+                    if (fileTime < cutoff) {
+                        fs::remove(iter->path());
+                    }
+                }
+            }
+        }
+    }
     // Backup data
+    {
+    }
     // Delete system tmp file
 }
 
