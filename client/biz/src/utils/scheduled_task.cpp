@@ -123,9 +123,8 @@ void updateUIMainComponentHeader() {
     }
 
     // Wireless
-    {
+    const string wirelessIp = execScript(g_appWorkDir + "script/win/get_wireless_ip.ps1"); {
 #ifdef WIN32
-        const string wirelessIp = execScript(g_appWorkDir + "script/win/get_wireless_ip.ps1");
 #else
         const string wirelessIp = execScript(g_appWorkDir + "script/linux/get_wireless_ip.sh");
 #endif
@@ -152,6 +151,31 @@ void updateUIMainComponentHeader() {
         if (lastShowFaceRegisterTime > 0 && time - lastShowFaceRegisterTime > 60) {
             MainRouter::getInstance()->hideFaceRegister();
             lastShowFaceRegisterTime = 0;
+        }
+    }
+
+    // Connect
+    {
+        static int reconnectCount = 1;
+        // wireless
+        if (g_netModel == 2 && reconnectCount++ > 0) {
+            reconnectCount = 0;
+            static string lastPasswd = g_managementPassword;
+            static string lastSSid = g_wifiAccount;
+            if (wirelessIp.empty() || lastSSid != g_wifiAccount || lastPasswd != g_managementPassword) {
+                logPrintln("Connect to wifi ...", INFO, __FUNCTION__);
+                lastSSid = g_wifiAccount;
+                lastPasswd = g_managementPassword;
+#ifndef WIN32
+                execCommand("sh " + g_appWorkDir + "script/linux/reset_wifi.sh on '" +
+                            g_wifiAccount + "' '" + g_managementPassword + "'");
+#endif
+            }
+        } else if (g_netModel != 2 && !wirelessIp.empty()) {
+            logPrintln("Disconnect wifi ...", INFO, __FUNCTION__);
+#ifndef WIN32
+            execCommand("sh " + g_appWorkDir + "script/linux/reset_wifi.sh off");
+#endif
         }
     }
 }

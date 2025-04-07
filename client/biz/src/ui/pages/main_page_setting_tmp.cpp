@@ -91,7 +91,7 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     faceDistantGroup->addButton(faceDistantMore, 3);
 
 
-    netModelLabel = new QLabel("网络模式（重启生效）：", scrollContent);
+    netModelLabel = new QLabel("网络模式（暂不支持4G）：", scrollContent);
     netModelWidget = new QWidget(scrollContent);
     netModelLayout = new QHBoxLayout(netModelWidget);
     netModelWired = new QRadioButton("有线", netModelWidget);
@@ -114,9 +114,9 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     darkRatioLabel = new QLabel("降亮点（0-1）：", scrollContent);
     darkRatioInput = new QLineEditPro(scrollContent);
 
-    wifiAccountLabel = new QLabel("WIFI账号（重启生效）：", scrollContent);
+    wifiAccountLabel = new QLabel("WIFI账号：", scrollContent);
     wifiAccount = new QLineEditPro(scrollContent);
-    wifiPasswdLabel = new QLabel("WIFI密码（重启生效）：", scrollContent);
+    wifiPasswdLabel = new QLabel("WIFI密码：", scrollContent);
     wifiPasswdEdit = new QLineEditPro(scrollContent);
     wifiPasswdEdit->setEchoMode(QLineEdit::Password);
 
