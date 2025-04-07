@@ -166,8 +166,6 @@ void startCameraRk() {
         return;
     }
 
-    this_thread::sleep_for(chrono::seconds(2));
-
     int appWidth, appHeight;
     airstrip::getProgramOptions(PRO_OPT_APP_WIDTH, &appWidth);
     airstrip::getProgramOptions(PRO_OPT_APP_HEIGHT, &appHeight);
@@ -182,8 +180,6 @@ void startCameraRk() {
 
     closeProcess = false;
     int ret = 0;
-
-    this_thread::sleep_for(chrono::seconds(2));
 
     // Init
     RK_MPI_SYS_Init();

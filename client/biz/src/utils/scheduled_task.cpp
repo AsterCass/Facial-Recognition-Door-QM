@@ -22,6 +22,7 @@
 #include "utils/card_recognition.h"
 #include "utils/face_recognition.h"
 #include "utils/global_data_manager.h"
+#include <boost/filesystem.hpp>
 
 int doorOpenSec = 0;
 int messageLabelSec = 0;
@@ -30,6 +31,7 @@ int64_t lastShowFaceRegisterTime = 0;
 using namespace std;
 using namespace airstrip;
 using namespace boost::gregorian;
+namespace fs = boost::filesystem;
 
 // Every (30 * 60 * (taskIvCnt + executionTime)) sec
 void updatePersistentData() {
@@ -37,18 +39,33 @@ void updatePersistentData() {
     if (count++ < 1800) return;
     count = 1;
     // Every 22 hour
-    static auto lastTime = chrono::system_clock::from_time_t(0);
-    const auto currentTime = chrono::system_clock::now();
-    if (chrono::duration_cast<std::chrono::hours>(currentTime - lastTime).count() < 22) {
+    static time_t lastTime = 0;
+    const auto now = chrono::system_clock::now();
+    const auto time = chrono::system_clock::to_time_t(now);
+    if (time - lastTime < 22 * 60 * 60) {
         return;
     }
     // Operation
-    lastTime = currentTime;
+    lastTime = time;
     logPrintln("Update persistent data", INFO, __FUNCTION__);
     // Delete db data
     deleteYearRecordDB();
-    // Delete log
     // Delete face file
+    {
+        const std::time_t cutoff = time - (5 * 24 * 60 * 60);
+        const fs::directory_iterator end_iter;
+        const string faceLogDic = g_appWorkDir + "log-face/";
+        for (fs::directory_iterator iter(faceLogDic); iter != end_iter; ++iter) {
+            if (is_regular_file(iter->status())) {
+                if (iter->path().extension() == ".jpg") {
+                    const std::time_t fileTime = last_write_time(iter->path());
+                    if (fileTime < cutoff) {
+                        fs::remove(iter->path());
+                    }
+                }
+            }
+        }
+    }
     // Backup data
     // Delete system tmp file
 }
@@ -344,6 +361,11 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
             playWav(Expired);
             playWav(userInfo.voiceTemplate);
         } else {
+            ostringstream oss;
+            oss << g_appWorkDir << "log-face/" <<
+                    put_time(localtime(&currentTimeSec), "%Y-%m-%d-%H-%M-%S")
+                    << "-" << userInfo.userId << ".jpg";
+            imwrite(oss.str(), frame);
             OpenRecordInfo recordInfo = {};
             recordInfo.userId = userInfo.userId;
             recordInfo.openMode = FaceOpen;
@@ -366,6 +388,10 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
         static auto lastFailTime = chrono::system_clock::from_time_t(0);
         if ((currentTime - lastFailTime).count() > 3) {
             if (chrono::duration_cast<std::chrono::seconds>(currentTime - lastFailTime).count() < 5) {
+                ostringstream oss;
+                oss << g_appWorkDir << "log-face/" <<
+                        put_time(localtime(&currentTimeSec), "%Y-%m-%d-%H-%M-%S") << "-Fail" << ".jpg";
+                imwrite(oss.str(), frame);
                 CameraFrame::getInstance()->negativeMessage();
                 messageLabelSec = 1;
                 ++consecutiveFailCount;
