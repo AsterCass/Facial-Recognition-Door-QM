@@ -578,6 +578,7 @@ bool faceGrant(const cv::Mat &frame, const std::string &userPhone) {
                 info.userId = userId;
                 info.startTime = startTime;
                 info.endTime = endTime;
+                info.isEnable = true;
                 faceGrantRet = faceInsert(frame, info);
             } else {
                 logPrintln("Api face grant failed in server", airstrip::WARN, __FUNCTION__);
