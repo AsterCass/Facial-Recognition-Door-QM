@@ -43,7 +43,7 @@ endif ()
 set(SDK_PATH 3rdparty)
 set(AIRSTRIP_PREFIX_PATH ../airstrip)
 find_package(OpenCV REQUIRED)
-find_package(Boost REQUIRED COMPONENTS program_options json filesystem)
+find_package(Boost REQUIRED COMPONENTS program_options json filesystem process)
 find_package(SQLiteCpp REQUIRED)
 
 if (UNIX)
@@ -146,7 +146,7 @@ if (WIN32)
             ${OpenCV_LIBS}
             airstrip
             SQLiteCpp sqlite3
-            Boost::program_options Boost::json Boost::filesystem
+            Boost::program_options Boost::json Boost::filesystem Boost::process
             Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::MultimediaWidgets
             # Face
             -lfacedetection -fopenmp
@@ -161,7 +161,7 @@ elseif (UNIX)
             -llibtiff -llibopenjp2 -lIlmImf -lzlib -ltegra_hal -ldl -lm -lpthread -lrt
             # SQL
             SQLiteCpp sqlite3
-            Boost::program_options Boost::json Boost::filesystem
+            Boost::program_options Boost::json Boost::filesystem Boost::process
             Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets
             # InspireFace
             InspireFace

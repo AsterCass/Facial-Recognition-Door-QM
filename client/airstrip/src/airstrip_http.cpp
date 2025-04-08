@@ -2,7 +2,7 @@
 
 #include <airstrip_log.h>
 #include <iostream>
-#include <array>
+#include <boost/process.hpp>
 
 
 using namespace std;
@@ -43,7 +43,7 @@ namespace airstrip {
     ) {
         stringstream cmd;
         // base
-        cmd << R"(curl -s -w "\n%{http_code}" -X )" << methodToString(method);
+        cmd << R"(curl -w "\n%{http_code}" -X )" << methodToString(method);
 
         // timeout time
         cmd << " --max-time " << timeoutSec;
@@ -80,38 +80,51 @@ namespace airstrip {
 
 
     Response AirstripHttp::executeCurlCommand(const string &cmd) {
-        array<char, 128> buffer{};
-        string result;
+        namespace bp = boost::process;
 
-        // Execute command
-        FILE *pipe = popen(cmd.c_str(), "r");
-        if (!pipe) {
-            logPrintln("Failed to execute command", ERROR, __FUNCTION__);
-            return Response{false, 0, "", "Failed to execute command"};
+        try {
+            string result, error;
+            bp::ipstream out_stream, err_stream;
+
+            bp::child c(cmd, bp::std_out > out_stream, bp::std_err > err_stream);
+
+            string line;
+            while (out_stream && getline(out_stream, line))
+                result += line + "\n";
+
+            string err_line;
+            while (err_stream && getline(err_stream, err_line))
+                error += err_line + "\n";
+
+            c.wait();
+            const int exit_code = c.exit_code();
+
+            if (exit_code != 0) {
+                const string errorMsg = "Command " + cmd + " execution failed with status: "
+                                        + to_string(c.exit_code()) + " Error is : " + error;
+                logPrintln(errorMsg, WARN, __FUNCTION__);
+                return Response{false, 0, "", ""};
+            }
+
+            // 去除末尾换行符
+            if (!result.empty() && result.back() == '\n') {
+                result.pop_back();
+            }
+
+            // Parse http code
+            const size_t pos = result.find_last_of('\n');
+            if (pos == string::npos) {
+                logPrintln("Invalid response format", WARN, __FUNCTION__);
+                return Response{false, 0, "", "Invalid response format"};
+            }
+
+            const string body = result.substr(0, pos);
+            return Response{true, stoi(result.substr(pos + 1)), body, ""};
+        } catch (const std::exception &e) {
+            stringstream errorEx;
+            errorEx << "Exception while executing command: " << e.what();
+            logPrintln(errorEx.str(), WARN, __FUNCTION__);
+            return Response{false, 0, "", ""};
         }
-
-        // Read output
-        while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
-            result += buffer.data();
-        }
-
-        // Get command status
-        const int status = pclose(pipe);
-        if (status != 0) {
-            const string error = "Command execution failed with status: " +
-                                 to_string(status) + " Error is : " + result;
-            logPrintln(error, ERROR, __FUNCTION__);
-            return Response{false, 0, "", error};
-        }
-
-        // Parse http code
-        const size_t pos = result.find_last_of('\n');
-        if (pos == string::npos) {
-            logPrintln("Invalid response format", ERROR, __FUNCTION__);
-            return Response{false, 0, "", "Invalid response format"};
-        }
-
-        const string body = result.substr(0, pos);
-        return Response{true, stoi(result.substr(pos + 1)), body, ""};
     }
 }
