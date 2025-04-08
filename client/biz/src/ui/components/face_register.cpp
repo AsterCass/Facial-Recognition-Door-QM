@@ -1,5 +1,6 @@
 #include "ui/components/face_register.h"
 
+#include <thread>
 #include <unistd.h>
 #include "api/api.h"
 #include "config/config.h"
@@ -145,6 +146,13 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
     registerBtn = new QPushButton("确认", btnWidget);
     connect(registerBtn, &QPushButton::clicked, this,
             [=] {
+                static bool onProcess = false;
+                if (onProcess) {
+                    return;
+                }
+                onProcess = true;
+                registerBtn->setDisabled(true);
+                registerBtn->setStyleSheet("background-color: rgba(13, 133, 255, 0.5);");
                 const auto phoneNumber = phoneNumberFirst->text() +
                                          phoneNumberSecond->text() +
                                          phoneNumberThird->text();
@@ -158,13 +166,16 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
                         const auto ret = faceGrant(lastFrame, phoneNumber.toStdString());
                         if (ret) {
                             errorTips->setText("录入成功");
-                            sleep(3);
+                            std::this_thread::sleep_for(std::chrono::seconds(3));
                             this->hide();
                         } else {
                             errorTips->setText("未查询到配租信息，请联系窗口服务");
                         }
                     }
                 }
+                registerBtn->setStyleSheet("background-color: rgb(13, 133, 255);");
+                registerBtn->setDisabled(false);
+                onProcess = false;
             });
     registerBtn->setStyleSheet("background-color: rgb(13, 133, 255);");
 #ifdef WIN32

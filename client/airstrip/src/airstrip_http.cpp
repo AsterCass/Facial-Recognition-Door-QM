@@ -98,7 +98,8 @@ namespace airstrip {
         // Get command status
         const int status = pclose(pipe);
         if (status != 0) {
-            const string error = "Command execution failed with status: " + to_string(status);
+            const string error = "Command execution failed with status: " +
+                                 to_string(status) + " Error is : " + result;
             logPrintln(error, ERROR, __FUNCTION__);
             return Response{false, 0, "", error};
         }

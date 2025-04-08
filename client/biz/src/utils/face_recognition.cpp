@@ -607,9 +607,11 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
         return;
     }
 
-    logPrintln("Face recognition ret id = " + to_string(searchResult.id) + " " + to_string(confidence),
+    const auto userData = faceUserInfoMap[searchResult.id];
+    logPrintln("Face recognition ret id = " + to_string(searchResult.id)
+               + " userId = " + userData.userId + " " + to_string(confidence),
                airstrip::INFO, __FUNCTION__);
-    ScheduledTask::sendFaceRegRes(faceUserInfoMap[searchResult.id], frame);
+    ScheduledTask::sendFaceRegRes(userData, frame);
 
     HFReleaseImageStream(stream);
 }
