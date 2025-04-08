@@ -161,7 +161,7 @@ elseif (UNIX)
             -llibtiff -llibopenjp2 -lIlmImf -lzlib -ltegra_hal -ldl -lm -lpthread -lrt
             # SQL
             SQLiteCpp sqlite3
-            Boost::program_options Boost::json Boost::filesystem Boost::process
+            Boost::program_options Boost::json Boost::filesystem
             Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets
             # InspireFace
             InspireFace
