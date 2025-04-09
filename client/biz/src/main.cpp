@@ -308,7 +308,7 @@ int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
     // Init thread poll
-    g_mainThreadPool = airstrip::ThreadPool::getInstance(3);
+    g_mainThreadPool = airstrip::ThreadPool::getInstance(6);
 
     // Page router
     const auto router = MainRouter::getInstance();

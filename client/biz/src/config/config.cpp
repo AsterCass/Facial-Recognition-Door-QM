@@ -9,6 +9,8 @@ int g_tryGoManagementCount = 0;
 
 bool g_closeFaceRecognition = true;
 
+bool g_onFaceRegisterProcess = false;
+
 airstrip::CommonBackendConfigDbManager g_commonDb;
 
 std::string g_appWorkDir;

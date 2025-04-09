@@ -84,6 +84,8 @@ extern int g_tryGoManagementCount;
 
 extern bool g_closeFaceRecognition;
 
+extern bool g_onFaceRegisterProcess;
+
 extern airstrip::CommonBackendConfigDbManager g_commonDb;
 
 extern std::string g_appWorkDir;

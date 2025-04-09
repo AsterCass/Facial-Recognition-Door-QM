@@ -1,5 +1,6 @@
 #include "ui/components/face_register.h"
 
+#include <airstrip_thread_pool.h>
 #include <thread>
 #include <unistd.h>
 #include "api/api.h"
@@ -146,36 +147,37 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
     registerBtn = new QPushButton("确认", btnWidget);
     connect(registerBtn, &QPushButton::clicked, this,
             [=] {
-                static bool onProcess = false;
-                if (onProcess) {
+                if (g_onFaceRegisterProcess) {
                     return;
                 }
-                onProcess = true;
-                registerBtn->setDisabled(true);
-                registerBtn->setStyleSheet("background-color: rgba(13, 133, 255, 0.5);");
+                g_onFaceRegisterProcess = true;
                 const auto phoneNumber = phoneNumberFirst->text() +
                                          phoneNumberSecond->text() +
                                          phoneNumberThird->text();
                 if (phoneNumber.size() != 11) {
-                    errorTips->setText("手机号码格式错误");
+                    resetTips(false, "手机号码格式错误");
+                    g_onFaceRegisterProcess = false;
                 } else {
                     if (lastFrame.empty()) {
-                        errorTips->setText("图片采集质量不合格，请取消后重试");
+                        resetTips(false, "图片采集质量不合格，请取消后重试");
+                        g_onFaceRegisterProcess = false;
                     } else {
-                        errorTips->setText("信息查询中...");
-                        const auto ret = faceGrant(lastFrame, phoneNumber.toStdString());
-                        if (ret) {
-                            errorTips->setText("录入成功");
-                            std::this_thread::sleep_for(std::chrono::seconds(3));
-                            this->hide();
-                        } else {
-                            errorTips->setText("未查询到配租信息，请联系窗口服务");
-                        }
+                        resetTips(true, "信息查询中...");
+                        enableRegisterBtn(false);
+                        static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([this, phoneNumber] {
+                            const auto ret = faceGrant(lastFrame, phoneNumber.toStdString());
+                            if (ret) {
+                                resetTips(true, "录入成功");
+                                std::this_thread::sleep_for(std::chrono::seconds(2));
+                                this->hide();
+                            } else {
+                                resetTips(false, "未查询到配租信息，请联系窗口服务");
+                            }
+                            g_onFaceRegisterProcess = false;
+                            this->enableRegisterBtn(true);
+                        });
                     }
                 }
-                registerBtn->setStyleSheet("background-color: rgb(13, 133, 255);");
-                registerBtn->setDisabled(false);
-                onProcess = false;
             });
     registerBtn->setStyleSheet("background-color: rgb(13, 133, 255);");
 #ifdef WIN32

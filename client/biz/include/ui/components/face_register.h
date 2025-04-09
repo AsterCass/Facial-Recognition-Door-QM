@@ -18,6 +18,29 @@ public:
         lastFrame = frame.clone();
     }
 
+    void enableRegisterBtn(const bool isEnable) const {
+        if (registerBtn) {
+            if (isEnable) {
+                registerBtn->setStyleSheet("background-color: rgb(13, 133, 255);");
+                registerBtn->setDisabled(false);
+            } else {
+                registerBtn->setDisabled(true);
+                registerBtn->setStyleSheet("background-color: rgba(13, 133, 255, 0.5);");
+            }
+        }
+    }
+
+    void resetTips(const bool isPositive, const std::string &data) const {
+        if (errorTips) {
+            if (isPositive) {
+                errorTips->setStyleSheet("margin-top: 5px; font-size: 16px; color: green");
+            } else {
+                errorTips->setStyleSheet("margin-top: 5px; font-size: 16px; color: red");
+            }
+            errorTips->setText(QString::fromStdString(data));
+        }
+    }
+
 private:
     void showEvent(QShowEvent *event) override;
 
