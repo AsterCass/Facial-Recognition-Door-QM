@@ -34,6 +34,7 @@ constexpr auto PRO_DB_ENABLE_LIGHT_THRESHOLD = "lightThreshold";
 constexpr auto PRO_DB_ENABLE_DARK_THRESHOLD = "darkThreshold";
 constexpr auto PRO_DB_ENABLE_LIGHT_RATIO = "lightRatio";
 constexpr auto PRO_DB_ENABLE_DARK_RATIO = "darkRatio";
+constexpr auto PRO_DB_FACE_REG_COUNT = "faceRegCount";
 
 const std::vector<std::string> CHINESE_WEEK = {
     "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日",
@@ -104,6 +105,7 @@ extern double g_lightThreshold;
 extern double g_darkThreshold;
 extern double g_lightRatio;
 extern double g_darkRatio;
+extern int g_faceRegCount;
 
 
 #endif //CONFIG_H

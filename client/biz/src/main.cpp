@@ -295,6 +295,22 @@ int main(int argc, char *argv[]) {
                 g_darkRatio = 0.3;
             }
         }
+        // update common set v="3" where k="faceRegCount";
+        {
+            std::string faceRegCount = g_commonDb.getConfig(PRO_DB_FACE_REG_COUNT);
+            if (faceRegCount.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_FACE_REG_COUNT, "3");
+                faceRegCount = "3";
+            }
+            try {
+                g_faceRegCount = stoi(faceRegCount);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data faceRegCount error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_faceRegCount = 3;
+            }
+        }
 
         logPrintln("Db finish", airstrip::INFO, __FUNCTION__);
     }

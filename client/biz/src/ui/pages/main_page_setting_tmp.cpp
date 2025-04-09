@@ -76,6 +76,10 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     faceThreshold = new QLineEditPro(scrollContent);
     volLabel = new QLabel("设备音量（0 - 100）：", scrollContent);
     vol = new QLineEditPro(scrollContent);
+    faceRegCountLabel = new QLabel("失败N次触发人脸信息验证：", scrollContent);
+    faceRegCount = new QLineEditPro(scrollContent);
+
+
     faceDistantLabel = new QLabel("人脸识别距离：", scrollContent);;
     faceDistantWidget = new QWidget(scrollContent);
     faceDistantLayout = new QHBoxLayout(faceDistantWidget);
@@ -215,6 +219,12 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
                         g_commonDb.upsertConfig(
                             PRO_DB_ENABLE_LIGHT_ONLY_CHECK, to_string(g_lightOnlyCheck));
                     }
+
+                    const auto newFaceRegCount = faceRegCount->text().trimmed().toInt();
+                    if (g_faceRegCount != newFaceRegCount) {
+                        g_faceRegCount = newFaceRegCount;
+                        g_commonDb.upsertConfig(PRO_DB_FACE_REG_COUNT, to_string(g_faceRegCount));
+                    }
                 } catch (const std::exception &e) {
                     ostringstream errMsg;
                     errMsg << "Save config data error :" << e.what();
@@ -252,6 +262,10 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     scrollerAreaLayout->addWidget(faceThreshold);
     scrollerAreaLayout->addWidget(volLabel);
     scrollerAreaLayout->addWidget(vol);
+    scrollerAreaLayout->addWidget(faceRegCountLabel);
+    scrollerAreaLayout->addWidget(faceRegCount);
+
+
     scrollerAreaLayout->addWidget(faceDistantLabel);
     scrollerAreaLayout->addWidget(faceDistantWidget);
 
@@ -298,7 +312,7 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     darkThresholdInput->setText(QString::number(g_darkThreshold));
     lightRatioInput->setText(QString::number(g_lightRatio));
     darkRatioInput->setText(QString::number(g_darkRatio));
-
+    faceRegCount->setText(QString::number(g_faceRegCount));
 
 
     // Connect

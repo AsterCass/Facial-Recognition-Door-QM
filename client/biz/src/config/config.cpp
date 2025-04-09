@@ -29,3 +29,4 @@ double g_lightThreshold;
 double g_darkThreshold;
 double g_lightRatio;
 double g_darkRatio;
+int g_faceRegCount;

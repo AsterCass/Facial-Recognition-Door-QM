@@ -33,6 +33,10 @@ private:
     QLineEditPro *faceThreshold;
     QLabel *volLabel;
     QLineEditPro *vol;
+    QLabel *faceRegCountLabel;
+    QLineEditPro *faceRegCount;
+
+
     QLabel *faceDistantLabel;
     QWidget *faceDistantWidget;
     QHBoxLayout *faceDistantLayout;

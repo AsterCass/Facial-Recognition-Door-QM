@@ -268,7 +268,13 @@ void getNfcCode() {
         } else {
             OpenRecordInfo recordInfo = {};
             recordInfo.userId = cardInfo.userId;
-            recordInfo.openMode = IcCardOpen;
+            if (cardInfo.cardType == ICCard) {
+                recordInfo.openMode = IcCardOpen;
+            } else if (cardInfo.cardType == IdCard) {
+                recordInfo.openMode = IdCardOpen;
+            } else {
+                recordInfo.openMode = 0;
+            }
             recordInfo.openResult = 0;
             recordInfo.openTime = chrono::system_clock::to_time_t(chrono::system_clock::now());
             recordInfo.cardNo = cardInfo.cardNo;
@@ -416,8 +422,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
                 messageLabelSec = 1;
                 ++consecutiveFailCount;
                 playWav(AuthFail);
-                // todo save frame
-                if (consecutiveFailCount >= 3) {
+                if (consecutiveFailCount >= g_faceRegCount) {
                     consecutiveFailCount = 0;
                     MainRouter::getInstance()->showFaceRegister(frame);
                     lastShowFaceRegisterTime = currentTimeSec;
