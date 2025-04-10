@@ -93,7 +93,7 @@ void updatePersistentData() {
 
 // Every (30 * 60 * (taskIvCnt + executionTime)) sec
 void uploadAppData() {
-    static int count = 1800;
+    static int count = 1680;
     if (count++ < 1800) return;
     count = 1;
 
@@ -351,6 +351,7 @@ void repeatOperation() {
 }
 
 [[noreturn]] void taskExecutor(const chrono::milliseconds interval) {
+    //std::this_thread::sleep_for(std::chrono::seconds(10));
     onceTaskBefore();
     repeatOperation();
     onceTaskAfter();

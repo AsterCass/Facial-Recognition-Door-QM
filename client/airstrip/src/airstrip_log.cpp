@@ -41,8 +41,8 @@ namespace airstrip {
         }
         thread cleanup_thread([&] {
             while (true) {
-                this_thread::sleep_for(chrono::hours(12));
                 clearHistoryLog();
+                this_thread::sleep_for(chrono::hours(12));
             }
         });
         cleanup_thread.detach();

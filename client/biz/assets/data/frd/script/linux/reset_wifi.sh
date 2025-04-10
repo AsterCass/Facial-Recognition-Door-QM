@@ -49,6 +49,8 @@ EOF
     # Start wpa_supplicant
     wpa_supplicant -B -i wlan0 -c $CONF
 
+    echo "nameserver 8.8.8.8" > /etc/resolv.conf
+
     # Start DHCP client
     udhcpc -i wlan0 &
 
