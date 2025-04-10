@@ -44,6 +44,8 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
     errorTipsWidget = new QWidget(faceRegisterWidget);
     errorTipsWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     errorTipsLayout = new QVBoxLayout(errorTipsWidget);
+    errorTipsLayout->setSpacing(0);
+    errorTipsLayout->setMargin(0);
     errorTips = new QLabel(errorTipsWidget);
     errorTipsLayout->addWidget(errorTips);
     errorTips->setAlignment(Qt::AlignCenter);
