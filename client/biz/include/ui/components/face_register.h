@@ -46,9 +46,17 @@ public:
     void resetTips(const bool isPositive, const std::string &data) const {
         if (errorTips) {
             if (isPositive) {
-                errorTips->setStyleSheet("margin-top: 5px; font-size: 16px; color: green");
+#ifdef WIN32
+                errorTips->setStyleSheet("font-size: 12px; color: green");
+#else
+                errorTips->setStyleSheet("font-size: 24px; color: green");
+#endif
             } else {
-                errorTips->setStyleSheet("margin-top: 5px; font-size: 16px; color: red");
+#ifdef WIN32
+                errorTips->setStyleSheet("font-size: 12px; color: red");
+#else
+                errorTips->setStyleSheet("font-size: 24px; color: red");
+#endif
             }
             errorTips->setText(QString::fromStdString(data));
         }
@@ -76,6 +84,8 @@ private:
     QPushButton *cancelBtn = nullptr;
     QPushButton *registerBtn = nullptr;
 
+    QWidget* errorTipsWidget = nullptr;
+    QVBoxLayout* errorTipsLayout = nullptr;
     QLabel *errorTips = nullptr;
     QMovie *loadGif = nullptr;
 

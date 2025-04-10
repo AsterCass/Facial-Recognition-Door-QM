@@ -2,7 +2,6 @@
 
 #include <airstrip_thread_pool.h>
 #include <thread>
-#include <unistd.h>
 #include "api/api.h"
 #include "config/config.h"
 #include "ui/components/virtual_keyboard_number.h"
@@ -42,16 +41,26 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
 #else
     btnWidget->setFixedHeight(120);
 #endif
-    errorTips = new QLabel("");
+    errorTipsWidget = new QWidget(faceRegisterWidget);
+    errorTipsWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    errorTipsLayout = new QVBoxLayout(errorTipsWidget);
+    errorTips = new QLabel(errorTipsWidget);
+    errorTipsLayout->addWidget(errorTips);
     errorTips->setAlignment(Qt::AlignCenter);
-    errorTips->setStyleSheet("margin-top: 5px; font-size: 16px; color: red");
     loadGif = new QMovie(QString::fromStdString(
         g_appWorkDir + "static/images/loading.gif"));
+    resetTips(true, "输入用户手机号检查是否包含门禁权限");
+#ifdef WIN32
+    errorTipsWidget->setFixedHeight(40);
+    loadGif->setScaledSize(QSize(30, 30));
+#else
+    errorTipsWidget->setFixedHeight(80);
     loadGif->setScaledSize(QSize(60, 60));
+#endif
 
     faceRegisterLayout->addWidget(faceRegisterTitle);
     faceRegisterLayout->addWidget(phoneNumberWidget);
-    faceRegisterLayout->addWidget(errorTips);
+    faceRegisterLayout->addWidget(errorTipsWidget);
     faceRegisterLayout->addWidget(btnWidget);
 
     // Input
