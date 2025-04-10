@@ -45,6 +45,10 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
     errorTips = new QLabel("");
     errorTips->setAlignment(Qt::AlignCenter);
     errorTips->setStyleSheet("margin-top: 5px; font-size: 16px; color: red");
+    loadGif = new QMovie(QString::fromStdString(
+        g_appWorkDir + "static/images/loading.gif"));
+    loadGif->setScaledSize(QSize(60, 60));
+
     faceRegisterLayout->addWidget(faceRegisterTitle);
     faceRegisterLayout->addWidget(phoneNumberWidget);
     faceRegisterLayout->addWidget(errorTips);
@@ -162,13 +166,12 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
                         resetTips(false, "图片采集质量不合格，请取消后重试");
                         g_onFaceRegisterProcess = false;
                     } else {
-                        resetTips(true, "信息查询中...");
+                        loadingApi(true);
                         enableRegisterBtn(false);
                         static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([this, phoneNumber] {
                             const auto ret = faceGrant(lastFrame, phoneNumber.toStdString());
+                            loadingApi(false);
                             if (ret) {
-                                resetTips(true, "录入成功");
-                                std::this_thread::sleep_for(std::chrono::seconds(2));
                                 this->hide();
                             } else {
                                 resetTips(false, "未查询到配租信息，请联系窗口服务");
@@ -210,6 +213,10 @@ void FaceRegister::hideEvent(QHideEvent *) {
     if (nullptr != errorTips) {
         errorTips->setText("");
     }
+    if (nullptr != loadGif) {
+        loadGif->stop();
+    }
+    VirtualKeyboardNumber::getInstance()->hideKeyboard();
     lastFrame.release();
 }
 

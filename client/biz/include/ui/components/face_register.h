@@ -3,6 +3,7 @@
 
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QMovie>
 #include <QPushButton>
 #include <opencv2/opencv.hpp>
 
@@ -26,6 +27,18 @@ public:
             } else {
                 registerBtn->setDisabled(true);
                 registerBtn->setStyleSheet("background-color: rgba(13, 133, 255, 0.5);");
+            }
+        }
+    }
+
+    void loadingApi(const bool isStart) const {
+        if (errorTips && loadGif) {
+            if (isStart) {
+                errorTips->setMovie(loadGif);
+                loadGif->start();
+            } else {
+                loadGif->stop();
+                errorTips->setText("");
             }
         }
     }
@@ -64,6 +77,7 @@ private:
     QPushButton *registerBtn = nullptr;
 
     QLabel *errorTips = nullptr;
+    QMovie *loadGif = nullptr;
 
 
     cv::Mat lastFrame = {};
