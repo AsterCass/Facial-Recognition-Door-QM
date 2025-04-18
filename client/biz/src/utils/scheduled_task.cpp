@@ -170,10 +170,8 @@ void updateUIMainComponentHeader() {
     }
 
     // 4g
-    {
-#ifdef WIN32
-        const string fourGIp;
-#else
+    string fourGIp; {
+#ifndef WIN32
         const string fourGIp = execScript(g_appWorkDir + "script/linux/get_4g_ip.sh");
 #endif
         GlobalDataManager::getInstance()->updateHeaderFourG(fourGIp);
@@ -215,6 +213,23 @@ void updateUIMainComponentHeader() {
             execCommandNoReturn("sh " + g_appWorkDir + "script/linux/reset_wifi.sh off");
 #endif
         }
+
+        // 4g
+        static int reconnectCountFourG = 1;
+        if (g_netModel == 3 && reconnectCountFourG++ > 0) {
+            reconnectCountFourG = 0;
+            if (fourGIp.empty()) {
+                logPrintln("Connect to 4g ...", INFO, __FUNCTION__);
+#ifndef WIN32
+                execCommandNoReturn("sh " + g_appWorkDir + "script/linux/reset_4g.sh on")
+#endif
+            }
+        } else if (g_netModel != 3 && !fourGIp.empty()) {
+            logPrintln("Disconnect 4g ...", INFO, __FUNCTION__);
+#ifndef WIN32
+            execCommandNoReturn("sh " + g_appWorkDir + "script/linux/reset_4g.sh off");
+#endif
+        }
     }
 }
 
@@ -224,7 +239,14 @@ void checkTaskAndExecute() {
     static int count = 1;
     if (count++ < 5) return;
     count = 1;
-    checkTask();
+
+    const auto now = chrono::system_clock::now();
+    const auto time = chrono::system_clock::to_time_t(now);
+    static time_t lastTime = 0;
+    if (time - lastTime > g_taskIvSec) {
+        lastTime = time;
+        checkTask();
+    }
 }
 
 // Every (4 * (taskIvCnt + executionTime)) sec
@@ -428,6 +450,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
                     MainRouter::getInstance()->showFaceRegister(frame);
                     lastShowFaceRegisterTime = currentTimeSec;
                 }
+                //todo 如果任务时间间隔大于1分钟 则异步调获取任务接口，防止刚刚下发
             } else {
                 consecutiveFailCount = 0;
                 playWav(AuthFailFirst);

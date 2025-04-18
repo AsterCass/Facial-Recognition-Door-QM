@@ -311,6 +311,22 @@ int main(int argc, char *argv[]) {
                 g_faceRegCount = 3;
             }
         }
+        // update common set v="600" where k="taskIvSec";
+        {
+            std::string taskIvSec = g_commonDb.getConfig(PRO_DB_TASK_IV_SEC);
+            if (taskIvSec.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_TASK_IV_SEC, "600");
+                taskIvSec = "600";
+            }
+            try {
+                g_taskIvSec = stoi(taskIvSec);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data taskIvSec error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_taskIvSec = 600;
+            }
+        }
 
         logPrintln("Db finish", airstrip::INFO, __FUNCTION__);
     }

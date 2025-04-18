@@ -78,6 +78,8 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     vol = new QLineEditPro(scrollContent);
     faceRegCountLabel = new QLabel("失败N次触发人脸信息验证：", scrollContent);
     faceRegCount = new QLineEditPro(scrollContent);
+    taskIvSecLabel = new QLabel("获取任务间隔秒数（最小为5）", scrollContent);
+    taskIvSec = new QLineEditPro(scrollContent);
 
 
     faceDistantLabel = new QLabel("人脸识别距离：", scrollContent);;
@@ -95,7 +97,7 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     faceDistantGroup->addButton(faceDistantMore, 3);
 
 
-    netModelLabel = new QLabel("网络模式（暂不支持4G）：", scrollContent);
+    netModelLabel = new QLabel("网络模式（4G和无线不能同时开启）：", scrollContent);
     netModelWidget = new QWidget(scrollContent);
     netModelLayout = new QHBoxLayout(netModelWidget);
     netModelWired = new QRadioButton("有线", netModelWidget);
@@ -225,6 +227,13 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
                         g_faceRegCount = newFaceRegCount;
                         g_commonDb.upsertConfig(PRO_DB_FACE_REG_COUNT, to_string(g_faceRegCount));
                     }
+
+                    const auto newTaskIvSec = taskIvSec->text().trimmed().toInt();
+                    if (g_taskIvSec != newTaskIvSec) {
+                        g_taskIvSec = newTaskIvSec;
+                        g_commonDb.upsertConfig(PRO_DB_TASK_IV_SEC, to_string(g_taskIvSec));
+                    }
+
                 } catch (const std::exception &e) {
                     ostringstream errMsg;
                     errMsg << "Save config data error :" << e.what();
@@ -264,6 +273,8 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     scrollerAreaLayout->addWidget(vol);
     scrollerAreaLayout->addWidget(faceRegCountLabel);
     scrollerAreaLayout->addWidget(faceRegCount);
+    scrollerAreaLayout->addWidget(taskIvSecLabel);
+    scrollerAreaLayout->addWidget(taskIvSec);
 
 
     scrollerAreaLayout->addWidget(faceDistantLabel);
@@ -313,6 +324,7 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     lightRatioInput->setText(QString::number(g_lightRatio));
     darkRatioInput->setText(QString::number(g_darkRatio));
     faceRegCount->setText(QString::number(g_faceRegCount));
+    taskIvSec->setText(QString::number(g_taskIvSec));
 
 
     // Connect

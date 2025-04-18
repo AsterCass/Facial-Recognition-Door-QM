@@ -35,6 +35,8 @@ private:
     QLineEditPro *vol;
     QLabel *faceRegCountLabel;
     QLineEditPro *faceRegCount;
+    QLabel *taskIvSecLabel;
+    QLineEditPro *taskIvSec;
 
 
     QLabel *faceDistantLabel;
