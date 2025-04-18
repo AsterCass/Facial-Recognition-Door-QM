@@ -172,7 +172,7 @@ void updateUIMainComponentHeader() {
     // 4g
     string fourGIp; {
 #ifndef WIN32
-        const string fourGIp = execScript(g_appWorkDir + "script/linux/get_4g_ip.sh");
+        fourGIp = execScript(g_appWorkDir + "script/linux/get_4g_ip.sh");
 #endif
         GlobalDataManager::getInstance()->updateHeaderFourG(fourGIp);
     }
@@ -215,13 +215,13 @@ void updateUIMainComponentHeader() {
         }
 
         // 4g
-        static int reconnectCountFourG = 1;
-        if (g_netModel == 3 && reconnectCountFourG++ > 0) {
+        static int reconnectCountFourG = 3;
+        if (g_netModel == 3 && ++reconnectCountFourG > 3) {
             reconnectCountFourG = 0;
             if (fourGIp.empty()) {
                 logPrintln("Connect to 4g ...", INFO, __FUNCTION__);
 #ifndef WIN32
-                execCommandNoReturn("sh " + g_appWorkDir + "script/linux/reset_4g.sh on")
+                execCommandNoReturn("sh " + g_appWorkDir + "script/linux/reset_4g.sh on");
 #endif
             }
         } else if (g_netModel != 3 && !fourGIp.empty()) {

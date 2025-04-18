@@ -78,7 +78,7 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     vol = new QLineEditPro(scrollContent);
     faceRegCountLabel = new QLabel("失败N次触发人脸信息验证：", scrollContent);
     faceRegCount = new QLineEditPro(scrollContent);
-    taskIvSecLabel = new QLabel("获取任务间隔秒数（最小为5）", scrollContent);
+    taskIvSecLabel = new QLabel("获取任务间隔秒数（最小为5）：", scrollContent);
     taskIvSec = new QLineEditPro(scrollContent);
 
 
