@@ -325,6 +325,32 @@ void messageLabelHide() {
     }
 }
 
+void faceTest() {
+    try {
+        const std::string directory = g_appWorkDir + "test/";
+        if (!fs::exists(directory) || !fs::is_directory(directory)) {
+            logPrintln("Test directory not exist", WARN, __FUNCTION__);
+        }
+        for (const auto &entry: fs::recursive_directory_iterator(directory)) {
+            if (is_regular_file(entry.path())) {
+                string extension = entry.path().extension().string();
+                transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
+                if (extension == ".jpg") {
+                    const auto absolutePath = absolute(entry.path()).string();
+                    logPrintln("Test image start" + absolutePath, INFO, __FUNCTION__);
+                    const auto imageTest = cv::imread(absolutePath);
+                    faceRecognition(imageTest, cv::Rect(0, 0, imageTest.cols, imageTest.rows));
+                }
+            }
+        }
+    } catch (const exception &e) {
+        ostringstream errMsg;
+        errMsg << e.what();
+        logPrintln("Test face error" + errMsg.str(), airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
+    }
+}
+
 void onceTaskBefore() {
     // Init Camera
     CameraFrame::getInstance()->start();
@@ -341,6 +367,12 @@ void onceTaskBefore() {
     initOpenRecordDB();
     loadCardDb();
     loadFaceDb();
+
+
+
+
+    // Face test
+    faceTest();
 }
 
 
