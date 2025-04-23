@@ -29,7 +29,7 @@ HFSession faceRecognitionSession = nullptr;
 
 
 void closeLight() {
-    if (g_currentLightLevel >= EXPOSE_AND_GAIN_PARAM.size() - 1) {
+    if (currentIsNight()) {
         logPrintln("To Close light", airstrip::INFO, __FUNCTION__);
         --g_currentLightLevel;
 
