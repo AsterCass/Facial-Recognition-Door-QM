@@ -37,7 +37,7 @@ public:
         if (extraStr.empty()) {
             successLabel->setText("核验通过");
         } else {
-            successLabel->setText(QString::fromStdString("核验通过 " + extraStr));
+            successLabel->setText(QString::fromStdString(extraStr));
         }
         failLabel->hide();
         successLabel->show();

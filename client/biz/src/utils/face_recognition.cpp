@@ -150,7 +150,7 @@ void initFaceRecognition() {
     configuration.primaryKeyMode = HF_PK_MANUAL_INPUT;
     configuration.enablePersistence = 0;
     configuration.persistenceDbPath = nullptr;
-    configuration.searchMode = HF_SEARCH_MODE_EAGER;
+    configuration.searchMode = HF_SEARCH_MODE_EXHAUSTIVE;
     configuration.searchThreshold = static_cast<float>(g_faceThreshold);
     ret = HFFeatureHubDataEnable(configuration);
     if (ret != HSUCCEED) {
@@ -543,6 +543,18 @@ bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, i
     free(pBuffer);
     pBuffer = nullptr;
     return ret;
+}
+
+void faceRecognition(const std::string &address, const cv::Rect &rect) {
+    if (!initializedFaceRec) {
+        return;
+    }
+    const auto image = cv::imread(address);
+    if (image.empty()) {
+        logPrintln("Read pic error " + address, airstrip::WARN, __FUNCTION__);
+        return;
+    }
+    return faceRecognition(image, rect);
 }
 
 void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
