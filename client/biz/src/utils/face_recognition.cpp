@@ -26,12 +26,12 @@ std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
 
 
 HFSession faceRecognitionSession = nullptr;
-int currentLightLevel = 13;
+
 
 void closeLight() {
-    if (currentLightLevel >= EXPOSE_AND_GAIN_PARAM.size() - 1) {
+    if (g_currentLightLevel >= EXPOSE_AND_GAIN_PARAM.size() - 1) {
         logPrintln("To Close light", airstrip::INFO, __FUNCTION__);
-        --currentLightLevel;
+        --g_currentLightLevel;
 
         ostringstream closeLight;
         closeLight << "sh " << g_appWorkDir + "script/linux/reset_light.sh 0";
@@ -41,27 +41,27 @@ void closeLight() {
 
 
 void updateExposeAndGain(const bool isUp) {
-    logPrintln("Current level is " + to_string(currentLightLevel) +
+    logPrintln("Current level is " + to_string(g_currentLightLevel) +
                " want to up " + to_string(isUp), airstrip::INFO, __FUNCTION__);
 
-    if (currentLightLevel <= 0 && !isUp) {
+    if (g_currentLightLevel <= 0 && !isUp) {
         logPrintln("Down fail", airstrip::INFO, __FUNCTION__);
-    } else if (currentLightLevel >= EXPOSE_AND_GAIN_PARAM.size() - 1 && isUp) {
+    } else if (g_currentLightLevel >= EXPOSE_AND_GAIN_PARAM.size() - 1 && isUp) {
         logPrintln("Up fail", airstrip::INFO, __FUNCTION__);
     } else {
         if (isUp) {
-            ++currentLightLevel;
+            ++g_currentLightLevel;
         } else {
-            --currentLightLevel;
+            --g_currentLightLevel;
         }
     }
 
     ostringstream updateExposeGainCmd;
     updateExposeGainCmd << "sh " << g_appWorkDir + "script/linux/reset_expose.sh "
-            << EXPOSE_AND_GAIN_PARAM.at(currentLightLevel).at(0) << " "
-            << EXPOSE_AND_GAIN_PARAM.at(currentLightLevel).at(1) << " && sh "
+            << EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(0) << " "
+            << EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(1) << " && sh "
             << g_appWorkDir + "script/linux/reset_light.sh "
-            << EXPOSE_AND_GAIN_PARAM.at(currentLightLevel).at(2);
+            << EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(2);
 
 
     logPrintln("Current cmd : " + updateExposeGainCmd.str(),
@@ -151,7 +151,7 @@ void initFaceRecognition() {
     configuration.enablePersistence = 0;
     configuration.persistenceDbPath = nullptr;
     configuration.searchMode = HF_SEARCH_MODE_EXHAUSTIVE;
-    configuration.searchThreshold = static_cast<float>(g_faceThreshold);
+    configuration.searchThreshold = static_cast<float>(std::min(g_faceThreshold, g_faceThresholdNight));
     ret = HFFeatureHubDataEnable(configuration);
     if (ret != HSUCCEED) {
         logPrintln("Create face db error: " + ret, airstrip::CRITICAL, __FUNCTION__);
@@ -623,6 +623,12 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
     logPrintln("Face recognition ret id = " + to_string(searchResult.id)
                + " userId = " + userData.userId + " " + to_string(confidence),
                airstrip::INFO, __FUNCTION__);
+    if ((!currentIsNight() && confidence < g_faceThreshold) || (
+            currentIsNight() && confidence < g_faceThresholdNight)) {
+        ScheduledTask::sendFaceRegRes({}, frame, 0.0);
+    } else {
+        ScheduledTask::sendFaceRegRes(userData, frame, confidence);
+    }
     ScheduledTask::sendFaceRegRes(userData, frame, confidence);
 
     HFReleaseImageStream(stream);

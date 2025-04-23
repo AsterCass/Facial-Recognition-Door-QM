@@ -23,6 +23,7 @@ constexpr auto PRO_DB_COMMON_KEY_SERVER_ADD = "serverAddress";
 constexpr auto PRO_DB_COMMON_KEY_MANA_PASS = "managementPassword";
 constexpr auto PRO_DB_SIGN_ID = "signId";
 constexpr auto PRO_DB_FACE_THRESHOLD = "faceThreshold";
+constexpr auto PRO_DB_FACE_THRESHOLD_NIG = "faceThresholdNight";
 constexpr auto PRO_DB_VOL_NUM = "volNum";
 constexpr auto PRO_DB_FACE_DISTANCE = "faceDistance";
 constexpr auto PRO_DB_NET_MODEL = "netModel";
@@ -77,7 +78,12 @@ const std::vector<std::vector<int> > EXPOSE_AND_GAIN_PARAM = {
     {1121, 150, 0},
     {1121, 200, 0},
     {1121, 300, 0},
-    {1121, 400, 80},
+    {1121, 400, 0},
+    {1121, 600, 0},
+    {1121, 800, 0},
+    {1121, 800, 20},
+    {1121, 800, 40},
+    {1121, 800, 80},
 };
 
 // variable
@@ -89,6 +95,8 @@ extern bool g_closeFaceRecognition;
 
 extern bool g_onFaceRegisterProcess;
 
+extern int g_currentLightLevel;
+
 extern airstrip::CommonBackendConfigDbManager g_commonDb;
 
 extern std::string g_appWorkDir;
@@ -96,6 +104,7 @@ extern std::string g_serverAddress;
 extern std::string g_managementPassword;
 extern std::string g_signId;
 extern double g_faceThreshold;
+extern double g_faceThresholdNight;
 extern int g_volNum;
 extern int g_faceDistance;
 extern int g_netModel;
@@ -110,6 +119,12 @@ extern double g_darkRatio;
 extern int g_faceRegCount;
 extern int g_taskIvSec;
 extern int g_showConfUser;
+
+// function
+
+inline bool currentIsNight() {
+    return EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(2) != 0;
+}
 
 
 #endif //CONFIG_H

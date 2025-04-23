@@ -31,6 +31,8 @@ private:
     QLineEditPro *serverAddress;
     QLabel *faceThresholdLabel;
     QLineEditPro *faceThreshold;
+    QLabel *faceThresholdNightLabel;
+    QLineEditPro *faceThresholdNight;
     QLabel *volLabel;
     QLineEditPro *vol;
     QLabel *faceRegCountLabel;

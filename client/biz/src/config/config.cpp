@@ -11,6 +11,8 @@ bool g_closeFaceRecognition = true;
 
 bool g_onFaceRegisterProcess = false;
 
+int g_currentLightLevel = 13;
+
 airstrip::CommonBackendConfigDbManager g_commonDb;
 
 std::string g_appWorkDir;
@@ -18,6 +20,7 @@ std::string g_serverAddress;
 std::string g_managementPassword;
 std::string g_signId;
 double g_faceThreshold;
+double g_faceThresholdNight;
 int g_volNum;
 int g_faceDistance;
 int g_netModel;

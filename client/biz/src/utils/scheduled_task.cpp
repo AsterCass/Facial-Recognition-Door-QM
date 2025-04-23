@@ -498,7 +498,9 @@ bool ScheduledTask::commonOpenDoor(const OpenRecordInfo &openRecordInfo, const s
     doorOpenSec = 1;
     if (g_showConfUser) {
         const string preUserId = userId.substr(0, std::min(userId.size(), static_cast<size_t>(5)));
-        const string extraStr = preUserId + " " + to_string(confidence);
+        std::ostringstream confidenceOss;
+        confidenceOss << std::fixed << std::setprecision(3) << confidence;
+        const string extraStr = preUserId + " " + confidenceOss.str();
         CameraFrame::getInstance()->positiveMessage(extraStr);
     } else {
         CameraFrame::getInstance()->positiveMessage();

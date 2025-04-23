@@ -74,6 +74,9 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     faceThresholdLabel = new QLabel("人脸识别阈值（0 - 0.6）（推荐 0.48）（重启生效）：", scrollContent);
     faceThresholdLabel->setWordWrap(true);
     faceThreshold = new QLineEditPro(scrollContent);
+    faceThresholdNightLabel = new QLabel("夜间人脸识别阈值（0 - 0.6）（推荐 0.42）（重启生效）：", scrollContent);
+    faceThresholdNightLabel->setWordWrap(true);
+    faceThresholdNight = new QLineEditPro(scrollContent);
     volLabel = new QLabel("设备音量（0 - 100）：", scrollContent);
     vol = new QLineEditPro(scrollContent);
     faceRegCountLabel = new QLabel("失败N次触发人脸信息验证：", scrollContent);
@@ -148,6 +151,13 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
                     if (g_faceThreshold != newFaceThreshold) {
                         g_faceThreshold = newFaceThreshold;
                         g_commonDb.upsertConfig(PRO_DB_FACE_THRESHOLD, to_string(g_faceThreshold));
+                    }
+
+                    const auto newFaceThresholdNight = faceThresholdNight->text().trimmed().toDouble();
+                    if (g_faceThresholdNight != newFaceThresholdNight) {
+                        g_faceThresholdNight = newFaceThresholdNight;
+                        g_commonDb.upsertConfig(
+                            PRO_DB_FACE_THRESHOLD_NIG, to_string(g_faceThresholdNight));
                     }
 
                     const auto newVolNum = vol->text().trimmed().toInt();
@@ -276,6 +286,8 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     scrollerAreaLayout->addWidget(serverAddress);
     scrollerAreaLayout->addWidget(faceThresholdLabel);
     scrollerAreaLayout->addWidget(faceThreshold);
+    scrollerAreaLayout->addWidget(faceThresholdNightLabel);
+    scrollerAreaLayout->addWidget(faceThresholdNight);
     scrollerAreaLayout->addWidget(volLabel);
     scrollerAreaLayout->addWidget(vol);
     scrollerAreaLayout->addWidget(faceRegCountLabel);
@@ -320,6 +332,7 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     // Data
     serverAddress->setText(QString::fromStdString(g_serverAddress));
     faceThreshold->setText(QString::number(g_faceThreshold));
+    faceThresholdNight->setText(QString::number(g_faceThresholdNight));
     vol->setText(QString::number(g_volNum));
     faceDistantGroup->button(g_faceDistance)->setChecked(true);
     enableFaceSpoof->setCheckState(g_enableFaceSpoof ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);

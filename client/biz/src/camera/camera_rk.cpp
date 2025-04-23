@@ -56,10 +56,13 @@ void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
             try {
                 //rectangle(frameRga, rect, cv::Scalar(255, 0, 0), 2);
                 //cv::imwrite("/data/frd/test.jpg", frameRga);
-                // faceRecognition(frameRga, rect);
 
-                cv::imwrite("/data/frd/current.jpg", frameRga);
-                faceRecognition("/data/frd/current.jpg", rect);
+                if (currentIsNight()) {
+                    cv::imwrite("/data/frd/current.jpg", frameRga);
+                    faceRecognition("/data/frd/current.jpg", rect);
+                } else {
+                    faceRecognition(frameRga, rect);
+                }
             } catch (const exception &e) {
                 logPrintln("Face Recognition fail : " + string(e.what()),
                            airstrip::ERROR, __FUNCTION__);

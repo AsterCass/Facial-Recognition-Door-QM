@@ -133,6 +133,22 @@ int main(int argc, char *argv[]) {
                 g_faceThreshold = 0.48;
             }
         }
+        // update common set v="0.42" where k="faceThresholdNight";
+        {
+            std::string faceThresholdNight = g_commonDb.getConfig(PRO_DB_FACE_THRESHOLD_NIG);
+            if (faceThresholdNight.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_FACE_THRESHOLD_NIG, "0.42");
+                faceThresholdNight = "0.42";
+            }
+            try {
+                g_faceThresholdNight = stod(faceThresholdNight);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data faceThresholdNight error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_faceThresholdNight = 0.42;
+            }
+        }
         // update common set v="50" where k="volNum";
         {
             std::string volNum = g_commonDb.getConfig(PRO_DB_VOL_NUM);
