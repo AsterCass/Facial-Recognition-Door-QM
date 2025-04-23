@@ -128,6 +128,7 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
 
     enableFaceSpoof = new QCheckBox("活体验证（仅供调试，用户需开启）", scrollContent);
     lightOnlyCheck = new QCheckBox("仅在核验时开启补光灯", scrollContent);
+    showConfUser = new QCheckBox("核验通过显示用户名和置信", scrollContent);
 
     ipWiredLabel = new QLabel("有线IP地址：", scrollContent);
     ipWirelessLabel = new QLabel("无线IP地址：", scrollContent);
@@ -234,6 +235,12 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
                         g_commonDb.upsertConfig(PRO_DB_TASK_IV_SEC, to_string(g_taskIvSec));
                     }
 
+                    const auto newShowConfUser = showConfUser->isChecked() ? 1 : 0;
+                    if (g_showConfUser != newShowConfUser) {
+                        g_showConfUser = newShowConfUser;
+                        g_commonDb.upsertConfig(
+                            PRO_DB_SHOW_CONF_USER, to_string(g_showConfUser));
+                    }
                 } catch (const std::exception &e) {
                     ostringstream errMsg;
                     errMsg << "Save config data error :" << e.what();
@@ -299,6 +306,7 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
 
     scrollerAreaLayout->addWidget(enableFaceSpoof);
     scrollerAreaLayout->addWidget(lightOnlyCheck);
+    scrollerAreaLayout->addWidget(showConfUser);
 
     scrollerAreaLayout->addWidget(ipWiredLabel);
     scrollerAreaLayout->addWidget(ipWirelessLabel);
@@ -316,6 +324,7 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     faceDistantGroup->button(g_faceDistance)->setChecked(true);
     enableFaceSpoof->setCheckState(g_enableFaceSpoof ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     lightOnlyCheck->setCheckState(g_lightOnlyCheck ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+    showConfUser->setCheckState(g_showConfUser ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     netModelGroup->button(g_netModel)->setChecked(true);
     wifiAccount->setText(QString::fromStdString(g_wifiAccount));
     wifiPasswdEdit->setText(QString::fromStdString(g_wifiPasswd));

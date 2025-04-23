@@ -36,6 +36,7 @@ constexpr auto PRO_DB_ENABLE_LIGHT_RATIO = "lightRatio";
 constexpr auto PRO_DB_ENABLE_DARK_RATIO = "darkRatio";
 constexpr auto PRO_DB_FACE_REG_COUNT = "faceRegCount";
 constexpr auto PRO_DB_TASK_IV_SEC = "taskIvSec";
+constexpr auto PRO_DB_SHOW_CONF_USER = "showConfUser";
 
 const std::vector<std::string> CHINESE_WEEK = {
     "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日",
@@ -108,6 +109,7 @@ extern double g_lightRatio;
 extern double g_darkRatio;
 extern int g_faceRegCount;
 extern int g_taskIvSec;
+extern int g_showConfUser;
 
 
 #endif //CONFIG_H

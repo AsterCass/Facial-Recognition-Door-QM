@@ -369,8 +369,6 @@ void onceTaskBefore() {
     loadFaceDb();
 
 
-
-
     // Face test
     faceTest();
 }
@@ -418,7 +416,7 @@ void repeatOperation() {
     }
 }
 
-void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &frame) {
+void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &frame, float confidence) {
     static auto lastTime = chrono::system_clock::from_time_t(0);
     static bool lastPass = false;
     static int consecutiveFailCount = 0;
@@ -453,7 +451,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
             recordInfo.openResult = 0;
             recordInfo.openTime = chrono::system_clock::to_time_t(currentTime);
             recordInfo.faceId = userInfo.faceId;
-            commonOpenDoor(recordInfo);
+            commonOpenDoor(recordInfo, userInfo.userId, confidence);
             consecutiveFailCount = 0;
             playWav(AuthSuccess);
             playWav(userInfo.voiceTemplate);
@@ -494,10 +492,17 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
     lastTime = currentTime;
 }
 
-bool ScheduledTask::commonOpenDoor(const OpenRecordInfo &openRecordInfo) {
+bool ScheduledTask::commonOpenDoor(const OpenRecordInfo &openRecordInfo, const std::string &userId,
+                                   float confidence) {
     openDoor();
     doorOpenSec = 1;
-    CameraFrame::getInstance()->positiveMessage();
+    if (g_showConfUser) {
+        const string preUserId = userId.substr(0, std::min(userId.size(), static_cast<size_t>(5)));
+        const string extraStr = preUserId + " " + to_string(confidence);
+        CameraFrame::getInstance()->positiveMessage(extraStr);
+    } else {
+        CameraFrame::getInstance()->positiveMessage();
+    }
     messageLabelSec = 1;
     return insertOpenRecordDB(openRecordInfo);
 }

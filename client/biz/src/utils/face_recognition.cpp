@@ -602,7 +602,7 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
     }
 
     if (searchResult.id <= 0 || faceUserInfoMap.find(searchResult.id) == faceUserInfoMap.end()) {
-        ScheduledTask::sendFaceRegRes({}, frame);
+        ScheduledTask::sendFaceRegRes({}, frame, 0.0);
         HFReleaseImageStream(stream);
         return;
     }
@@ -611,7 +611,7 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
     logPrintln("Face recognition ret id = " + to_string(searchResult.id)
                + " userId = " + userData.userId + " " + to_string(confidence),
                airstrip::INFO, __FUNCTION__);
-    ScheduledTask::sendFaceRegRes(userData, frame);
+    ScheduledTask::sendFaceRegRes(userData, frame, confidence);
 
     HFReleaseImageStream(stream);
 }

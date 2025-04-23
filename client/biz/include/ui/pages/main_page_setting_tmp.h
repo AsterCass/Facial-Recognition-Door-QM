@@ -49,6 +49,7 @@ private:
 
     QCheckBox *enableFaceSpoof;
     QCheckBox *lightOnlyCheck;
+    QCheckBox *showConfUser;
 
     QLabel *netModelLabel;
     QWidget *netModelWidget;

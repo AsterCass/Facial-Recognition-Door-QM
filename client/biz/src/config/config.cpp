@@ -31,3 +31,4 @@ double g_lightRatio;
 double g_darkRatio;
 int g_faceRegCount;
 int g_taskIvSec;
+int g_showConfUser;

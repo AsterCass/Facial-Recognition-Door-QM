@@ -327,6 +327,22 @@ int main(int argc, char *argv[]) {
                 g_taskIvSec = 600;
             }
         }
+        // update common set v="0" where k="showConfUser";
+        {
+            std::string showConfUser = g_commonDb.getConfig(PRO_DB_SHOW_CONF_USER);
+            if (showConfUser.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_SHOW_CONF_USER, "0");
+                showConfUser = "0";
+            }
+            try {
+                g_showConfUser = stoi(showConfUser);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data showConfUser error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_showConfUser = 0;
+            }
+        }
 
         logPrintln("Db finish", airstrip::INFO, __FUNCTION__);
     }
