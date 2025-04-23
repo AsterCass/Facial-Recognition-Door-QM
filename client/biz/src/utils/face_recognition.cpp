@@ -31,11 +31,23 @@ HFSession faceRecognitionSession = nullptr;
 void closeLight() {
     if (currentIsNight()) {
         logPrintln("To Close light", airstrip::INFO, __FUNCTION__);
-        --g_currentLightLevel;
 
-        ostringstream closeLight;
-        closeLight << "sh " << g_appWorkDir + "script/linux/reset_light.sh 0";
-        airstrip::execCommand(closeLight.str());
+        for (int count = EXPOSE_AND_GAIN_PARAM.size() - 1; count >= 0; count--) {
+            if (EXPOSE_AND_GAIN_PARAM.at(count).at(2) == 0) {
+                ostringstream updateExposeGainCmd;
+                g_currentLightLevel = count;
+                updateExposeGainCmd << "sh " << g_appWorkDir + "script/linux/reset_expose.sh "
+                        << EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(0) << " "
+                        << EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(1) << " && sh "
+                        << g_appWorkDir + "script/linux/reset_light.sh "
+                        << EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(2);
+
+                logPrintln("Current cmd : " + updateExposeGainCmd.str(),
+                           airstrip::DEBUG, __FUNCTION__);
+                airstrip::execCommand(updateExposeGainCmd.str());
+                break;
+            }
+        }
     }
 }
 
@@ -629,7 +641,6 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
     } else {
         ScheduledTask::sendFaceRegRes(userData, frame, confidence);
     }
-    ScheduledTask::sendFaceRegRes(userData, frame, confidence);
 
     HFReleaseImageStream(stream);
 }
