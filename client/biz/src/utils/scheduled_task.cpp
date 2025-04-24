@@ -1,5 +1,6 @@
 #include "utils/scheduled_task.h"
 
+#include <airstrip_thread_pool.h>
 #include <iomanip>
 #include <thread>
 #include <sstream>
@@ -37,7 +38,7 @@ namespace fs = boost::filesystem;
 // Every (30 * 60 * (taskIvCnt + executionTime)) sec
 void updatePersistentData() {
     // todo 这里需要压缩，比较消耗时间，最好放到线程池中执行
-    static int count = 1800;
+    static int count = 1740;
     if (count++ < 1800) return;
     count = 1;
     // Every 22 hour
@@ -86,8 +87,24 @@ void updatePersistentData() {
     }
     // Backup data
     {
+        // todo 增加备份选项
     }
     // Delete system tmp file
+    {
+        const std::time_t cutoff = time - (5 * 24 * 60 * 60);
+        const fs::directory_iterator end_iter;
+        const string dic = "/data/";
+        for (fs::directory_iterator iter(dic); iter != end_iter; ++iter) {
+            if (is_regular_file(iter->status())) {
+                if (iter->path().filename().string().substr(0, 5) == "core-") {
+                    const std::time_t fileTime = last_write_time(iter->path());
+                    if (fileTime < cutoff) {
+                        fs::remove(iter->path());
+                    }
+                }
+            }
+        }
+    }
 }
 
 
@@ -235,7 +252,6 @@ void updateUIMainComponentHeader() {
 
 // Every (5 * (taskIvCnt + executionTime)) sec
 void checkTaskAndExecute() {
-    // todo 这里考虑扔到子线程里面去执行，否则会非常大延长executionTime的时间
     static int count = 1;
     if (count++ < 5) return;
     count = 1;
@@ -245,7 +261,14 @@ void checkTaskAndExecute() {
     static time_t lastTime = 0;
     if (time - lastTime > g_taskIvSec) {
         lastTime = time;
-        checkTask();
+        static bool inTasking = false;
+        if (!inTasking) {
+            inTasking = true;
+            static_cast<ThreadPool *>(g_mainThreadPool)->enqueue([] {
+                checkTask();
+                inTasking = false;
+            });
+        }
     }
 }
 
