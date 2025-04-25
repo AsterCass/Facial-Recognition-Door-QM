@@ -37,7 +37,6 @@ namespace fs = boost::filesystem;
 
 // Every (30 * 60 * (taskIvCnt + executionTime)) sec
 void updatePersistentData() {
-    // todo 这里需要压缩，比较消耗时间，最好放到线程池中执行
     static int count = 1740;
     if (count++ < 1800) return;
     count = 1;
@@ -87,7 +86,9 @@ void updatePersistentData() {
     }
     // Backup data
     {
-        // todo 增加备份选项
+        static_cast<ThreadPool *>(g_mainThreadPool)->enqueue([] {
+            // todo 增加备份上传
+        });
     }
     // Delete system tmp file
     {
