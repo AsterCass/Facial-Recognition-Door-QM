@@ -9,6 +9,12 @@
 #include "enums/general_enums.h"
 #include "opencv2/opencv.hpp"
 
+typedef struct AppUpdateNotification {
+    bool isSuccessful;
+    bool isNeedUpdate;
+    std::string updateVersion;
+    std::string updateUrl;
+} AppUpdateNotification;
 
 // local
 
@@ -35,15 +41,13 @@ void checkTask();
 
 bool faceGrant(const cv::Mat &frame, const std::string &userPhone);
 
-void appUpdate();
+AppUpdateNotification appUpdate();
 
 bool uploadOpenRecord(const std::vector<OpenRecordInfo> &records);
 
 void taskFinish(const std::map<std::string, int> &taskStatusMap);
 
 bool dataBackupUp();
-
-bool dataBackupDown();
 
 
 #endif // API_H

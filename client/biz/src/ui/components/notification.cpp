@@ -14,7 +14,7 @@ Notification::Notification(QWidget *parent): QWidget(parent) {
 Notification::~Notification() = default;
 
 
-void Notification::setMessage(const QString &message) {
-    messageLabel->setText(message);
+void Notification::setMessage(const std::string &message) {
+    messageLabel->setText(QString::fromStdString(message));
     this->show();
 }

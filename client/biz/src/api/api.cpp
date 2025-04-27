@@ -242,11 +242,6 @@ void login() {
         loginJson["deviceVersion"] = APP_VERSION;
         loginJson["timestamp"] = sec;
 
-#ifdef  WIN32
-        const string certPath;
-#else
-    const string certPath = "/etc/ssl/certs/ca-certificates.crt";
-#endif
         const string bodyStr = serialize(loginJson);
         logPrintln("Api login body string = " + bodyStr, airstrip::INFO, __FUNCTION__);
         const auto ret = airstrip::AirstripHttp::sendRequest(
@@ -255,7 +250,7 @@ void login() {
             {},
             bodyStr,
             5,
-            certPath
+            CERT_PATH
         );
 
         if (ret.success) {
@@ -300,12 +295,6 @@ void checkTask() {
     taskListJson["deviceToken"] = token;
     taskListJson["timestamp"] = sec;
 
-
-#ifdef  WIN32
-    const string certPath;
-#else
-    const string certPath = "/etc/ssl/certs/ca-certificates.crt";
-#endif
     const string bodyStr = serialize(taskListJson);
     logPrintln("Api check task body string = " + bodyStr, airstrip::DEBUG, __FUNCTION__);
 
@@ -316,7 +305,7 @@ void checkTask() {
         {},
         bodyStr,
         10,
-        certPath
+        CERT_PATH
     );
 
     try {
@@ -538,12 +527,6 @@ bool faceGrant(const cv::Mat &frame, const std::string &userPhone) {
     faceGrantJson["userPhone"] = userPhone;
     faceGrantJson["facePhoto"] = generalUtils::matToBase64(compressedImage);
 
-
-#ifdef  WIN32
-    const string certPath;
-#else
-    const string certPath = "/etc/ssl/certs/ca-certificates.crt";
-#endif
     const string bodyStr = serialize(faceGrantJson);
     logPrintln("Api face grant request string = " + bodyStr, airstrip::DEBUG, __FUNCTION__);
 
@@ -556,7 +539,7 @@ bool faceGrant(const cv::Mat &frame, const std::string &userPhone) {
             {},
             bodyStr,
             30,
-            certPath
+            CERT_PATH
         );
 
         if (ret.success) {
@@ -598,13 +581,63 @@ bool faceGrant(const cv::Mat &frame, const std::string &userPhone) {
     return faceGrantRet;
 }
 
-void appUpdate() {
+AppUpdateNotification appUpdate() {
     if (token.empty()) {
         login();
         if (token.empty()) {
-            return;
+            return {};
         }
     }
+
+    AppUpdateNotification notification = {};
+
+    try {
+        boost::json::object retObj;
+        retObj["deviceId"] = getSn();
+        retObj["deviceToken"] = token;
+        retObj["deviceVersion"] = APP_VERSION;
+        const string bodyStr = serialize(retObj);
+        logPrintln("Api app update body string = " + bodyStr,
+                   airstrip::DEBUG, __FUNCTION__);
+
+        const auto ret = airstrip::AirstripHttp::sendRequest(
+            g_serverAddress + "/api/v1/doorGuard/zFang/device/pluginUpgrade",
+            airstrip::RequestMethod::POST,
+            {},
+            bodyStr,
+            5,
+            CERT_PATH
+        );
+        if (ret.success) {
+            logPrintln("Ret body ret = " + ret.body,
+                       airstrip::DEBUG, __FUNCTION__);
+            auto parsed = boost::json::parse(ret.body);
+            if (HTTP_CODE_OK == parsed.at("code").as_int64()) {
+                notification.isSuccessful = true;
+                const auto app = parsed.at("data").as_object();
+                const auto url = app.at("deviceVersionUrl").as_string().c_str();
+                const auto version = app.at("deviceVersion").as_string().c_str();
+                if (version != APP_VERSION) {
+                    notification.isNeedUpdate = true;
+                    notification.updateVersion = version;
+                    notification.updateUrl = url;
+                }
+            } else {
+                token = "";
+            }
+        } else {
+            token = "";
+            logPrintln("Ret failed in local",
+                       airstrip::WARN, __FUNCTION__);
+        }
+    } catch (const exception &e) {
+        ostringstream errMsg;
+        errMsg << e.what();
+        logPrintln("Update operation error " + errMsg.str()
+                   , airstrip::ERROR, __FUNCTION__);
+    }
+
+    return notification;
 }
 
 bool uploadOpenRecord(const std::vector<OpenRecordInfo> &records) {
@@ -636,11 +669,6 @@ bool uploadOpenRecord(const std::vector<OpenRecordInfo> &records) {
         }
         retObj["list"] = recordListJsonObj;
 
-#ifdef  WIN32
-        const string certPath;
-#else
-        const string certPath = "/etc/ssl/certs/ca-certificates.crt";
-#endif
         const string bodyStr = serialize(retObj);
         logPrintln("Request body string = " + bodyStr,
                    airstrip::DEBUG, __FUNCTION__);
@@ -650,7 +678,7 @@ bool uploadOpenRecord(const std::vector<OpenRecordInfo> &records) {
             {},
             bodyStr,
             10,
-            certPath
+            CERT_PATH
         );
         if (ret.success) {
             logPrintln("Ret body ret = " + ret.body,
@@ -695,11 +723,6 @@ void taskFinish(const map<string, int> &taskStatusMap) {
         }
         retObj["list"] = tasks;
 
-#ifdef  WIN32
-        const string certPath;
-#else
-        const string certPath = "/etc/ssl/certs/ca-certificates.crt";
-#endif
         const string bodyStr = serialize(retObj);
         logPrintln("Api check task ret body string = " + bodyStr,
                    airstrip::DEBUG, __FUNCTION__);
@@ -709,7 +732,7 @@ void taskFinish(const map<string, int> &taskStatusMap) {
             {},
             bodyStr,
             10,
-            certPath
+            CERT_PATH
         );
         if (ret.success) {
             logPrintln("Api task ret body ret = " + ret.body,
@@ -728,17 +751,6 @@ void taskFinish(const map<string, int> &taskStatusMap) {
 }
 
 bool dataBackupUp() {
-    if (token.empty()) {
-        login();
-        if (token.empty()) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-bool dataBackupDown() {
     if (token.empty()) {
         login();
         if (token.empty()) {

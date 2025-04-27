@@ -59,6 +59,13 @@ constexpr auto MAX_FONT_SIZE = 18;
 constexpr auto MINI_ICON_SIZE = 40;
 #endif
 
+
+#ifdef  WIN32
+constexpr auto CERT_PATH = "";
+#else
+constexpr auto CERT_PATH = "/etc/ssl/certs/ca-certificates.crt";
+#endif
+
 const std::vector<std::vector<int> > EXPOSE_AND_GAIN_PARAM = {
     {10, 64, 0},
     {40, 64, 0},

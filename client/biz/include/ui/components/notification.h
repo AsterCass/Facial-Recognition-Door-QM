@@ -9,7 +9,7 @@ public:
 
     ~Notification() override;
 
-    void setMessage(const QString &message);
+    void setMessage(const std::string& message);
 
 private:
     QLabel *messageLabel = nullptr;

@@ -1,9 +1,12 @@
 #include "ui/pages/main_page_setting_tmp.h"
 
+#include <airstrip_thread_pool.h>
+
 #include "airstrip_log.h"
 #include "ui/main_router.h"
 #include "utils/global_data_manager.h"
 #include <sstream>
+#include <api/api.h>
 #include <boost/json.hpp>
 
 #include "airstrip_command.h"
@@ -269,11 +272,9 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     checkUpdateBtn = new QPushButton("检查更新", scrollContent);
     connect(checkUpdateBtn, &QPushButton::clicked, this,
             [=] {
-#ifdef WIN32
-                logPrintln("Update ...", airstrip::INFO, __FUNCTION__);
-#else
-                //todo
-#endif
+                static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([] {
+                    const auto updateNotification = appUpdate();
+                });
             });
     cancelBtn = new QPushButton("取消", scrollContent);
     connect(cancelBtn, &QPushButton::clicked, this,
