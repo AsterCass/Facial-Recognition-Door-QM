@@ -364,7 +364,7 @@ void faceTest() {
                     logPrintln("Test image start" + absolutePath, INFO, __FUNCTION__);
 #ifndef WIN32
                     const auto imageTest = cv::imread(absolutePath);
-                    faceRecognition(imageTest, cv::Rect(0, 0, imageTest.cols, imageTest.rows))
+                    faceRecognition(imageTest, cv::Rect(0, 0, imageTest.cols, imageTest.rows));
 #endif
                 }
             }
