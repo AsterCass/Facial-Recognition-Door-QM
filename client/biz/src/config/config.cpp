@@ -13,6 +13,9 @@ bool g_onFaceRegisterProcess = false;
 
 int g_currentLightLevel = 13;
 
+std::string g_prepareUpdateUrl;
+std::string g_prepareUpdateVersion;
+
 airstrip::CommonBackendConfigDbManager g_commonDb;
 
 std::string g_appWorkDir;

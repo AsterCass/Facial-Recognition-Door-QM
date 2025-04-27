@@ -42,6 +42,12 @@ void MainRouter::hideFaceRegister() const {
     }
 }
 
+void MainRouter::mainNotificationShow(const std::string &text, const std::function<void(bool)> &callback) const {
+    if (nullptr != notification) {
+        notification->setMessage(text, callback);
+    }
+}
+
 
 void MainRouter::addPage(const MainPage page) const {
     if (nullptr == stackedWidget) return;

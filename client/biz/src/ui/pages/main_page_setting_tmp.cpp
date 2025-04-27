@@ -15,6 +15,45 @@
 
 using namespace std;
 
+std::string checkExtension(const std::string &filename) {
+    if (filename.size() >= 4 && filename.compare(filename.size() - 4, 4, ".zip") == 0) {
+        return ".zip";
+    }
+    if (filename.size() >= 7 && filename.compare(filename.size() - 7, 7, ".tar.gz") == 0) {
+        return ".tar.gz";
+    }
+    if (filename.size() >= 4 && filename.compare(filename.size() - 4, 4, ".tar") == 0) {
+        return ".tar";
+    }
+    return "";
+}
+
+void updateVersion(const bool confirm) {
+    if (!confirm) {
+        return;
+    }
+    logPrintln("Prepare to update ...", airstrip::INFO, __FUNCTION__);
+
+    std::ostringstream oss;
+    oss << "sh " << g_appWorkDir << "script/linux/update.sh";
+
+    const auto suffix = checkExtension(g_prepareUpdateUrl);
+    if (suffix.empty() || g_prepareUpdateVersion.empty()) {
+        logPrintln(
+            "Update not support for url: " + g_prepareUpdateUrl + " version: " + g_prepareUpdateVersion,
+            airstrip::INFO, __FUNCTION__
+        );
+        return;
+    }
+
+    oss << " " << g_appWorkDir << "app-" << g_prepareUpdateVersion << suffix << " " << g_prepareUpdateUrl;
+
+    logPrintln("Update command : " + oss.str(), airstrip::INFO, __FUNCTION__);
+#ifndef WIN32
+    airstrip::execCommandNoReturn(oss.str());
+#endif
+}
+
 MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     // Layout
     mainLayout = new QVBoxLayout(this);
@@ -274,6 +313,23 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
             [=] {
                 static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([] {
                     const auto updateNotification = appUpdate();
+                    if (!updateNotification.isSuccessful) {
+                        MainRouter::getInstance()->
+                                mainNotificationShow("获取版本信息失败，请稍后再试",
+                                                     bind(updateVersion, false));
+                    } else if (!updateNotification.isNeedUpdate) {
+                        MainRouter::getInstance()->
+                                mainNotificationShow("当前版本已经是最新版本，无需升级",
+                                                     bind(updateVersion, false));
+                    } else {
+                        g_prepareUpdateVersion = updateNotification.updateVersion;
+                        g_prepareUpdateUrl = updateNotification.updateUrl;
+                        MainRouter::getInstance()->
+                                mainNotificationShow(
+                                    "检测到最新版本：" + updateNotification.updateVersion + "，是否现在升级？",
+                                    bind(updateVersion, std::placeholders::_1)
+                                );
+                    }
                 });
             });
     cancelBtn = new QPushButton("取消", scrollContent);

@@ -1,17 +1,14 @@
 #!/bin/bash
 
-usage() {
-    echo "Usage: $0 <Compress File>"
-    echo "Support formate: zip, gz, tar, tar.gz, tgz"
+if [ $# -ne 2 ]; then
+    echo "Param error"
     exit 1
-}
-
-
-if [ $# -ne 1 ]; then
-    usage
 fi
 
 FILE="$1"
+URL="$2"
+
+wget -O "$FILE" "$URL"
 
 if [ ! -f "$FILE" ]; then
     echo "Error: File '$FILE' not exist"
@@ -44,5 +41,8 @@ case "$FILE" in
         exit 1
         ;;
 esac
+
+/etc/init.d/S99zplay stop
+reboot
 
 exit 0

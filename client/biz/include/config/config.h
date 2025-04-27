@@ -6,7 +6,7 @@
 #include <airstrip_db.h>
 
 // const
-constexpr auto APP_VERSION = "3.0.0";
+constexpr auto APP_VERSION = "3.0.13";
 constexpr int HTTP_CODE_OK = 200;
 constexpr auto ENV_DEV = "dev";
 constexpr auto ENV_PROD = "prod";
@@ -100,6 +100,9 @@ extern bool g_closeFaceRecognition;
 extern bool g_onFaceRegisterProcess;
 
 extern int g_currentLightLevel;
+
+extern std::string g_prepareUpdateUrl;
+extern std::string g_prepareUpdateVersion;
 
 extern airstrip::CommonBackendConfigDbManager g_commonDb;
 

@@ -616,10 +616,10 @@ AppUpdateNotification appUpdate() {
                 notification.isSuccessful = true;
                 const auto app = parsed.at("data").as_object();
                 const auto url = app.at("deviceVersionUrl").as_string().c_str();
-                const auto version = app.at("deviceVersion").as_string().c_str();
+                const auto version = app.at("deviceVersion").as_string();
                 if (version != APP_VERSION) {
                     notification.isNeedUpdate = true;
-                    notification.updateVersion = version;
+                    notification.updateVersion = version.c_str();
                     notification.updateUrl = url;
                 }
             } else {
