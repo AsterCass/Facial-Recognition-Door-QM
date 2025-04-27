@@ -6,7 +6,7 @@
 #include <airstrip_db.h>
 
 // const
-constexpr auto APP_VERSION = "3.0.15";
+constexpr auto APP_VERSION = "3.0.18";
 constexpr int HTTP_CODE_OK = 200;
 constexpr auto ENV_DEV = "dev";
 constexpr auto ENV_PROD = "prod";

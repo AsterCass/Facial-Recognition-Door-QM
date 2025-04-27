@@ -42,6 +42,8 @@ case "$FILE" in
         ;;
 esac
 
+chmod 755 /data/frd/bin/*
+
 /etc/init.d/S99zplay stop
 reboot
 
