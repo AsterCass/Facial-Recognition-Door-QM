@@ -39,6 +39,12 @@ private:
     QLineEditPro *faceRegCount;
     QLabel *taskIvSecLabel;
     QLineEditPro *taskIvSec;
+    QLabel *camExposeLabel;
+    QLineEditPro *camExpose;
+    QLabel *camGainLabel;
+    QLineEditPro *camGain;
+    QLabel *camLightLabel;
+    QLineEditPro *camLight;
 
 
     QLabel *faceDistantLabel;
@@ -52,6 +58,7 @@ private:
     QCheckBox *enableFaceSpoof;
     QCheckBox *lightOnlyCheck;
     QCheckBox *showConfUser;
+    QCheckBox *camAutoLight;
 
     QLabel *netModelLabel;
     QWidget *netModelWidget;

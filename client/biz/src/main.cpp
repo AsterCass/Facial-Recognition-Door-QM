@@ -359,6 +359,70 @@ int main(int argc, char *argv[]) {
                 g_showConfUser = 0;
             }
         }
+        // update common set v="1" where k="camAutoLight";
+        {
+            std::string camAutoLight = g_commonDb.getConfig(PRO_DB_CAM_AUTO_LIGHT);
+            if (camAutoLight.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_CAM_AUTO_LIGHT, "1");
+                camAutoLight = "1";
+            }
+            try {
+                g_camAutoLight = stoi(camAutoLight);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data camAutoLight error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_camAutoLight = 1;
+            }
+        }
+        // update common set v="800" where k="camExpose";
+        {
+            std::string camExpose = g_commonDb.getConfig(PRO_DB_CAM_EXPOSE);
+            if (camExpose.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_CAM_EXPOSE, "800");
+                camExpose = "800";
+            }
+            try {
+                g_camExpose = stoi(camExpose);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data camExpose error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_camExpose = 800;
+            }
+        }
+        // update common set v="64" where k="camGain";
+        {
+            std::string camGain = g_commonDb.getConfig(PRO_DB_CAM_GAIN);
+            if (camGain.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_CAM_GAIN, "64");
+                camGain = "64";
+            }
+            try {
+                g_camGain = stoi(camGain);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data camGain error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_camGain = 64;
+            }
+        }
+        // update common set v="0" where k="camLight";
+        {
+            std::string camLight = g_commonDb.getConfig(PRO_DB_CAM_LIGHT);
+            if (camLight.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_CAM_LIGHT, "0");
+                camLight = "0";
+            }
+            try {
+                g_camLight = stoi(camLight);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data camLight error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_camLight = 0;
+            }
+        }
 
         logPrintln("Db finish", airstrip::INFO, __FUNCTION__);
     }

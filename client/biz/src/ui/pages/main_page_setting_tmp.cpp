@@ -8,6 +8,7 @@
 #include <sstream>
 #include <api/api.h>
 #include <boost/json.hpp>
+#include <utils/face_recognition.h>
 
 #include "airstrip_command.h"
 #include "config/config.h"
@@ -125,6 +126,12 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     faceRegCount = new QLineEditPro(scrollContent);
     taskIvSecLabel = new QLabel("获取任务间隔秒数（最小为5）：", scrollContent);
     taskIvSec = new QLineEditPro(scrollContent);
+    camExposeLabel = new QLabel("摄像头曝光量（需禁用自动调光，范围 1-1121）：", scrollContent);
+    camExpose = new QLineEditPro(scrollContent);
+    camGainLabel = new QLabel("摄像头进光量（需禁用自动调光，范围 64-8192）：", scrollContent);
+    camGain = new QLineEditPro(scrollContent);
+    camLightLabel = new QLabel("补光灯亮度（需禁用自动调光，范围 0-255）：", scrollContent);
+    camLight = new QLineEditPro(scrollContent);
 
 
     faceDistantLabel = new QLabel("人脸识别距离：", scrollContent);;
@@ -174,6 +181,7 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     enableFaceSpoof = new QCheckBox("活体验证（仅供调试，用户需开启）", scrollContent);
     lightOnlyCheck = new QCheckBox("仅在核验时开启补光灯", scrollContent);
     showConfUser = new QCheckBox("核验通过显示用户名和置信", scrollContent);
+    camAutoLight = new QCheckBox("自动调光（仅供调试，用户需开启）", scrollContent);
 
     ipWiredLabel = new QLabel("有线IP地址：", scrollContent);
     ipWirelessLabel = new QLabel("无线IP地址：", scrollContent);
@@ -293,6 +301,44 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
                         g_commonDb.upsertConfig(
                             PRO_DB_SHOW_CONF_USER, to_string(g_showConfUser));
                     }
+
+                    // Light
+                    {
+                        bool changeLightProperty = false;
+                        const auto newCamAutoLight = camAutoLight->isChecked() ? 1 : 0;
+                        if (g_camAutoLight != newCamAutoLight) {
+                            changeLightProperty = true;
+                            g_camAutoLight = newCamAutoLight;
+                            g_commonDb.upsertConfig(
+                                PRO_DB_CAM_AUTO_LIGHT, to_string(g_camAutoLight));
+                        }
+
+                        const auto newCamExpose = camExpose->text().trimmed().toInt();
+                        if (g_camExpose != newCamExpose) {
+                            changeLightProperty = true;
+                            g_camExpose = newCamExpose;
+                            g_commonDb.upsertConfig(PRO_DB_CAM_EXPOSE, to_string(g_camExpose));
+                        }
+                        const auto newCamGain = camGain->text().trimmed().toInt();
+                        if (g_camGain != newCamGain) {
+                            changeLightProperty = true;
+                            g_camGain = newCamGain;
+                            g_commonDb.upsertConfig(PRO_DB_CAM_GAIN, to_string(g_camGain));
+                        }
+                        const auto newCamLight = camLight->text().trimmed().toInt();
+                        if (g_camLight != newCamLight) {
+                            changeLightProperty = true;
+                            g_camLight = newCamLight;
+                            g_commonDb.upsertConfig(PRO_DB_CAM_LIGHT, to_string(g_camLight));
+                        }
+
+                        // update
+                        if (changeLightProperty && !g_camAutoLight) {
+#ifndef WIN32
+                            updateLight(g_camExpose, g_camGain, g_camLight);
+#endif
+                        }
+                    }
                 } catch (const std::exception &e) {
                     ostringstream errMsg;
                     errMsg << "Save config data error :" << e.what();
@@ -351,6 +397,12 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     scrollerAreaLayout->addWidget(faceRegCount);
     scrollerAreaLayout->addWidget(taskIvSecLabel);
     scrollerAreaLayout->addWidget(taskIvSec);
+    scrollerAreaLayout->addWidget(camExposeLabel);
+    scrollerAreaLayout->addWidget(camExpose);
+    scrollerAreaLayout->addWidget(camGainLabel);
+    scrollerAreaLayout->addWidget(camGain);
+    scrollerAreaLayout->addWidget(camLightLabel);
+    scrollerAreaLayout->addWidget(camLight);
 
 
     scrollerAreaLayout->addWidget(faceDistantLabel);
@@ -376,6 +428,7 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     scrollerAreaLayout->addWidget(enableFaceSpoof);
     scrollerAreaLayout->addWidget(lightOnlyCheck);
     scrollerAreaLayout->addWidget(showConfUser);
+    scrollerAreaLayout->addWidget(camAutoLight);
 
     scrollerAreaLayout->addWidget(ipWiredLabel);
     scrollerAreaLayout->addWidget(ipWirelessLabel);
@@ -395,6 +448,7 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     enableFaceSpoof->setCheckState(g_enableFaceSpoof ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     lightOnlyCheck->setCheckState(g_lightOnlyCheck ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     showConfUser->setCheckState(g_showConfUser ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+    camAutoLight->setCheckState(g_camAutoLight ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     netModelGroup->button(g_netModel)->setChecked(true);
     wifiAccount->setText(QString::fromStdString(g_wifiAccount));
     wifiPasswdEdit->setText(QString::fromStdString(g_wifiPasswd));
@@ -404,6 +458,9 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     darkRatioInput->setText(QString::number(g_darkRatio));
     faceRegCount->setText(QString::number(g_faceRegCount));
     taskIvSec->setText(QString::number(g_taskIvSec));
+    camExpose->setText(QString::number(g_camExpose));
+    camGain->setText(QString::number(g_camGain));
+    camLight->setText(QString::number(g_camLight));
 
 
     // Connect

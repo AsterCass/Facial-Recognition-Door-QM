@@ -38,3 +38,7 @@ double g_darkRatio;
 int g_faceRegCount;
 int g_taskIvSec;
 int g_showConfUser;
+int g_camAutoLight;
+int g_camExpose;
+int g_camGain;
+int g_camLight;

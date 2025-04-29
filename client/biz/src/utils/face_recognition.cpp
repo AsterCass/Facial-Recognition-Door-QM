@@ -27,24 +27,31 @@ std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
 
 HFSession faceRecognitionSession = nullptr;
 
+void updateLight(int expose, int gain, int light) {
+    ostringstream updateExposeGainCmd;
+    updateExposeGainCmd << "sh " << g_appWorkDir + "script/linux/reset_expose.sh "
+            << expose << " "
+            << gain << " && sh "
+            << g_appWorkDir + "script/linux/reset_light.sh "
+            << light;
+
+
+    logPrintln("Current cmd : " + updateExposeGainCmd.str(),
+               airstrip::DEBUG, __FUNCTION__);
+    airstrip::execCommand(updateExposeGainCmd.str());
+}
+
 
 void closeLight() {
-    if (currentIsNight()) {
+    if (currentIsNight() && g_camAutoLight) {
         logPrintln("To Close light", airstrip::INFO, __FUNCTION__);
 
         for (int count = EXPOSE_AND_GAIN_PARAM.size() - 1; count >= 0; count--) {
             if (EXPOSE_AND_GAIN_PARAM.at(count).at(2) == 0) {
-                ostringstream updateExposeGainCmd;
                 g_currentLightLevel = count;
-                updateExposeGainCmd << "sh " << g_appWorkDir + "script/linux/reset_expose.sh "
-                        << EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(0) << " "
-                        << EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(1) << " && sh "
-                        << g_appWorkDir + "script/linux/reset_light.sh "
-                        << EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(2);
-
-                logPrintln("Current cmd : " + updateExposeGainCmd.str(),
-                           airstrip::DEBUG, __FUNCTION__);
-                airstrip::execCommand(updateExposeGainCmd.str());
+                updateLight(EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(0),
+                            EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(1),
+                            EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(2));
                 break;
             }
         }
@@ -53,6 +60,10 @@ void closeLight() {
 
 
 void updateExposeAndGain(const bool isUp) {
+    if (!g_camAutoLight) {
+        return;
+    }
+
     logPrintln("Current level is " + to_string(g_currentLightLevel) +
                " want to up " + to_string(isUp), airstrip::INFO, __FUNCTION__);
 
@@ -67,18 +78,9 @@ void updateExposeAndGain(const bool isUp) {
             --g_currentLightLevel;
         }
     }
-
-    ostringstream updateExposeGainCmd;
-    updateExposeGainCmd << "sh " << g_appWorkDir + "script/linux/reset_expose.sh "
-            << EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(0) << " "
-            << EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(1) << " && sh "
-            << g_appWorkDir + "script/linux/reset_light.sh "
-            << EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(2);
-
-
-    logPrintln("Current cmd : " + updateExposeGainCmd.str(),
-               airstrip::DEBUG, __FUNCTION__);
-    airstrip::execCommand(updateExposeGainCmd.str());
+    updateLight(EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(0),
+                EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(1),
+                EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(2));
 }
 
 
