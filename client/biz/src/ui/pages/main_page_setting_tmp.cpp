@@ -126,11 +126,14 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     faceRegCount = new QLineEditPro(scrollContent);
     taskIvSecLabel = new QLabel("获取任务间隔秒数（最小为5）：", scrollContent);
     taskIvSec = new QLineEditPro(scrollContent);
-    camExposeLabel = new QLabel("摄像头曝光量（需禁用自动调光，范围 1-1121）：", scrollContent);
+    camExposeLabel = new QLabel("摄像头曝光量（需禁用自动调光，范围 1-1121，默认1121）：", scrollContent);
+    camExposeLabel->setWordWrap(true);
     camExpose = new QLineEditPro(scrollContent);
-    camGainLabel = new QLabel("摄像头进光量（需禁用自动调光，范围 64-8192）：", scrollContent);
+    camGainLabel = new QLabel("摄像头进光量（需禁用自动调光，范围 64-300，默认64）：", scrollContent);
+    camGainLabel->setWordWrap(true);
     camGain = new QLineEditPro(scrollContent);
-    camLightLabel = new QLabel("补光灯亮度（需禁用自动调光，范围 0-255）：", scrollContent);
+    camLightLabel = new QLabel("补光灯亮度（需禁用自动调光，范围 0-255，默认0）：", scrollContent);
+    camLightLabel->setWordWrap(true);
     camLight = new QLineEditPro(scrollContent);
 
 
