@@ -17,6 +17,7 @@
     `sqlite3 /data/frd/db/common.db "update common set v='123456' where k='managementPassword';"`
     `sqlite3 /data/frd/db/common.db "update common set v='adbcde' where k='signId';"`
     改完之后再次重启
+13. 根据需求更改其他配置，比如获取任务时间间隔（同时影响断网/重连之后右上角云图标的反馈）等
 
 ## 注意事项
 
