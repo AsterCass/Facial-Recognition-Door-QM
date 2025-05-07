@@ -9,7 +9,7 @@ CMakeLists.txt.user
 
 ### C++ ###
 # Prerequisites
-*.d
+#*.d
 
 # Compiled Object files
 *.slo

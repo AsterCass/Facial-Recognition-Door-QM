@@ -1,0 +1,16 @@
+#!/bin/sh
+
+case "$1" in
+  start)
+    rm -rf /data/frp/log.txt
+    /data/frp/frpc -c /data/frp/frpc.toml >> /data/frp/log.txt 2>&1 &
+    ;;
+  stop)
+    killall frpc
+    ;;
+  *)
+    echo "Usage: $0 {start|stop}"
+    exit 1
+    ;;
+esac
+exit 0

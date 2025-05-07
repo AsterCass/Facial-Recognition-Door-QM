@@ -1,0 +1,12 @@
+serverAddr = "8.8.8.8"
+serverPort = 8000
+
+loginFailExit = false
+
+[[proxies]]
+name = "test"
+type = "tcpmux"
+multiplexer = "httpconnect"
+customDomains = ["test.domin.com"]
+localIP = "127.0.0.1"
+localPort = 22
