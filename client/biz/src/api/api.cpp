@@ -765,8 +765,7 @@ bool dataBackupUp(const std::string &fileBase64) {
         retObj["backupBase64"] = fileBase64;
 
         const string bodyStr = serialize(retObj);
-        logPrintln("Data backup body string = " + bodyStr,
-                   airstrip::DEBUG, __FUNCTION__);
+        // logPrintln("Data backup body string = " + bodyStr, airstrip::DEBUG, __FUNCTION__);
         const auto ret = airstrip::AirstripHttp::sendRequest(
             g_serverAddress + "/api/v1/doorGuard/zFang/device/uploadBackup",
             airstrip::RequestMethod::POST,

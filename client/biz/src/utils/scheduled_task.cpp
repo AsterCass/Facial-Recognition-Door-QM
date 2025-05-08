@@ -90,13 +90,14 @@ void updatePersistentData() {
     }
     // Backup data
     {
+        logPrintln("Start backup data thread");
         static_cast<ThreadPool *>(g_mainThreadPool)->enqueue([] {
             logPrintln("Start backup data");
 #ifndef WIN32
             execScript(g_appWorkDir + "script/linux/backup.sh ");
 #endif
             logPrintln("Got backup data");
-#ifndef WIN32x
+#ifndef WIN32
             const auto fileBase64 = generalUtils::fileToBase64(g_appWorkDir + "frd.bk.tar.gz");
             dataBackupUp(fileBase64);
 #endif
