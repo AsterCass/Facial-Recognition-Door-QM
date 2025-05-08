@@ -3,10 +3,29 @@
 #include <airstrip_log.h>
 #include <boost/beast/core/detail/base64.hpp>
 
+#include <boost/filesystem.hpp>
+#include <fstream>
+#include <vector>
+
 
 using namespace std;
 
 namespace generalUtils {
+    std::string fileToBase64(const std::string &filepath) {
+        std::ifstream file(filepath, std::ios::binary);
+        if (!file) return "";
+
+        const std::vector<unsigned char> buffer((std::istreambuf_iterator<char>(file)),
+                                                std::istreambuf_iterator<char>());
+
+        std::string out;
+        out.resize(boost::beast::detail::base64::encoded_size(buffer.size()));
+
+        boost::beast::detail::base64::encode(&out[0], buffer.data(), buffer.size());
+        return out;
+    }
+
+
     std::vector<uchar> decodeBase64(const std::string &base64String) {
         std::vector<uchar> decoded;
         // 计算解码后的大小

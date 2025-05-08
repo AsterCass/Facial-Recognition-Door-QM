@@ -750,12 +750,46 @@ void taskFinish(const map<string, int> &taskStatusMap) {
     }
 }
 
-bool dataBackupUp() {
+bool dataBackupUp(const std::string &fileBase64) {
     if (token.empty()) {
         login();
         if (token.empty()) {
             return false;
         }
+    }
+
+    try {
+        boost::json::object retObj;
+        retObj["deviceId"] = getSn();
+        retObj["deviceToken"] = token;
+        retObj["backupBase64"] = fileBase64;
+
+        const string bodyStr = serialize(retObj);
+        logPrintln("Data backup body string = " + bodyStr,
+                   airstrip::DEBUG, __FUNCTION__);
+        const auto ret = airstrip::AirstripHttp::sendRequest(
+            g_serverAddress + "/api/v1/doorGuard/zFang/device/uploadBackup",
+            airstrip::RequestMethod::POST,
+            {},
+            bodyStr,
+            20,
+            CERT_PATH
+        );
+        if (ret.success) {
+            logPrintln("Data backup ret = " + ret.body,
+                       airstrip::DEBUG, __FUNCTION__);
+        } else {
+            token = "";
+            logPrintln("Data backup failed in local",
+                       airstrip::WARN, __FUNCTION__);
+            return false;
+        }
+    } catch (const exception &e) {
+        ostringstream errMsg;
+        errMsg << e.what();
+        logPrintln("Data backup error " + errMsg.str()
+                   , airstrip::ERROR, __FUNCTION__);
+        return false;
     }
 
     return true;

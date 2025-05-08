@@ -47,7 +47,7 @@ bool uploadOpenRecord(const std::vector<OpenRecordInfo> &records);
 
 void taskFinish(const std::map<std::string, int> &taskStatusMap);
 
-bool dataBackupUp();
+bool dataBackupUp(const std::string &fileBase64);
 
 
 #endif // API_H

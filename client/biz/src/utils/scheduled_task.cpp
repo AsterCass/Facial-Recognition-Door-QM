@@ -62,6 +62,8 @@ void updatePersistentData() {
                 if (iter->path().extension() == ".jpg") {
                     const std::time_t fileTime = last_write_time(iter->path());
                     if (fileTime < cutoff) {
+                        logPrintln("Delete file: " + iter->path().string(),
+                                   INFO, __FUNCTION__);
                         fs::remove(iter->path());
                     }
                 }
@@ -78,6 +80,8 @@ void updatePersistentData() {
                 if (iter->path().extension() == ".dmp") {
                     const std::time_t fileTime = last_write_time(iter->path());
                     if (fileTime < cutoff) {
+                        logPrintln("Delete file: " + iter->path().string(),
+                                   INFO, __FUNCTION__);
                         fs::remove(iter->path());
                     }
                 }
@@ -87,7 +91,16 @@ void updatePersistentData() {
     // Backup data
     {
         static_cast<ThreadPool *>(g_mainThreadPool)->enqueue([] {
-            // todo 增加备份上传
+            logPrintln("Start backup data");
+#ifndef WIN32
+            execScript(g_appWorkDir + "script/linux/backup.sh ");
+#endif
+            logPrintln("Got backup data");
+#ifndef WIN32x
+            const auto fileBase64 = generalUtils::fileToBase64(g_appWorkDir + "frd.bk.tar.gz");
+            dataBackupUp(fileBase64);
+#endif
+            logPrintln("Backup data finish");
         });
     }
     // Delete system tmp file
@@ -100,11 +113,16 @@ void updatePersistentData() {
                 if (iter->path().filename().string().substr(0, 5) == "core-") {
                     const std::time_t fileTime = last_write_time(iter->path());
                     if (fileTime < cutoff) {
+                        logPrintln("Delete file: " + iter->path().string(),
+                                   INFO, __FUNCTION__);
                         fs::remove(iter->path());
                     }
                 }
             }
         }
+    }
+    // Delete user face deleted in server
+    {
     }
 }
 
