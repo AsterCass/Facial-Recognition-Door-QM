@@ -122,9 +122,6 @@ void updatePersistentData() {
             }
         }
     }
-    // Delete user face deleted in server
-    {
-    }
 }
 
 
