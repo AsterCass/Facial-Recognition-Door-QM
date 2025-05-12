@@ -9,6 +9,7 @@ cp -rf /data/frd/script /tmp/frd/script
 cp -rf /data/frd/log.txt /tmp/frd/log.txt
 
 cd /tmp
-tar -czvf frd.bk.tar.gz frd/bin frd/db frd/dump frd/log frd/script frd/log.txt
+tar -cf frd.bk.tar frd/bin frd/db frd/dump frd/log frd/script frd/log.txt
+gzip frd.bk.tar
 mv frd.bk.tar.gz /data/frd/
 rm -rf /tmp/frd

@@ -26,7 +26,10 @@ case "$FILE" in
     *.gz)
         if [[ "$FILE" == *.tar.gz || "$FILE" == *.tgz ]]; then
             echo "Tar.gz file: $FILE"
-            tar -xzf "$FILE" -C "$DIR"
+            TMP_FILE="${FILE%.gz}"
+            gzip -d -c "$FILE" > "$TMP_FILE"
+            tar -xf "$TMP_FILE" -C "$DIR"
+            rm "$TMP_FILE"
         else
             BASENAME=$(basename "$FILE" .gz)
             gunzip -c "$FILE" > "$DIR/$BASENAME"
