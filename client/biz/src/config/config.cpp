@@ -43,3 +43,5 @@ int g_camExpose;
 int g_camGain;
 int g_camLight;
 int g_fullFaceCompare;
+int g_faceRegIvSec;
+int g_faceRegCoreIvMillSec;

@@ -507,8 +507,8 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
         lastPass = true;
     } else {
         static auto lastFailTime = chrono::system_clock::from_time_t(0);
-        if ((currentTime - lastFailTime).count() > 3) {
-            if (chrono::duration_cast<std::chrono::seconds>(currentTime - lastFailTime).count() < 5) {
+        if ((currentTime - lastFailTime).count() > g_faceRegIvSec) {
+            if (chrono::duration_cast<std::chrono::seconds>(currentTime - lastFailTime).count() < 6) {
                 ostringstream oss;
                 oss << g_appWorkDir << "log-face/" <<
                         put_time(localtime(&currentTimeSec), "%Y-%m-%d-%H-%M-%S") << "-Fail" << ".jpg";

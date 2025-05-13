@@ -74,7 +74,9 @@ void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
         faceRecognition(frameRga, rect);
     }
 
-    usleep(500 * 1000);
+    if (g_faceRegCoreIvMillSec >= 0) {
+        usleep(g_faceRegCoreIvMillSec * 1000);
+    }
 
     delete [] s_irFrame;
     delete [] s_rgaFrame;

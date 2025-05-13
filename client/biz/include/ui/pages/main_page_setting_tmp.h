@@ -7,7 +7,6 @@
 #include <QWidget>
 #include <QScrollArea>
 #include <QRadioButton>
-#include <QButtonGroup>
 #include <QCheckBox>
 
 #include "ui/components/common_components.h"
@@ -39,6 +38,10 @@ private:
     QLineEditPro *faceRegCount;
     QLabel *taskIvSecLabel;
     QLineEditPro *taskIvSec;
+    QLabel *faceRegIvSecLabel;
+    QLineEditPro *faceRegIvSec;
+    QLabel *faceRegCoreIvMillSecLabel;
+    QLineEditPro *faceRegCoreIvMillSec;
     QLabel *camExposeLabel;
     QLineEditPro *camExpose;
     QLabel *camGainLabel;

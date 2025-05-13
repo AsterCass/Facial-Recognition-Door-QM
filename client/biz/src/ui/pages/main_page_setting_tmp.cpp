@@ -123,10 +123,15 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     fullFaceCompare = new QCheckBox("核验人脸全量比对（重启生效）", scrollContent);
     volLabel = new QLabel("设备音量（0 - 100）：", scrollContent);
     vol = new QLineEditPro(scrollContent);
+    faceRegCoreIvMillSecLabel = new QLabel("机器识别超频（0-1000，推荐 500）（0为极致超频，高温下可能会过热关机）：", scrollContent);
+    faceRegCoreIvMillSecLabel->setWordWrap(true);
+    faceRegCoreIvMillSec = new QLineEditPro(scrollContent);
     faceRegCountLabel = new QLabel("失败N次触发人脸信息验证：", scrollContent);
     faceRegCount = new QLineEditPro(scrollContent);
     taskIvSecLabel = new QLabel("获取任务间隔秒数（最小为5）：", scrollContent);
     taskIvSec = new QLineEditPro(scrollContent);
+    faceRegIvSecLabel = new QLabel("N秒内不重复识别：", scrollContent);
+    faceRegIvSec = new QLineEditPro(scrollContent);
     camExposeLabel = new QLabel("摄像头曝光量（需禁用自动调光，范围 1-1121，默认1121）：", scrollContent);
     camExposeLabel->setWordWrap(true);
     camExpose = new QLineEditPro(scrollContent);
@@ -344,12 +349,24 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
                         }
                     }
 
-                    // Face compare
                     const auto newFullFaceCompare = fullFaceCompare->isChecked() ? 1 : 0;
                     if (g_fullFaceCompare != newFullFaceCompare) {
                         g_fullFaceCompare = newFullFaceCompare;
                         g_commonDb.upsertConfig(
                             PRO_DB_FULL_FACE_COMPARE, to_string(g_fullFaceCompare));
+                    }
+
+                    const auto newFaceRegIvSec = faceRegIvSec->text().trimmed().toInt();
+                    if (g_faceRegIvSec != newFaceRegIvSec) {
+                        g_faceRegIvSec = newFaceRegIvSec;
+                        g_commonDb.upsertConfig(PRO_DB_FACE_REG_IV_SEC, to_string(g_faceRegIvSec));
+                    }
+
+                    const auto newFaceRegCoreIvMillSec = faceRegCoreIvMillSec->text().trimmed().toInt();
+                    if (g_faceRegCoreIvMillSec != newFaceRegCoreIvMillSec) {
+                        g_faceRegCoreIvMillSec = newFaceRegCoreIvMillSec;
+                        g_commonDb.upsertConfig(
+                            PRO_DB_FACE_REG_IV_SEC, to_string(g_faceRegCoreIvMillSec));
                     }
                 } catch (const std::exception &e) {
                     ostringstream errMsg;
@@ -399,6 +416,8 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
 
     scrollerAreaLayout->addWidget(serverAddressLabel);
     scrollerAreaLayout->addWidget(serverAddress);
+    scrollerAreaLayout->addWidget(faceRegCoreIvMillSecLabel);
+    scrollerAreaLayout->addWidget(faceRegCoreIvMillSec);
     scrollerAreaLayout->addWidget(faceThresholdLabel);
     scrollerAreaLayout->addWidget(faceThreshold);
     scrollerAreaLayout->addWidget(faceThresholdNightLabel);
@@ -410,6 +429,8 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     scrollerAreaLayout->addWidget(faceRegCount);
     scrollerAreaLayout->addWidget(taskIvSecLabel);
     scrollerAreaLayout->addWidget(taskIvSec);
+    scrollerAreaLayout->addWidget(faceRegIvSecLabel);
+    scrollerAreaLayout->addWidget(faceRegIvSec);
     scrollerAreaLayout->addWidget(camExposeLabel);
     scrollerAreaLayout->addWidget(camExpose);
     scrollerAreaLayout->addWidget(camGainLabel);
@@ -472,9 +493,11 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     darkRatioInput->setText(QString::number(g_darkRatio));
     faceRegCount->setText(QString::number(g_faceRegCount));
     taskIvSec->setText(QString::number(g_taskIvSec));
+    faceRegIvSec->setText(QString::number(g_faceRegIvSec));
     camExpose->setText(QString::number(g_camExpose));
     camGain->setText(QString::number(g_camGain));
     camLight->setText(QString::number(g_camLight));
+    faceRegCoreIvMillSec->setText(QString::number(g_faceRegCoreIvMillSec));
 
 
     // Connect
