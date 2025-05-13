@@ -7,6 +7,7 @@
 #include <QWidget>
 #include <QScrollArea>
 #include <QRadioButton>
+#include <QButtonGroup>
 #include <QCheckBox>
 
 #include "ui/components/common_components.h"
