@@ -6,7 +6,7 @@
 #include <airstrip_db.h>
 
 // const
-constexpr auto APP_VERSION = "3.0.18";
+constexpr auto APP_VERSION = "3.1.0";
 constexpr int HTTP_CODE_OK = 200;
 constexpr auto ENV_DEV = "dev";
 constexpr auto ENV_PROD = "prod";
@@ -42,6 +42,7 @@ constexpr auto PRO_DB_CAM_AUTO_LIGHT = "camAutoLight";
 constexpr auto PRO_DB_CAM_EXPOSE = "camExpose";
 constexpr auto PRO_DB_CAM_GAIN = "camGain";
 constexpr auto PRO_DB_CAM_LIGHT = "camLight";
+constexpr auto PRO_DB_FULL_FACE_COMPARE = "fullFaceCompare";
 
 const std::vector<std::string> CHINESE_WEEK = {
     "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日",
@@ -134,6 +135,7 @@ extern int g_camAutoLight;
 extern int g_camExpose;
 extern int g_camGain;
 extern int g_camLight;
+extern int g_fullFaceCompare;
 
 // function
 

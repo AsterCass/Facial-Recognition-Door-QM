@@ -120,6 +120,7 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     faceThresholdNightLabel = new QLabel("夜间人脸识别阈值（0 - 0.6）（推荐 0.42）（重启生效）：", scrollContent);
     faceThresholdNightLabel->setWordWrap(true);
     faceThresholdNight = new QLineEditPro(scrollContent);
+    fullFaceCompare = new QCheckBox("核验人脸全量比对（重启生效）", scrollContent);
     volLabel = new QLabel("设备音量（0 - 100）：", scrollContent);
     vol = new QLineEditPro(scrollContent);
     faceRegCountLabel = new QLabel("失败N次触发人脸信息验证：", scrollContent);
@@ -342,6 +343,14 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
 #endif
                         }
                     }
+
+                    // Face compare
+                    const auto newFullFaceCompare = fullFaceCompare->isChecked() ? 1 : 0;
+                    if (g_fullFaceCompare != newFullFaceCompare) {
+                        g_fullFaceCompare = newFullFaceCompare;
+                        g_commonDb.upsertConfig(
+                            PRO_DB_FULL_FACE_COMPARE, to_string(g_fullFaceCompare));
+                    }
                 } catch (const std::exception &e) {
                     ostringstream errMsg;
                     errMsg << "Save config data error :" << e.what();
@@ -394,6 +403,7 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     scrollerAreaLayout->addWidget(faceThreshold);
     scrollerAreaLayout->addWidget(faceThresholdNightLabel);
     scrollerAreaLayout->addWidget(faceThresholdNight);
+    scrollerAreaLayout->addWidget(fullFaceCompare);
     scrollerAreaLayout->addWidget(volLabel);
     scrollerAreaLayout->addWidget(vol);
     scrollerAreaLayout->addWidget(faceRegCountLabel);
@@ -452,6 +462,7 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     lightOnlyCheck->setCheckState(g_lightOnlyCheck ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     showConfUser->setCheckState(g_showConfUser ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     camAutoLight->setCheckState(g_camAutoLight ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+    fullFaceCompare->setCheckState(g_fullFaceCompare ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     netModelGroup->button(g_netModel)->setChecked(true);
     wifiAccount->setText(QString::fromStdString(g_wifiAccount));
     wifiPasswdEdit->setText(QString::fromStdString(g_wifiPasswd));

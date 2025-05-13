@@ -42,3 +42,4 @@ int g_camAutoLight;
 int g_camExpose;
 int g_camGain;
 int g_camLight;
+int g_fullFaceCompare;

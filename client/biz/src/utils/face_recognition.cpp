@@ -164,7 +164,11 @@ void initFaceRecognition() {
     configuration.primaryKeyMode = HF_PK_MANUAL_INPUT;
     configuration.enablePersistence = 0;
     configuration.persistenceDbPath = nullptr;
-    configuration.searchMode = HF_SEARCH_MODE_EXHAUSTIVE;
+    if (g_fullFaceCompare) {
+        configuration.searchMode = HF_SEARCH_MODE_EXHAUSTIVE;
+    } else {
+        configuration.searchMode = HF_SEARCH_MODE_EAGER;
+    }
     configuration.searchThreshold = static_cast<float>(std::min(g_faceThreshold, g_faceThresholdNight));
     ret = HFFeatureHubDataEnable(configuration);
     if (ret != HSUCCEED) {

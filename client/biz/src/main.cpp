@@ -423,6 +423,22 @@ int main(int argc, char *argv[]) {
                 g_camLight = 0;
             }
         }
+        // update common set v="0" where k="fullFaceCompare";
+        {
+            std::string fullFaceCompare = g_commonDb.getConfig(PRO_DB_FULL_FACE_COMPARE);
+            if (fullFaceCompare.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_FULL_FACE_COMPARE, "0");
+                fullFaceCompare = "0";
+            }
+            try {
+                g_fullFaceCompare = stoi(fullFaceCompare);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data fullFaceCompare error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_fullFaceCompare = 0;
+            }
+        }
 
         logPrintln("Db finish", airstrip::INFO, __FUNCTION__);
     }
