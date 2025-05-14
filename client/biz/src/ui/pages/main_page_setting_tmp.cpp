@@ -366,7 +366,7 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
                     if (g_faceRegCoreIvMillSec != newFaceRegCoreIvMillSec) {
                         g_faceRegCoreIvMillSec = newFaceRegCoreIvMillSec;
                         g_commonDb.upsertConfig(
-                            PRO_DB_FACE_REG_IV_SEC, to_string(g_faceRegCoreIvMillSec));
+                            PRO_DB_FACE_REG_CORE_IV_MILL_SEC, to_string(g_faceRegCoreIvMillSec));
                     }
                 } catch (const std::exception &e) {
                     ostringstream errMsg;
