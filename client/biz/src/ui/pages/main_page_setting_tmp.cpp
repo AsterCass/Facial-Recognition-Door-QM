@@ -130,7 +130,7 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     faceRegCount = new QLineEditPro(scrollContent);
     taskIvSecLabel = new QLabel("获取任务间隔秒数（最小为5）：", scrollContent);
     taskIvSec = new QLineEditPro(scrollContent);
-    faceRegIvSecLabel = new QLabel("N秒内不重复识别：", scrollContent);
+    faceRegIvSecLabel = new QLabel("N秒内不重复报错：", scrollContent);
     faceRegIvSec = new QLineEditPro(scrollContent);
     camExposeLabel = new QLabel("摄像头曝光量（需禁用自动调光，范围 1-1121，默认1121）：", scrollContent);
     camExposeLabel->setWordWrap(true);
