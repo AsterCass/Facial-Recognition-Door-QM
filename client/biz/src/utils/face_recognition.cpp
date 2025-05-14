@@ -620,7 +620,8 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
     HFloat quality;
     ret = HFFaceQualityDetect(faceRecognitionSession, multipleFaceData.tokens[0], &quality);
     logPrintln("Face quality is " + to_string(quality), airstrip::INFO, __FUNCTION__);
-    // if (quality < 0.5 || ret != HSUCCEED) {
+    // 正常环境0.65没问题，其他恶劣或者黑暗环境未测试
+    // if (quality < 0.65 || ret != HSUCCEED) {
     //     logPrintln("Face quality not meet " + to_string(quality),
     //                airstrip::WARN, __FUNCTION__);
     //     HFReleaseImageStream(stream);
