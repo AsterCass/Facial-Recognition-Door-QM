@@ -521,6 +521,9 @@ bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, i
         if ((1 == g_faceDistance && minSide < 320) || (2 == g_faceDistance && minSide < 180)) {
             ret = false;
         }
+        if (confidence < 60) {
+            ret = false;
+        }
 
         // 计算明暗矫正摄像头
         const cv::Mat rgaFrameFace = rgaFrame(rect);
@@ -616,12 +619,13 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
 
     HFloat quality;
     ret = HFFaceQualityDetect(faceRecognitionSession, multipleFaceData.tokens[0], &quality);
-    if (quality < 0.5 || ret != HSUCCEED) {
-        logPrintln("Face quality not meet " + to_string(quality),
-                   airstrip::WARN, __FUNCTION__);
-        HFReleaseImageStream(stream);
-        return;
-    }
+    logPrintln("Face quality is " + to_string(quality), airstrip::INFO, __FUNCTION__);
+    // if (quality < 0.5 || ret != HSUCCEED) {
+    //     logPrintln("Face quality not meet " + to_string(quality),
+    //                airstrip::WARN, __FUNCTION__);
+    //     HFReleaseImageStream(stream);
+    //     return;
+    // }
 
     HFFaceFeature feature = {};
     ret = HFFaceFeatureExtract(faceRecognitionSession, stream,
