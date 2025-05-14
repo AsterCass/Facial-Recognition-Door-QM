@@ -459,13 +459,13 @@ void repeatOperation() {
 }
 
 void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &frame, float confidence) {
-    static auto lastTime = chrono::system_clock::from_time_t(0);
+    static time_t lastTime = 0;
     static bool lastPass = false;
     static int consecutiveFailCount = 0;
     const auto currentTime = chrono::system_clock::now();
     const auto currentTimeSec = chrono::system_clock::to_time_t(currentTime);
 
-    if (lastPass && chrono::duration_cast<std::chrono::seconds>(currentTime - lastTime).count() < 5) {
+    if (lastPass && currentTimeSec - lastTime < 5) {
         logPrintln("Already pass last", DEBUG, __FUNCTION__);
         return;
     }
@@ -491,7 +491,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
             recordInfo.userId = userInfo.userId;
             recordInfo.openMode = FaceOpen;
             recordInfo.openResult = 0;
-            recordInfo.openTime = chrono::system_clock::to_time_t(currentTime);
+            recordInfo.openTime = currentTimeSec;
             recordInfo.faceId = userInfo.faceId;
             commonOpenDoor(recordInfo, userInfo.userId, confidence);
             consecutiveFailCount = 0;
@@ -506,9 +506,9 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
         }
         lastPass = true;
     } else {
-        static auto lastFailTime = chrono::system_clock::from_time_t(0);
-        if ((currentTime - lastFailTime).count() > g_faceRegIvSec) {
-            if (chrono::duration_cast<std::chrono::seconds>(currentTime - lastFailTime).count() < 6) {
+        static time_t lastFailTime = 0;
+        if (currentTimeSec - lastFailTime > g_faceRegIvSec) {
+            if (currentTimeSec - lastFailTime < 6) {
                 ostringstream oss;
                 oss << g_appWorkDir << "log-face/" <<
                         put_time(localtime(&currentTimeSec), "%Y-%m-%d-%H-%M-%S") << "-Fail" << ".jpg";
@@ -527,11 +527,11 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
                 consecutiveFailCount = 0;
                 playWav(AuthFailFirst);
             }
-            lastFailTime = currentTime;
+            lastFailTime = currentTimeSec;
         }
         lastPass = false;
     }
-    lastTime = currentTime;
+    lastTime = currentTimeSec;
 }
 
 bool ScheduledTask::commonOpenDoor(const OpenRecordInfo &openRecordInfo, const std::string &userId,
