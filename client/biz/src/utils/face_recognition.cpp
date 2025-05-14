@@ -12,7 +12,7 @@ using namespace std;
 
 std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
 
-#ifndef WIN32x
+#ifndef WIN32
 
 #include "inspireface.h"
 #include "intypedef.h"
@@ -264,15 +264,6 @@ bool faceInsert(const cv::Mat &pic, FaceUserInfo &userInfo) {
     if (faceNum <= 0) {
         // todo error throw
         logPrintln("Face insert face not found ", airstrip::WARN, __FUNCTION__);
-        HFReleaseImageStream(stream);
-        return false;
-    }
-
-    HFloat quality;
-    ret = HFFaceQualityDetect(faceRecognitionSession, multipleFaceData.tokens[0], &quality);
-    if (quality < 0.8 || ret != HSUCCEED) {
-        logPrintln("Face quality not meet " + to_string(quality),
-                   airstrip::WARN, __FUNCTION__);
         HFReleaseImageStream(stream);
         return false;
     }
@@ -616,6 +607,15 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
 
     if (multipleFaceData.detectedNum <= 0) {
         // logPrintln("Face recognition face not found",airstrip::WARN, __FUNCTION__);
+        HFReleaseImageStream(stream);
+        return;
+    }
+
+    HFloat quality;
+    ret = HFFaceQualityDetect(faceRecognitionSession, multipleFaceData.tokens[0], &quality);
+    if (quality < 0.8 || ret != HSUCCEED) {
+        logPrintln("Face quality not meet " + to_string(quality),
+                   airstrip::WARN, __FUNCTION__);
         HFReleaseImageStream(stream);
         return;
     }
