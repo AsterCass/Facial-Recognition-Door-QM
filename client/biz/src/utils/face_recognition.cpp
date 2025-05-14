@@ -484,10 +484,13 @@ bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, i
 
         // 最大人脸
         const auto *p = (short *) (pResults + 1);
+        const int confidence = p[0];
         const int x = p[1];
         const int y = p[2];
         const int w = p[3];
         const int h = p[4];
+        char sScore[256];
+        snprintf(sScore, 256, "%d", confidence);
 
         // 校正
         const int maxWidth = frame.cols;
@@ -513,7 +516,7 @@ bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, i
 
 
         const auto minSide = min(rect.width, rect.height);
-        logPrintln("Size min side =  " + to_string(minSide) +
+        logPrintln("Size min side =  " + to_string(minSide) + " confidence is " + to_string(confidence) +
                    " faceDistance = " + to_string(g_faceDistance), airstrip::DEBUG, __FUNCTION__);
         if ((1 == g_faceDistance && minSide < 320) || (2 == g_faceDistance && minSide < 180)) {
             ret = false;
@@ -613,7 +616,7 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
 
     HFloat quality;
     ret = HFFaceQualityDetect(faceRecognitionSession, multipleFaceData.tokens[0], &quality);
-    if (quality < 0.8 || ret != HSUCCEED) {
+    if (quality < 0.5 || ret != HSUCCEED) {
         logPrintln("Face quality not meet " + to_string(quality),
                    airstrip::WARN, __FUNCTION__);
         HFReleaseImageStream(stream);
