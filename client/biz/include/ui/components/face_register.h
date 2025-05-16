@@ -38,7 +38,7 @@ public:
                 loadGif->start();
             } else {
                 loadGif->stop();
-                errorTips->setText("");
+                errorTips->setText(" ");
             }
         }
     }
