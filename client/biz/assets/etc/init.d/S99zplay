@@ -7,6 +7,7 @@ case "$1" in
     echo 0 >/sys/class/backlight/pwm_leds/brightness
     amixer cset name='Master Playback Volume' 0
     rm -rf /data/frd/log.txt
+    chmod 755 /data/frd/bin/*
     #/data/frd/bin/FacialRecognitionDoor --width 800 --height 1280 --appWorkDir /data/frd/ &
     /data/frd/bin/FacialRecognitionDoor --width 800 --height 1280 --appWorkDir /data/frd/ --logPath /data/frd/log >> /data/frd/log.txt 2>&1 &
     ;;
