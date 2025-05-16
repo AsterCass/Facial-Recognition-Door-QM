@@ -184,7 +184,6 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
                             loadingApi(false);
                             if (ret) {
                                 this->hide();
-                                resetTips(true, "输入用户手机号检查是否包含门禁权限");
                             } else {
                                 resetTips(false, "未查询到配租信息，请联系窗口服务");
                             }
@@ -207,6 +206,8 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
 
 void FaceRegister::showEvent(QShowEvent *) {
     g_closeFaceRecognition = true;
+
+    resetTips(true, "输入用户手机号检查是否包含门禁权限");
 }
 
 void FaceRegister::hideEvent(QHideEvent *) {
@@ -222,11 +223,11 @@ void FaceRegister::hideEvent(QHideEvent *) {
         phoneNumberFirst->setText("");
         phoneNumberFirst->setFocus();
     }
-    if (nullptr != errorTips) {
-        errorTips->setText(" ");
-    }
     if (nullptr != loadGif) {
         loadGif->stop();
+    }
+    if (nullptr != errorTips) {
+        resetTips(true, "输入用户手机号检查是否包含门禁权限");
     }
     VirtualKeyboardNumber::getInstance()->hideKeyboard();
     lastFrame.release();
