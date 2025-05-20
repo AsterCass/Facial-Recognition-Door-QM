@@ -439,12 +439,12 @@ int main(int argc, char *argv[]) {
                 g_fullFaceCompare = 0;
             }
         }
-        // update common set v="3" where k="faceRegIvSec";
+        // update common set v="0" where k="faceRegIvSec";
         {
             std::string faceRegIvSec = g_commonDb.getConfig(PRO_DB_FACE_REG_IV_SEC);
             if (faceRegIvSec.empty()) {
-                g_commonDb.upsertConfig(PRO_DB_FACE_REG_IV_SEC, "3");
-                faceRegIvSec = "3";
+                g_commonDb.upsertConfig(PRO_DB_FACE_REG_IV_SEC, "0");
+                faceRegIvSec = "0";
             }
             try {
                 g_faceRegIvSec = stoi(faceRegIvSec);
@@ -452,7 +452,7 @@ int main(int argc, char *argv[]) {
                 std::ostringstream errMsg;
                 errMsg << "Load data faceRegIvSec error " << e.what();
                 logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
-                g_faceRegIvSec = 3;
+                g_faceRegIvSec = 0;
             }
         }
         // update common set v="500" where k="faceRegCoreIvMillSec";
