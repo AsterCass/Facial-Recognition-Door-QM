@@ -18,6 +18,37 @@
     `sqlite3 /data/frd/db/common.db "update common set v='adbcde' where k='signId';"`
     改完之后再次重启
 13. 根据需求更改其他配置，比如获取任务时间间隔（同时影响断网/重连之后右上角云图标的反馈）等
+14. 创建定时任务
+    ```shell
+    cat <<'EOF' > /etc/init.d/S97cron
+    #!/bin/sh
+    
+    case "$1" in
+      start)
+        if [ ! -d /data/cron/crontabs ]; then
+            mkdir -p /data/cron/crontabs
+        fi
+        ln -sf /data/cron /var/spool/
+        crond -b
+        ;;
+      stop)
+        killall -q crond
+        ;;
+      restart)
+        $0 stop
+        $0 start
+        ;;
+      *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+    esac
+    exit 0
+    EOF
+    chmod 755 /etc/init.d/S97cron
+    ```
+    重启后修改定时任务`crontab -e`
+    最后输入`0 4 * * * sh /data/frd/script/linux/reboot_app.sh`
+15. 
 
 ## 注意事项
 
