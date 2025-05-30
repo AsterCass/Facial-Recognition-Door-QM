@@ -156,6 +156,7 @@ void updateCommonAppData() {
     static int count = 60;
     if (count++ < 60) return;
     count = 1;
+    logPrintln("Start update common app data", DEBUG, __FUNCTION__);
     if (g_lightOnlyCheck) {
 #ifndef WIN32
         closeLight();
@@ -169,6 +170,9 @@ void updateUIMainComponentHeader() {
     static int count = 10;
     if (count++ < 10) return;
     count = 1;
+
+    logPrintln("Start update time", DEBUG, __FUNCTION__);
+
     const auto now = chrono::system_clock::now();
     const auto time = chrono::system_clock::to_time_t(now);
     const auto today = day_clock::local_day();
@@ -273,6 +277,7 @@ void checkTaskAndExecute() {
     if (count++ < 5) return;
     count = 1;
 
+    logPrintln("Start task execute", DEBUG, __FUNCTION__);
     const auto now = chrono::system_clock::now();
     const auto time = chrono::system_clock::to_time_t(now);
     static time_t lastTime = 0;
@@ -296,6 +301,7 @@ void gotoManagement() {
     count = 1;
     if (g_tryGoManagementCount >= 5) {
         g_tryGoManagementCount = 0;
+        logPrintln("Start update page", DEBUG, __FUNCTION__);
         MainRouter::getInstance()->addPage(MAIN_PAGE_SETTING_LOGIN);
     } else {
         g_tryGoManagementCount = 0;
@@ -351,6 +357,7 @@ void getNfcCode() {
 void doorAutoClose() {
     if (doorOpenSec <= 0) return;
     if (++doorOpenSec > 5) {
+        logPrintln("Start close door", DEBUG, __FUNCTION__);
         closeDoor();
         doorOpenSec = -1;
     }
@@ -360,6 +367,7 @@ void doorAutoClose() {
 void messageLabelHide() {
     if (messageLabelSec <= 0) return;
     if (++messageLabelSec > 3) {
+        logPrintln("Start hide Label", DEBUG, __FUNCTION__);
         CameraFrame::getInstance()->hideAllMessage();
         messageLabelSec = -1;
     }
