@@ -188,6 +188,7 @@ void updateUIMainComponentHeader() {
     }
 
     // Wired
+    logPrintln("Start update wired", DEBUG, __FUNCTION__);
     {
 #ifdef WIN32
         const string wiredIp = execScript(g_appWorkDir + "script/win/get_wired_ip.ps1");
@@ -198,6 +199,7 @@ void updateUIMainComponentHeader() {
     }
 
     // Wireless
+    logPrintln("Start update wireless", DEBUG, __FUNCTION__);
     string wirelessIp; {
 #ifdef WIN32
         wirelessIp = execScript(g_appWorkDir + "script/win/get_wireless_ip.ps1");
@@ -208,6 +210,7 @@ void updateUIMainComponentHeader() {
     }
 
     // 4g
+    logPrintln("Start update 4g", DEBUG, __FUNCTION__);
     string fourGIp; {
 #ifndef WIN32
         fourGIp = execScript(g_appWorkDir + "script/linux/get_4g_ip.sh");
@@ -216,11 +219,13 @@ void updateUIMainComponentHeader() {
     }
 
     // Cloud
+    logPrintln("Start update cloud", DEBUG, __FUNCTION__);
     {
         GlobalDataManager::getInstance()->updateHeaderServer(linkedServer());
     }
 
     // Auto close face register
+    logPrintln("Start update register", DEBUG, __FUNCTION__);
     {
         if (lastShowFaceRegisterTime > 0 && time - lastShowFaceRegisterTime > 60) {
             MainRouter::getInstance()->hideFaceRegister();
@@ -229,6 +234,7 @@ void updateUIMainComponentHeader() {
     }
 
     // Connect
+    logPrintln("Start update connect", DEBUG, __FUNCTION__);
     {
         static int reconnectCount = 1;
         // wireless
@@ -269,6 +275,11 @@ void updateUIMainComponentHeader() {
 #endif
         }
     }
+
+
+
+
+    logPrintln("Start bar label update finish", DEBUG, __FUNCTION__);
 }
 
 // Every (5 * (taskIvCnt + executionTime)) sec
