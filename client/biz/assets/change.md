@@ -25,6 +25,7 @@
     
     case "$1" in
       start)
+        rm -rf /data/frd/script/linux/live.txt
         if [ ! -d /data/cron/crontabs ]; then
             mkdir -p /data/cron/crontabs
         fi
@@ -47,7 +48,7 @@
     chmod 755 /etc/init.d/S97cron
     ```
     重启后修改定时任务`crontab -e`
-    最后输入`0 4 * * * sh /data/frd/script/linux/reboot_app.sh`
+    最后输入`0 4 * * * sh /data/frd/script/linux/reboot_app.sh`以及`* * * * * sh /data/frd/script/linux/check_app_live.sh`
 15. 
 
 ## 注意事项
