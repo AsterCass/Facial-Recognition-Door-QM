@@ -521,9 +521,9 @@ bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, i
         if ((1 == g_faceDistance && minSide < 320) || (2 == g_faceDistance && minSide < 180)) {
             ret = false;
         }
-        if (confidence < 60) {
-            ret = false;
-        }
+        // if (confidence < 60) {
+        //     ret = false;
+        // }
 
         // 计算明暗矫正摄像头
         const cv::Mat rgaFrameFace = rgaFrame(rect);
