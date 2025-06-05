@@ -16,9 +16,10 @@ public:
         return &instance;
     }
 
-    static void sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &frame);
+    static void sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &frame, float confidence);
 
-    static bool commonOpenDoor(const OpenRecordInfo &openRecordInfo);
+    static bool commonOpenDoor(const OpenRecordInfo &openRecordInfo, const std::string &userId = "",
+                               float confidence = 0.0);
 
 private:
     ScheduledTask();

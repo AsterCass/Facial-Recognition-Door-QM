@@ -31,8 +31,26 @@ private:
     QLineEditPro *serverAddress;
     QLabel *faceThresholdLabel;
     QLineEditPro *faceThreshold;
+    QLabel *faceThresholdNightLabel;
+    QLineEditPro *faceThresholdNight;
     QLabel *volLabel;
     QLineEditPro *vol;
+    QLabel *faceRegCountLabel;
+    QLineEditPro *faceRegCount;
+    QLabel *taskIvSecLabel;
+    QLineEditPro *taskIvSec;
+    QLabel *faceRegIvSecLabel;
+    QLineEditPro *faceRegIvSec;
+    QLabel *faceRegCoreIvMillSecLabel;
+    QLineEditPro *faceRegCoreIvMillSec;
+    QLabel *camExposeLabel;
+    QLineEditPro *camExpose;
+    QLabel *camGainLabel;
+    QLineEditPro *camGain;
+    QLabel *camLightLabel;
+    QLineEditPro *camLight;
+
+
     QLabel *faceDistantLabel;
     QWidget *faceDistantWidget;
     QHBoxLayout *faceDistantLayout;
@@ -43,6 +61,9 @@ private:
 
     QCheckBox *enableFaceSpoof;
     QCheckBox *lightOnlyCheck;
+    QCheckBox *showConfUser;
+    QCheckBox *camAutoLight;
+    QCheckBox *fullFaceCompare;
 
     QLabel *netModelLabel;
     QWidget *netModelWidget;

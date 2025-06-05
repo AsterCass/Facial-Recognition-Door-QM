@@ -23,6 +23,7 @@ MainSettingLogin::MainSettingLogin(QWidget *parent): QWidget(parent) {
     connect(cancelBtn, &QPushButton::clicked, this,
             [=] {
                 MainRouter::getInstance()->backPage();
+                passwd->setText("");
             });
 
     connect(loginBtn, &QPushButton::clicked, this,

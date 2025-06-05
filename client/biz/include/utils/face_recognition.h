@@ -15,6 +15,8 @@ struct FaceUserInfo {
     std::string voiceTemplate;
 };
 
+void updateLight(int expose, int gain, int light);
+
 void closeLight();
 
 void initFaceRecognition();
@@ -34,6 +36,8 @@ bool faceDisable(const std::string &userId, int isEnable);
 bool faceVoiceTemplate(const std::string &userId, const std::string &voiceFeature);
 
 bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, int orgCols, int orgRows);
+
+void faceRecognition(const std::string &address, const cv::Rect &rect);
 
 void faceRecognition(const cv::Mat &frame, const cv::Rect &rect);
 

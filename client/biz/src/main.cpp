@@ -133,6 +133,22 @@ int main(int argc, char *argv[]) {
                 g_faceThreshold = 0.48;
             }
         }
+        // update common set v="0.42" where k="faceThresholdNight";
+        {
+            std::string faceThresholdNight = g_commonDb.getConfig(PRO_DB_FACE_THRESHOLD_NIG);
+            if (faceThresholdNight.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_FACE_THRESHOLD_NIG, "0.42");
+                faceThresholdNight = "0.42";
+            }
+            try {
+                g_faceThresholdNight = stod(faceThresholdNight);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data faceThresholdNight error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_faceThresholdNight = 0.42;
+            }
+        }
         // update common set v="50" where k="volNum";
         {
             std::string volNum = g_commonDb.getConfig(PRO_DB_VOL_NUM);
@@ -295,6 +311,166 @@ int main(int argc, char *argv[]) {
                 g_darkRatio = 0.3;
             }
         }
+        // update common set v="3" where k="faceRegCount";
+        {
+            std::string faceRegCount = g_commonDb.getConfig(PRO_DB_FACE_REG_COUNT);
+            if (faceRegCount.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_FACE_REG_COUNT, "3");
+                faceRegCount = "3";
+            }
+            try {
+                g_faceRegCount = stoi(faceRegCount);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data faceRegCount error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_faceRegCount = 3;
+            }
+        }
+        // update common set v="600" where k="taskIvSec";
+        {
+            std::string taskIvSec = g_commonDb.getConfig(PRO_DB_TASK_IV_SEC);
+            if (taskIvSec.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_TASK_IV_SEC, "600");
+                taskIvSec = "600";
+            }
+            try {
+                g_taskIvSec = stoi(taskIvSec);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data taskIvSec error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_taskIvSec = 600;
+            }
+        }
+        // update common set v="0" where k="showConfUser";
+        {
+            std::string showConfUser = g_commonDb.getConfig(PRO_DB_SHOW_CONF_USER);
+            if (showConfUser.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_SHOW_CONF_USER, "0");
+                showConfUser = "0";
+            }
+            try {
+                g_showConfUser = stoi(showConfUser);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data showConfUser error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_showConfUser = 0;
+            }
+        }
+        // update common set v="1" where k="camAutoLight";
+        {
+            std::string camAutoLight = g_commonDb.getConfig(PRO_DB_CAM_AUTO_LIGHT);
+            if (camAutoLight.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_CAM_AUTO_LIGHT, "1");
+                camAutoLight = "1";
+            }
+            try {
+                g_camAutoLight = stoi(camAutoLight);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data camAutoLight error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_camAutoLight = 1;
+            }
+        }
+        // update common set v="800" where k="camExpose";
+        {
+            std::string camExpose = g_commonDb.getConfig(PRO_DB_CAM_EXPOSE);
+            if (camExpose.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_CAM_EXPOSE, "800");
+                camExpose = "800";
+            }
+            try {
+                g_camExpose = stoi(camExpose);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data camExpose error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_camExpose = 800;
+            }
+        }
+        // update common set v="64" where k="camGain";
+        {
+            std::string camGain = g_commonDb.getConfig(PRO_DB_CAM_GAIN);
+            if (camGain.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_CAM_GAIN, "64");
+                camGain = "64";
+            }
+            try {
+                g_camGain = stoi(camGain);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data camGain error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_camGain = 64;
+            }
+        }
+        // update common set v="0" where k="camLight";
+        {
+            std::string camLight = g_commonDb.getConfig(PRO_DB_CAM_LIGHT);
+            if (camLight.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_CAM_LIGHT, "0");
+                camLight = "0";
+            }
+            try {
+                g_camLight = stoi(camLight);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data camLight error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_camLight = 0;
+            }
+        }
+        // update common set v="0" where k="fullFaceCompare";
+        {
+            std::string fullFaceCompare = g_commonDb.getConfig(PRO_DB_FULL_FACE_COMPARE);
+            if (fullFaceCompare.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_FULL_FACE_COMPARE, "0");
+                fullFaceCompare = "0";
+            }
+            try {
+                g_fullFaceCompare = stoi(fullFaceCompare);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data fullFaceCompare error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_fullFaceCompare = 0;
+            }
+        }
+        // update common set v="0" where k="faceRegIvSec";
+        {
+            std::string faceRegIvSec = g_commonDb.getConfig(PRO_DB_FACE_REG_IV_SEC);
+            if (faceRegIvSec.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_FACE_REG_IV_SEC, "0");
+                faceRegIvSec = "0";
+            }
+            try {
+                g_faceRegIvSec = stoi(faceRegIvSec);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data faceRegIvSec error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_faceRegIvSec = 0;
+            }
+        }
+        // update common set v="500" where k="faceRegCoreIvMillSec";
+        {
+            std::string faceRegCoreIvMillSec = g_commonDb.getConfig(PRO_DB_FACE_REG_CORE_IV_MILL_SEC);
+            if (faceRegCoreIvMillSec.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_FACE_REG_CORE_IV_MILL_SEC, "500");
+                faceRegCoreIvMillSec = "500";
+            }
+            try {
+                g_faceRegCoreIvMillSec = stoi(faceRegCoreIvMillSec);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data faceRegCoreIvMillSec error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_faceRegCoreIvMillSec = 500;
+            }
+        }
 
         logPrintln("Db finish", airstrip::INFO, __FUNCTION__);
     }
@@ -308,7 +484,7 @@ int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
     // Init thread poll
-    g_mainThreadPool = airstrip::ThreadPool::getInstance(3);
+    g_mainThreadPool = airstrip::ThreadPool::getInstance(8);
 
     // Page router
     const auto router = MainRouter::getInstance();

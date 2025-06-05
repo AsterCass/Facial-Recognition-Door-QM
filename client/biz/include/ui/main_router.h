@@ -32,6 +32,8 @@ public:
 
     void hideFaceRegister() const;
 
+    void mainNotificationShow(const std::string &text, const std::function<void(bool)>& callback) const;
+
 private:
     explicit MainRouter(QWidget *parent = nullptr);
 

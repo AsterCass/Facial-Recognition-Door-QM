@@ -188,6 +188,18 @@ HYPER_CAPI_EXPORT extern HResult HFReleaseImageBitmap(HFImageBitmap handle);
 HYPER_CAPI_EXPORT extern HResult HFCreateImageStreamFromImageBitmap(HFImageBitmap handle, HFRotation rotation, HFImageStream *streamHandle);
 
 /**
+ * @brief Create a image bitmap from image stream.
+ *
+ * @param streamHandle Pointer to the image stream handle.
+ * @param handle Pointer to the image bitmap handle that will be returned.
+ * @param is_rotate Whether to rotate the image.
+ * @param scale The scale of the image.
+ * @return HResult indicating the success or failure of the operation.
+ */
+HYPER_CAPI_EXPORT extern HResult HFCreateImageBitmapFromImageStreamProcess(HFImageStream streamHandle, HFImageBitmap *handle, int is_rotate,
+                                                                           float scale);
+
+/**
  * @brief Write the image bitmap to a file.
  *
  * @param handle Pointer to the image bitmap handle.
@@ -304,19 +316,54 @@ HYPER_CAPI_EXPORT extern HResult HFSetExpansiveHardwareRockchipDmaHeapPath(HPath
 HYPER_CAPI_EXPORT extern HResult HFQueryExpansiveHardwareRockchipDmaHeapPath(HString path);
 
 /**
- * @brief Set the Apple CoreML model path. In normal circumstances, manual modification is not needed.
- * @param path The path to the apple coreml model
- * @return HResult indicating the success or failure of the operation.
- * */
-HYPER_CAPI_EXPORT extern HResult HFSetExpansiveHardwareAppleCoreMLModelPath(HString path);
+ * @brief Enum for Apple CoreML inference mode.
+ */
+typedef enum HFAppleCoreMLInferenceMode {
+    HF_APPLE_COREML_INFERENCE_MODE_CPU = 0,  ///< CPU Only.
+    HF_APPLE_COREML_INFERENCE_MODE_GPU = 1,  ///< GPU first.
+    HF_APPLE_COREML_INFERENCE_MODE_ANE = 2,  ///< Automatic selection, ANE first.
+} HFAppleCoreMLInferenceMode;
 
 /**
- * @brief Query the Apple CoreML model path. After executing HFLaunchInspireFace, it's typically your input filename plus the suffix '.mlmodelc', for
- * example: Pikachu and Pikachu.mlmodelc
- * @param path Query the apple coreml model path
+ * @brief Set the Apple CoreML inference mode, must be called before HFCreateInspireFaceSession.
+ * @param mode The inference mode to be set.
  * @return HResult indicating the success or failure of the operation.
  * */
-HYPER_CAPI_EXPORT extern HResult HFQueryExpansiveHardwareAppleCoreMLModelPath(HString path);
+HYPER_CAPI_EXPORT extern HResult HFSetAppleCoreMLInferenceMode(HFAppleCoreMLInferenceMode mode);
+
+/**
+ * @brief Set the CUDA device id, must be called before HFCreateInspireFaceSession.
+ * @param device_id The device id to be set.
+ * @return HResult indicating the success or failure of the operation.
+ * */
+HYPER_CAPI_EXPORT extern HResult HFSetCudaDeviceId(int32_t device_id);
+
+/**
+ * @brief Get the CUDA device id, must be called after HFCreateInspireFaceSession.
+ * @param device_id Pointer to the device id to be returned.
+ * @return HResult indicating the success or failure of the operation.
+ * */
+HYPER_CAPI_EXPORT extern HResult HFGetCudaDeviceId(int32_t *device_id);
+
+/**
+ * @brief Print the CUDA device information.
+ * @return HResult indicating the success or failure of the operation.
+ * */
+HYPER_CAPI_EXPORT extern HResult HFPrintCudaDeviceInfo();
+
+/**
+ * @brief Get the number of CUDA devices.
+ * @param num_devices Pointer to the number of CUDA devices to be returned.
+ * @return HResult indicating the success or failure of the operation.
+ * */
+HYPER_CAPI_EXPORT extern HResult HFGetNumCudaDevices(int32_t *num_devices);
+
+/**
+ * @brief Check if the CUDA device is supported.
+ * @param support The support flag to be checked.
+ * @return HResult indicating the success or failure of the operation.
+ * */
+HYPER_CAPI_EXPORT extern HResult HFCheckCudaDeviceSupport(int32_t *is_support);
 
 /************************************************************************
  * FaceSession

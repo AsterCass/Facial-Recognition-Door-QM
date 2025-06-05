@@ -1,0 +1,22 @@
+#!/bin/sh
+
+case "$1" in
+  start)
+    export QT_QPA_FB_DRM=1
+    export QT_QPA_PLATFORM=linuxfb:rotation=0
+    echo 0 >/sys/class/backlight/pwm_leds/brightness
+    amixer cset name='Master Playback Volume' 0
+    rm -rf /data/frd/log.txt
+    chmod 755 /data/frd/bin/*
+    #/data/frd/bin/FacialRecognitionDoor --width 800 --height 1280 --appWorkDir /data/frd/ &
+    /data/frd/bin/FacialRecognitionDoor --width 800 --height 1280 --appWorkDir /data/frd/ --logPath /data/frd/log >> /data/frd/log.txt 2>&1 &
+    ;;
+  stop)
+    killall FacialRecognitionDoor
+    ;;
+  *)
+    echo "Usage: $0 {start|stop}"
+    exit 1
+    ;;
+esac
+exit 0

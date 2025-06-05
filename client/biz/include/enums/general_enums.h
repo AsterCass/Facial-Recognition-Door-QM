@@ -34,6 +34,7 @@ enum PlayWavType {
 enum ZFOpenDoorType {
     FaceOpen = 7,
     IcCardOpen = 15,
+    IdCardOpen = 16,
     RemoteOpen = 5,
 };
 

@@ -3,10 +3,29 @@
 #include <airstrip_log.h>
 #include <boost/beast/core/detail/base64.hpp>
 
+#include <boost/filesystem.hpp>
+#include <fstream>
+#include <vector>
+
 
 using namespace std;
 
 namespace generalUtils {
+    std::string fileToBase64(const std::string &filepath) {
+        std::ifstream file(filepath, std::ios::binary);
+        if (!file) return "";
+
+        const std::vector<unsigned char> buffer((std::istreambuf_iterator<char>(file)),
+                                                std::istreambuf_iterator<char>());
+
+        std::string out;
+        out.resize(boost::beast::detail::base64::encoded_size(buffer.size()));
+
+        boost::beast::detail::base64::encode(&out[0], buffer.data(), buffer.size());
+        return out;
+    }
+
+
     std::vector<uchar> decodeBase64(const std::string &base64String) {
         std::vector<uchar> decoded;
         // 计算解码后的大小
@@ -75,5 +94,17 @@ namespace generalUtils {
         // 调整为实际编码大小
         base64String.resize(result);
         return base64String;
+    }
+
+    cv::Mat matCompress(const cv::Mat &img) {
+        const cv::Size newSize(img.cols / 2, img.rows / 2);
+        cv::Mat resizedImage;
+        resize(img, resizedImage, newSize, 0, 0, cv::INTER_AREA);
+        std::vector<uchar> buffer;
+        std::vector<int> compressionParams;
+        compressionParams.push_back(cv::IMWRITE_JPEG_QUALITY);
+        compressionParams.push_back(50);
+        imencode(".jpg", resizedImage, buffer, compressionParams);
+        return imdecode(buffer, cv::IMREAD_COLOR);
     }
 }

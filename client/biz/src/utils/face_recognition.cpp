@@ -1,4 +1,5 @@
 #include "utils/face_recognition.h"
+#include <utils/general_utils.h>
 #include "db/face_db.h"
 #include "airstrip_log.h"
 #include "airstrip_program_options.h"
@@ -25,47 +26,61 @@ std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
 
 
 HFSession faceRecognitionSession = nullptr;
-int currentLightLevel = 13;
 
-void closeLight() {
-    if (currentLightLevel >= EXPOSE_AND_GAIN_PARAM.size() - 1) {
-        logPrintln("To Close light", airstrip::INFO, __FUNCTION__);
-        --currentLightLevel;
-
-        ostringstream closeLight;
-        closeLight << "sh " << g_appWorkDir + "script/linux/reset_light.sh 0";
-        airstrip::execCommand(closeLight.str());
-    }
-}
-
-
-void updateExposeAndGain(const bool isUp) {
-    logPrintln("Current level is " + to_string(currentLightLevel) +
-               " want to up " + to_string(isUp), airstrip::INFO, __FUNCTION__);
-
-    if (currentLightLevel <= 0 && !isUp) {
-        logPrintln("Down fail", airstrip::INFO, __FUNCTION__);
-    } else if (currentLightLevel >= EXPOSE_AND_GAIN_PARAM.size() - 1 && isUp) {
-        logPrintln("Up fail", airstrip::INFO, __FUNCTION__);
-    } else {
-        if (isUp) {
-            ++currentLightLevel;
-        } else {
-            --currentLightLevel;
-        }
-    }
-
+void updateLight(int expose, int gain, int light) {
     ostringstream updateExposeGainCmd;
     updateExposeGainCmd << "sh " << g_appWorkDir + "script/linux/reset_expose.sh "
-            << EXPOSE_AND_GAIN_PARAM.at(currentLightLevel).at(0) << " "
-            << EXPOSE_AND_GAIN_PARAM.at(currentLightLevel).at(1) << " && sh "
+            << expose << " "
+            << gain << " && sh "
             << g_appWorkDir + "script/linux/reset_light.sh "
-            << EXPOSE_AND_GAIN_PARAM.at(currentLightLevel).at(2);
+            << light;
 
 
     logPrintln("Current cmd : " + updateExposeGainCmd.str(),
                airstrip::DEBUG, __FUNCTION__);
     airstrip::execCommand(updateExposeGainCmd.str());
+}
+
+
+void closeLight() {
+    if (currentIsNight() && g_camAutoLight) {
+        logPrintln("To Close light", airstrip::INFO, __FUNCTION__);
+
+        for (int count = EXPOSE_AND_GAIN_PARAM.size() - 1; count >= 0; count--) {
+            if (EXPOSE_AND_GAIN_PARAM.at(count).at(2) == 0) {
+                g_currentLightLevel = count;
+                updateLight(EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(0),
+                            EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(1),
+                            EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(2));
+                break;
+            }
+        }
+    }
+}
+
+
+void updateExposeAndGain(const bool isUp) {
+    if (!g_camAutoLight) {
+        return;
+    }
+
+    logPrintln("Current level is " + to_string(g_currentLightLevel) +
+               " want to up " + to_string(isUp), airstrip::INFO, __FUNCTION__);
+
+    if (g_currentLightLevel <= 0 && !isUp) {
+        logPrintln("Down fail", airstrip::INFO, __FUNCTION__);
+    } else if (g_currentLightLevel >= EXPOSE_AND_GAIN_PARAM.size() - 1 && isUp) {
+        logPrintln("Up fail", airstrip::INFO, __FUNCTION__);
+    } else {
+        if (isUp) {
+            ++g_currentLightLevel;
+        } else {
+            --g_currentLightLevel;
+        }
+    }
+    updateLight(EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(0),
+                EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(1),
+                EXPOSE_AND_GAIN_PARAM.at(g_currentLightLevel).at(2));
 }
 
 
@@ -149,8 +164,12 @@ void initFaceRecognition() {
     configuration.primaryKeyMode = HF_PK_MANUAL_INPUT;
     configuration.enablePersistence = 0;
     configuration.persistenceDbPath = nullptr;
-    configuration.searchMode = HF_SEARCH_MODE_EAGER;
-    configuration.searchThreshold = static_cast<float>(g_faceThreshold);
+    if (g_fullFaceCompare) {
+        configuration.searchMode = HF_SEARCH_MODE_EXHAUSTIVE;
+    } else {
+        configuration.searchMode = HF_SEARCH_MODE_EAGER;
+    }
+    configuration.searchThreshold = static_cast<float>(std::min(g_faceThreshold, g_faceThresholdNight));
     ret = HFFeatureHubDataEnable(configuration);
     if (ret != HSUCCEED) {
         logPrintln("Create face db error: " + ret, airstrip::CRITICAL, __FUNCTION__);
@@ -288,7 +307,7 @@ bool faceInsert(const cv::Mat &pic, FaceUserInfo &userInfo) {
     userInfo.faceId = faceId;
     faceUserInfoMap[faceId] = userInfo;
 
-    // todo add photo
+    imwrite(g_appWorkDir + "face/" + userInfo.userId + ".jpg", generalUtils::matCompress(pic));
 
     logPrintln("Insert finish userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
     logPrintln("Insert finish faceId = " + to_string(faceId), airstrip::INFO, __FUNCTION__);
@@ -324,8 +343,7 @@ bool faceDelete(const FaceUserInfo &userInfo) {
         faceUserInfoMap.erase(faceId);
     }
 
-
-    // todo delete photo
+    airstrip::execCommand("rm " + g_appWorkDir + "face/" + userInfo.userId + ".jpg");
 
     logPrintln("Delete finish userId = " + userInfo.userId, airstrip::INFO, __FUNCTION__);
 
@@ -466,10 +484,13 @@ bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, i
 
         // 最大人脸
         const auto *p = (short *) (pResults + 1);
+        const int confidence = p[0];
         const int x = p[1];
         const int y = p[2];
         const int w = p[3];
         const int h = p[4];
+        char sScore[256];
+        snprintf(sScore, 256, "%d", confidence);
 
         // 校正
         const int maxWidth = frame.cols;
@@ -495,11 +516,14 @@ bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, i
 
 
         const auto minSide = min(rect.width, rect.height);
-        logPrintln("Size min side =  " + to_string(minSide) +
+        logPrintln("Size min side =  " + to_string(minSide) + " confidence is " + to_string(confidence) +
                    " faceDistance = " + to_string(g_faceDistance), airstrip::DEBUG, __FUNCTION__);
         if ((1 == g_faceDistance && minSide < 320) || (2 == g_faceDistance && minSide < 180)) {
             ret = false;
         }
+        // if (confidence < 60) {
+        //     ret = false;
+        // }
 
         // 计算明暗矫正摄像头
         const cv::Mat rgaFrameFace = rgaFrame(rect);
@@ -545,6 +569,18 @@ bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, i
     return ret;
 }
 
+void faceRecognition(const std::string &address, const cv::Rect &rect) {
+    if (!initializedFaceRec) {
+        return;
+    }
+    const auto image = cv::imread(address);
+    if (image.empty()) {
+        logPrintln("Read pic error " + address, airstrip::WARN, __FUNCTION__);
+        return;
+    }
+    return faceRecognition(image, rect);
+}
+
 void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
     if (!initializedFaceRec) {
         return;
@@ -581,6 +617,17 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
         return;
     }
 
+    // HFloat quality;
+    // ret = HFFaceQualityDetect(faceRecognitionSession, multipleFaceData.tokens[0], &quality);
+    // logPrintln("Face quality is " + to_string(quality), airstrip::INFO, __FUNCTION__);
+    // 正常环境0.65没问题，其他恶劣或者黑暗环境未测试
+    // if (quality < 0.65 || ret != HSUCCEED) {
+    //     logPrintln("Face quality not meet " + to_string(quality),
+    //                airstrip::WARN, __FUNCTION__);
+    //     HFReleaseImageStream(stream);
+    //     return;
+    // }
+
     HFFaceFeature feature = {};
     ret = HFFaceFeatureExtract(faceRecognitionSession, stream,
                                multipleFaceData.tokens[0], &feature);
@@ -602,14 +649,21 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
     }
 
     if (searchResult.id <= 0 || faceUserInfoMap.find(searchResult.id) == faceUserInfoMap.end()) {
-        ScheduledTask::sendFaceRegRes({}, frame);
+        ScheduledTask::sendFaceRegRes({}, frame, 0.0);
         HFReleaseImageStream(stream);
         return;
     }
 
-    logPrintln("Face recognition ret id = " + to_string(searchResult.id) + " " + to_string(confidence),
+    const auto userData = faceUserInfoMap[searchResult.id];
+    logPrintln("Face recognition ret id = " + to_string(searchResult.id)
+               + " userId = " + userData.userId + " " + to_string(confidence),
                airstrip::INFO, __FUNCTION__);
-    ScheduledTask::sendFaceRegRes(faceUserInfoMap[searchResult.id], frame);
+    if ((!currentIsNight() && confidence < g_faceThreshold) || (
+            currentIsNight() && confidence < g_faceThresholdNight)) {
+        ScheduledTask::sendFaceRegRes({}, frame, 0.0);
+    } else {
+        ScheduledTask::sendFaceRegRes(userData, frame, confidence);
+    }
 
     HFReleaseImageStream(stream);
 }

@@ -3,6 +3,7 @@
 
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QMovie>
 #include <QPushButton>
 #include <opencv2/opencv.hpp>
 
@@ -16,6 +17,49 @@ public:
 
     void setLastFrame(const cv::Mat &frame) {
         lastFrame = frame.clone();
+    }
+
+    void enableRegisterBtn(const bool isEnable) const {
+        if (registerBtn) {
+            if (isEnable) {
+                registerBtn->setStyleSheet("background-color: rgb(13, 133, 255);");
+                registerBtn->setDisabled(false);
+            } else {
+                registerBtn->setDisabled(true);
+                registerBtn->setStyleSheet("background-color: rgba(13, 133, 255, 0.5);");
+            }
+        }
+    }
+
+    void loadingApi(const bool isStart) const {
+        if (errorTips && loadGif) {
+            if (isStart) {
+                errorTips->setMovie(loadGif);
+                loadGif->start();
+            } else {
+                loadGif->stop();
+                errorTips->setText(" ");
+            }
+        }
+    }
+
+    void resetTips(const bool isPositive, const std::string &data) const {
+        if (errorTips) {
+            if (isPositive) {
+#ifdef WIN32
+                errorTips->setStyleSheet("font-size: 12px; color: green");
+#else
+                errorTips->setStyleSheet("font-size: 24px; color: green");
+#endif
+            } else {
+#ifdef WIN32
+                errorTips->setStyleSheet("font-size: 12px; color: red");
+#else
+                errorTips->setStyleSheet("font-size: 24px; color: red");
+#endif
+            }
+            errorTips->setText(QString::fromStdString(data));
+        }
     }
 
 private:
@@ -40,7 +84,10 @@ private:
     QPushButton *cancelBtn = nullptr;
     QPushButton *registerBtn = nullptr;
 
+    QWidget* errorTipsWidget = nullptr;
+    QVBoxLayout* errorTipsLayout = nullptr;
     QLabel *errorTips = nullptr;
+    QMovie *loadGif = nullptr;
 
 
     cv::Mat lastFrame = {};

@@ -30,9 +30,14 @@ public:
 
     void updateFrameRK(const cv::Mat &frame);
 
-    void positiveMessage() const {
+    void positiveMessage(const std::string &extraStr = "") const {
         if (nullptr == successLabel) {
             return;
+        }
+        if (extraStr.empty()) {
+            successLabel->setText("核验通过");
+        } else {
+            successLabel->setText(QString::fromStdString(extraStr));
         }
         failLabel->hide();
         successLabel->show();

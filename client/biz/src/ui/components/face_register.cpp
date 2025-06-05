@@ -1,6 +1,7 @@
 #include "ui/components/face_register.h"
 
-#include <unistd.h>
+#include <airstrip_thread_pool.h>
+#include <thread>
 #include "api/api.h"
 #include "config/config.h"
 #include "ui/components/virtual_keyboard_number.h"
@@ -40,12 +41,28 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
 #else
     btnWidget->setFixedHeight(120);
 #endif
-    errorTips = new QLabel("");
+    errorTipsWidget = new QWidget(faceRegisterWidget);
+    errorTipsWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    errorTipsLayout = new QVBoxLayout(errorTipsWidget);
+    errorTipsLayout->setSpacing(0);
+    errorTipsLayout->setMargin(0);
+    errorTips = new QLabel(errorTipsWidget);
+    errorTipsLayout->addWidget(errorTips);
     errorTips->setAlignment(Qt::AlignCenter);
-    errorTips->setStyleSheet("margin-top: 5px; font-size: 16px; color: red");
+    loadGif = new QMovie(QString::fromStdString(
+        g_appWorkDir + "static/images/loading.gif"));
+    resetTips(true, "输入用户手机号检查是否包含门禁权限");
+#ifdef WIN32
+    errorTipsWidget->setFixedHeight(40);
+    loadGif->setScaledSize(QSize(30, 30));
+#else
+    errorTipsWidget->setFixedHeight(80);
+    loadGif->setScaledSize(QSize(60, 60));
+#endif
+
     faceRegisterLayout->addWidget(faceRegisterTitle);
     faceRegisterLayout->addWidget(phoneNumberWidget);
-    faceRegisterLayout->addWidget(errorTips);
+    faceRegisterLayout->addWidget(errorTipsWidget);
     faceRegisterLayout->addWidget(btnWidget);
 
     // Input
@@ -145,24 +162,34 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
     registerBtn = new QPushButton("确认", btnWidget);
     connect(registerBtn, &QPushButton::clicked, this,
             [=] {
+                if (g_onFaceRegisterProcess) {
+                    return;
+                }
+                g_onFaceRegisterProcess = true;
                 const auto phoneNumber = phoneNumberFirst->text() +
                                          phoneNumberSecond->text() +
                                          phoneNumberThird->text();
                 if (phoneNumber.size() != 11) {
-                    errorTips->setText("手机号码格式错误");
+                    resetTips(false, "手机号码格式错误");
+                    g_onFaceRegisterProcess = false;
                 } else {
                     if (lastFrame.empty()) {
-                        errorTips->setText("图片采集质量不合格，请取消后重试");
+                        resetTips(false, "图片采集质量不合格，请取消后重试");
+                        g_onFaceRegisterProcess = false;
                     } else {
-                        errorTips->setText("信息查询中...");
-                        const auto ret = faceGrant(lastFrame, phoneNumber.toStdString());
-                        if (ret) {
-                            errorTips->setText("录入成功");
-                            sleep(3);
-                            this->hide();
-                        } else {
-                            errorTips->setText("未查询到配租信息，请联系窗口服务");
-                        }
+                        loadingApi(true);
+                        enableRegisterBtn(false);
+                        static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([this, phoneNumber] {
+                            const auto ret = faceGrant(lastFrame, phoneNumber.toStdString());
+                            loadingApi(false);
+                            if (ret) {
+                                this->hide();
+                            } else {
+                                resetTips(false, "未查询到配租信息，请联系窗口服务");
+                            }
+                            g_onFaceRegisterProcess = false;
+                            this->enableRegisterBtn(true);
+                        });
                     }
                 }
             });
@@ -179,6 +206,8 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
 
 void FaceRegister::showEvent(QShowEvent *) {
     g_closeFaceRecognition = true;
+
+    resetTips(true, "输入用户手机号检查是否包含门禁权限");
 }
 
 void FaceRegister::hideEvent(QHideEvent *) {
@@ -194,9 +223,13 @@ void FaceRegister::hideEvent(QHideEvent *) {
         phoneNumberFirst->setText("");
         phoneNumberFirst->setFocus();
     }
-    if (nullptr != errorTips) {
-        errorTips->setText("");
+    if (nullptr != loadGif) {
+        loadGif->stop();
     }
+    if (nullptr != errorTips) {
+        resetTips(true, "输入用户手机号检查是否包含门禁权限");
+    }
+    VirtualKeyboardNumber::getInstance()->hideKeyboard();
     lastFrame.release();
 }
 
