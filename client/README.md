@@ -7,12 +7,11 @@
 * 本客户端可以在`Windows`和`Linux`环境下编译运行。以下内容，默认`Windows`为开发环境，`Linux`为交叉编译生产环境。当然，你可以将
   `Linux`也作为开发环境，这样更简单，但是需要改变部分预编译代码
 * 编译`airstrip`和`biz`前，记得修改`CMakeList.txt`中关于所需库位置的环境变量
-* 本代码在X86_64 Windows（测试）和ARM Linux（正式）正常运行，其他平台未测试，可能需要修改部分预编译代码
+* 本代码在X86_64 Windows（测试）和ARM Linux（正式）正常运行，其他平台未测试，需要修改部分预编译代码
 
 ### Windows开发环境编译流程
 
-* 下载Qt到本地，并设置环境变量，可以参考
-  [使用CLion开发Qt应用的基本方法](https://www.astercasc.com/article/detail?articleId=AT175475147755096064)
+* 下[Qt](https://www.qt.io/)到本地，并构建，设置环境变量
 * 下载[Boost]((https://www.boost.org/))到本地，并构建
 * 下载[SQLiteCpp](https://github.com/SRombauts/SQLiteCpp)到本地，并构建
 * 下载[OpenCV](https://opencv.org/)到本地，并构建
@@ -23,6 +22,7 @@
 
 #### 编译提示
 
+* 使用`CLion`跑测试环境可以参考，可以参考[使用CLion开发Qt应用的基本方法](https://www.astercasc.com/article/detail?articleId=AT175475147755096064)
 * Windows下使用`MinGW`编译`Boost`
   ，这里我将可能遇到的问题放在了[Windows下构建使用MinGW构建Boost](https://www.astercasc.com/article/detail?articleId=AT188739606681985433)
   可以参考，其他环境比较简单，参考官方文档即可
