@@ -150,8 +150,10 @@ namespace airstrip {
                 try {
                     boost::filesystem::remove(tempFileName);
                 } catch (const std::exception &e) {
-                    logPrintln("Failed to remove temp file: " + tempFileName + ", error: " + e.what(), WARN,
-                               __FUNCTION__);
+                    std::ostringstream oss;
+                    oss << "Failed to remove temp file: " <<
+                            tempFileName << ", error: " << (e.what() ? e.what() : "unknown");
+                    logPrintln(oss.str(), WARN, __FUNCTION__);
                 }
             }
 
@@ -179,7 +181,7 @@ namespace airstrip {
             return Response{true, stoi(result.substr(pos + 1)), body, ""};
         } catch (const std::exception &e) {
             stringstream errorEx;
-            errorEx << "Exception while executing command: " << e.what();
+            errorEx << "Exception while executing command: " << (e.what() ? e.what() : "unknown");
             logPrintln(errorEx.str(), WARN, __FUNCTION__);
             return Response{false, 0, "", ""};
         }
