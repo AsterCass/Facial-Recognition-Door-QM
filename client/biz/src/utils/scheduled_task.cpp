@@ -89,7 +89,7 @@ void updatePersistentData() {
         }
     }
     // Backup data
-    {
+    if (g_needBackup) {
         logPrintln("Start backup data thread");
         static_cast<ThreadPool *>(g_mainThreadPool)->enqueue([] {
             logPrintln("Start backup data");
@@ -188,8 +188,7 @@ void updateUIMainComponentHeader() {
     }
 
     // Wired
-    logPrintln("Start update wired", DEBUG, __FUNCTION__);
-    {
+    logPrintln("Start update wired", DEBUG, __FUNCTION__); {
 #ifdef WIN32
         const string wiredIp = execScript(g_appWorkDir + "script/win/get_wired_ip.ps1");
 #else
@@ -219,14 +218,12 @@ void updateUIMainComponentHeader() {
     }
 
     // Cloud
-    logPrintln("Start update cloud", DEBUG, __FUNCTION__);
-    {
+    logPrintln("Start update cloud", DEBUG, __FUNCTION__); {
         GlobalDataManager::getInstance()->updateHeaderServer(linkedServer());
     }
 
     // Auto close face register
-    logPrintln("Start update register", DEBUG, __FUNCTION__);
-    {
+    logPrintln("Start update register", DEBUG, __FUNCTION__); {
         if (lastShowFaceRegisterTime > 0 && time - lastShowFaceRegisterTime > 60) {
             MainRouter::getInstance()->hideFaceRegister();
             lastShowFaceRegisterTime = 0;
@@ -234,8 +231,7 @@ void updateUIMainComponentHeader() {
     }
 
     // Connect
-    logPrintln("Start update connect", DEBUG, __FUNCTION__);
-    {
+    logPrintln("Start update connect", DEBUG, __FUNCTION__); {
         static int reconnectCount = 1;
         // wireless
         if (g_netModel == 2 && reconnectCount++ > 0) {
@@ -275,8 +271,6 @@ void updateUIMainComponentHeader() {
 #endif
         }
     }
-
-
 
 
     logPrintln("Start bar label update finish", DEBUG, __FUNCTION__);

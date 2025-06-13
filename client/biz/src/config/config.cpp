@@ -45,3 +45,4 @@ int g_camLight;
 int g_fullFaceCompare;
 int g_faceRegIvSec;
 int g_faceRegCoreIvMillSec;
+int g_needBackup;

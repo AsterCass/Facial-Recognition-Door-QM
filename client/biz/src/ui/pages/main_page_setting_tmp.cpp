@@ -121,6 +121,7 @@ MainSettingTmp::MainSettingTmp(QWidget *parent): QWidget(parent) {
     faceThresholdNightLabel->setWordWrap(true);
     faceThresholdNight = new QLineEditPro(scrollContent);
     fullFaceCompare = new QCheckBox("核验人脸全量比对（重启生效）", scrollContent);
+    needBackup = new QCheckBox("数据备份（较多流量，4G模式下慎用）", scrollContent);
     volLabel = new QLabel("设备音量（0 - 100）：", scrollContent);
     vol = new QLineEditPro(scrollContent);
     faceRegCoreIvMillSecLabel = new QLabel("机器识别超频（0-1000，推荐 500）（0为极致超频，高温下可能会过热关机）：", scrollContent);
@@ -368,6 +369,13 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
                         g_commonDb.upsertConfig(
                             PRO_DB_FACE_REG_CORE_IV_MILL_SEC, to_string(g_faceRegCoreIvMillSec));
                     }
+
+                    const auto newNeedBackup = needBackup->isChecked() ? 1 : 0;
+                    if (g_needBackup != newNeedBackup) {
+                        g_needBackup = newNeedBackup;
+                        g_commonDb.upsertConfig(
+                            PRO_DB_NEED_BACKUP, to_string(g_needBackup));
+                    }
                 } catch (const std::exception &e) {
                     ostringstream errMsg;
                     errMsg << "Save config data error :" << e.what();
@@ -484,6 +492,7 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     showConfUser->setCheckState(g_showConfUser ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     camAutoLight->setCheckState(g_camAutoLight ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     fullFaceCompare->setCheckState(g_fullFaceCompare ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+    needBackup->setCheckState(g_needBackup ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
     netModelGroup->button(g_netModel)->setChecked(true);
     wifiAccount->setText(QString::fromStdString(g_wifiAccount));
     wifiPasswdEdit->setText(QString::fromStdString(g_wifiPasswd));

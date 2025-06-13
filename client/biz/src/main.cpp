@@ -471,6 +471,22 @@ int main(int argc, char *argv[]) {
                 g_faceRegCoreIvMillSec = 500;
             }
         }
+        // update common set v="0" where k="needBackup";
+        {
+            std::string needBackup = g_commonDb.getConfig(PRO_DB_NEED_BACKUP);
+            if (needBackup.empty()) {
+                g_commonDb.upsertConfig(PRO_DB_NEED_BACKUP, "0");
+                needBackup = "0";
+            }
+            try {
+                g_needBackup = stoi(needBackup);
+            } catch (const std::exception &e) {
+                std::ostringstream errMsg;
+                errMsg << "Load data needBackup error " << e.what();
+                logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                g_needBackup = 0;
+            }
+        }
 
         logPrintln("Db finish", airstrip::INFO, __FUNCTION__);
     }

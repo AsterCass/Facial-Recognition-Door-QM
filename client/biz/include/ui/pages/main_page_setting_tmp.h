@@ -64,6 +64,7 @@ private:
     QCheckBox *showConfUser;
     QCheckBox *camAutoLight;
     QCheckBox *fullFaceCompare;
+    QCheckBox *needBackup;
 
     QLabel *netModelLabel;
     QWidget *netModelWidget;

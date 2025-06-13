@@ -45,6 +45,7 @@ constexpr auto PRO_DB_CAM_LIGHT = "camLight";
 constexpr auto PRO_DB_FULL_FACE_COMPARE = "fullFaceCompare";
 constexpr auto PRO_DB_FACE_REG_IV_SEC = "faceRegIvSec";
 constexpr auto PRO_DB_FACE_REG_CORE_IV_MILL_SEC = "faceRegCoreIvMillSec";
+constexpr auto PRO_DB_NEED_BACKUP = "needBackup";
 
 
 const std::vector<std::string> CHINESE_WEEK = {
@@ -141,6 +142,7 @@ extern int g_camLight;
 extern int g_fullFaceCompare;
 extern int g_faceRegIvSec;
 extern int g_faceRegCoreIvMillSec;
+extern int g_needBackup;
 
 // function
 
