@@ -33,12 +33,12 @@ MainSettingLogin::MainSettingLogin(QWidget *parent): QWidget(parent) {
     passwd->setStyleSheet(
         "background-color: rgb(28, 50, 79); font-size: 16px; border-radius: 8px; "
         "padding-left: 8px; padding-right: 8px; color: white; margin: 10px");
-    passwd->setFixedHeight(50);
+    passwd->setFixedHeight(75);
 #else
     passwd->setStyleSheet(
         "background-color: rgb(28, 50, 79); font-size: 32px; border-radius: 8px; "
         "padding-left: 16px; padding-right: 16px; color: white; margin: 20px");
-    passwd->setFixedHeight(100);
+    passwd->setFixedHeight(150);
 #endif
 
 
@@ -49,17 +49,17 @@ MainSettingLogin::MainSettingLogin(QWidget *parent): QWidget(parent) {
 #ifdef WIN32
     loginBtn->setStyleSheet(
         "background-color: rgb(13, 133, 255); color: white; border-radius: 8px;box-shadow: none;"
-        " height: 30px; font-size: 20px");
+        " height: 35px; font-size: 20px");
     cancelBtn->setStyleSheet(
         "background-color: rgb(101, 101, 101); color: white; border-radius: 8px;box-shadow: none;"
-        " height: 30px; font-size: 20px");
+        " height: 35px; font-size: 20px");
 #else
     loginBtn->setStyleSheet(
         "background-color: rgb(13, 133, 255); color: white; border-radius: 16px;box-shadow: none;"
-        " height: 60px; font-size: 40px");
+        " height: 70px; font-size: 40px");
     cancelBtn->setStyleSheet(
         "background-color: rgb(101, 101, 101); color: white; border-radius: 16px;box-shadow: none;"
-        " height: 60px; font-size: 40px");
+        " height: 70px; font-size: 40px");
 #endif
 
     connect(cancelBtn, &QPushButton::clicked, this,

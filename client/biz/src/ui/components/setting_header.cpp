@@ -36,6 +36,9 @@ SettingHeader::SettingHeader(QWidget *parent, const std::string &titleStr,
     QPushButton:hover {
         text-decoration: underline;
     }
+    QPushButton:focus {
+        outline: none;
+    }
 )");
     connect(leftBtn, &QPushButton::clicked, this,
             [=] {
