@@ -124,6 +124,7 @@ set(PROJECT_SOURCES
         src/ui/components/notification.cpp
         src/ui/components/common_components.cpp
         src/ui/components/face_register.cpp
+        src/ui/components/setting_header.cpp
         src/ui/pages/main_page_init.cpp
         src/ui/pages/main_page_home.cpp
         src/ui/pages/main_page_setting_login.cpp
