@@ -2,14 +2,15 @@
 
 #include <QLabel>
 #include <QWidget>
+#include <ui/main_router.h>
 
 
 SettingHeader::SettingHeader(QWidget *parent, const std::string &titleStr,
                              QPushButton *btn): QWidget(parent) {
 #ifdef WIN32
-    setFixedHeight(90);
+    setFixedHeight(50);
 #else
-    setFixedHeight(180);
+    setFixedHeight(100);
 #endif
     setStyleSheet("background-color: rgb(4, 9, 12);");
 
@@ -36,6 +37,10 @@ SettingHeader::SettingHeader(QWidget *parent, const std::string &titleStr,
         text-decoration: underline;
     }
 )");
+    connect(leftBtn, &QPushButton::clicked, this,
+            [=] {
+                MainRouter::getInstance()->backPage();
+            });
     leftLayout->addWidget(leftBtn, 0, Qt::AlignLeft);
     leftLayout->addStretch();
 

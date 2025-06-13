@@ -431,6 +431,7 @@ airstrip::execScript(g_appWorkDir + "script/linux/reset_vol.sh " + std::to_strin
     scrollerAreaLayout->addWidget(faceThresholdNightLabel);
     scrollerAreaLayout->addWidget(faceThresholdNight);
     scrollerAreaLayout->addWidget(fullFaceCompare);
+    scrollerAreaLayout->addWidget(needBackup);
     scrollerAreaLayout->addWidget(volLabel);
     scrollerAreaLayout->addWidget(vol);
     scrollerAreaLayout->addWidget(faceRegCountLabel);
