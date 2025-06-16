@@ -483,6 +483,11 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
         return;
     }
 
+    if (g_closeFaceRecognition) {
+        logPrintln("Enter setting page", INFO, __FUNCTION__);
+        return;
+    }
+
     if (!userInfo.userId.empty()) {
         if (!userInfo.isEnable) {
             CameraFrame::getInstance()->negativeMessage();

@@ -24,7 +24,7 @@ VirtualKeyboard::VirtualKeyboard(QWidget *parent): QWidget(parent) {
     mainScreenWidget->setObjectName("VirtualKeyboardMask");
     mainScreenWidget->setStyleSheet("background-color: rgba(0, 0, 0, 100);");
     keyboardWidget->setObjectName("VirtualKeyboardBody");
-    keyboardWidget->setStyleSheet("background-color: white");
+    keyboardWidget->setStyleSheet("background-color: rgb(52, 52, 52)");
     layout->addWidget(mainScreenWidget, 2);
     layout->addWidget(keyboardWidget, 1);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -47,6 +47,9 @@ VirtualKeyboard::VirtualKeyboard(QWidget *parent): QWidget(parent) {
         int col = 0;
         for (auto &key: keyRow) {
             key.btn = new QPushButton(QString::fromStdString(key.key), keyboardWidget);
+            key.btn->setFlat(true);
+            key.btn->setStyleSheet(
+                "background-color: rgb(113, 113, 113); color: white; border-radius: 4px;");
             QFont font = key.btn->font();
             font.setPointSize(5);
             key.btn->setFont(font);
