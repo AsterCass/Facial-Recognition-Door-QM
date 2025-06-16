@@ -8,10 +8,13 @@
 MainComponentHeader::MainComponentHeader(QWidget *parent): QWidget(parent) {
     // Main widget
     {
+#ifdef WIN32
+        setFixedHeight(40);
+#else
+        setFixedHeight(80);
+#endif
         this->setAutoFillBackground(true);
-        auto pal = this->palette();
-        pal.setColor(QPalette::Window, QColor(4, 9, 12));
-        this->setPalette(pal);
+        setStyleSheet("background-color: rgb(31, 31, 31);");
     }
 
     // Main layout

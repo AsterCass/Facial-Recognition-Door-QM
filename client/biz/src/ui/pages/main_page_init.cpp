@@ -21,8 +21,8 @@ MainPageInit::MainPageInit(QWidget *parent): QWidget(parent) {
             .append("static/images/bg-launch.png)}");
     body->setStyleSheet(styleSheet);
 
-    mainLayout->addWidget(header, 1);
-    mainLayout->addWidget(body, 17);
+    mainLayout->addWidget(header);
+    mainLayout->addWidget(body);
 }
 
 

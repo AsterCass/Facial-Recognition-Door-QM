@@ -8,8 +8,8 @@
 
 class SettingHeader final : public QWidget {
 public:
-    SettingHeader(QWidget *parent = nullptr, const std::string &titleStr = "",
-                  QPushButton *btn = nullptr);
+    explicit SettingHeader(QWidget *parent = nullptr, const std::string &titleStr = "",
+                           QPushButton *btn = nullptr);
 
     ~SettingHeader() override;
 

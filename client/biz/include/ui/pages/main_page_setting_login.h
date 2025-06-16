@@ -5,7 +5,8 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QWidget>
-#include <ui/components/setting_header.h>
+#include "ui/components/main_component_header.h"
+#include "ui/components/setting_header.h"
 
 
 class QLineEditPro;
@@ -32,6 +33,7 @@ private:
     QPushButton *cancelBtn = nullptr;
 
     SettingHeader *settingHeader = nullptr;
+    MainComponentHeader *mainHeader = nullptr;
 };
 
 

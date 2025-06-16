@@ -14,8 +14,8 @@ MainPageHome::MainPageHome(QWidget *parent): QWidget(parent) {
     header = new MainComponentHeader(this);
     body = CameraFrame::getInstance();
 
-    mainLayout->addWidget(header, 1);
-    mainLayout->addWidget(body, 17);
+    mainLayout->addWidget(header);
+    mainLayout->addWidget(body);
 }
 
 

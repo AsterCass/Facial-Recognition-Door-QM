@@ -45,7 +45,7 @@ CameraFrame::CameraFrame(QWidget *parent): QWidget(parent) {
         mask->setObjectName("cameraFrameMask");
         mask->setStyleSheet("#cameraFrameMask{background-color:qlineargradient("
             "spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(0, 0, 0,0 "
-            "),stop:0.85 rgba(0, 0, 0,0 ) ,stop:1 #000000)}");
+            "),stop:0.85 rgba(0, 0, 0,0 ) ,stop:1 #1f1f1f)}");
         mainLayout = new QVBoxLayout(mask);
 
         // bottom and info
