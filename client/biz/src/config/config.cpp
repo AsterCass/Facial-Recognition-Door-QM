@@ -9,6 +9,8 @@ int g_tryGoManagementCount = 0;
 
 bool g_closeFaceRecognition = true;
 
+bool g_closeFaceRecognitionRegister = true;
+
 bool g_onFaceRegisterProcess = false;
 
 int g_currentLightLevel = 13;

@@ -205,13 +205,13 @@ FaceRegister::FaceRegister(QWidget *parent): QWidget(parent) {
 
 
 void FaceRegister::showEvent(QShowEvent *) {
-    g_closeFaceRecognition = true;
+    g_closeFaceRecognitionRegister = true;
 
     resetTips(true, "输入用户手机号检查是否包含门禁权限");
 }
 
 void FaceRegister::hideEvent(QHideEvent *) {
-    g_closeFaceRecognition = false;
+    g_closeFaceRecognitionRegister = false;
 
     if (nullptr != phoneNumberThird) {
         phoneNumberThird->setText("");

@@ -103,7 +103,7 @@ void processWithMb(bool isIr, MEDIA_BUFFER mb) {
 
 void processWithMbIr(MEDIA_BUFFER mb) {
     if (closeProcess)return;
-    if (g_onFaceFrameIr || g_closeFaceRecognition) {
+    if (g_onFaceFrameIr || g_closeFaceRecognition || g_closeFaceRecognitionRegister) {
         RK_MPI_MB_ReleaseBuffer(mb);
         return;
     }
@@ -113,7 +113,7 @@ void processWithMbIr(MEDIA_BUFFER mb) {
 
 void processWithMbRga(MEDIA_BUFFER mb) {
     if (closeProcess)return;
-    if (g_onFaceFrameRga || g_closeFaceRecognition) {
+    if (g_onFaceFrameRga || g_closeFaceRecognition || g_closeFaceRecognitionRegister) {
         RK_MPI_MB_ReleaseBuffer(mb);
         return;
     }

@@ -106,6 +106,8 @@ extern int g_tryGoManagementCount;
 
 extern bool g_closeFaceRecognition;
 
+extern bool g_closeFaceRecognitionRegister;
+
 extern bool g_onFaceRegisterProcess;
 
 extern int g_currentLightLevel;
