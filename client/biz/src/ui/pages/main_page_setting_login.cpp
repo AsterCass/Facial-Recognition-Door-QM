@@ -70,7 +70,7 @@ MainSettingLogin::MainSettingLogin(QWidget *parent): QWidget(parent) {
     connect(loginBtn, &QPushButton::clicked, this,
             [=] {
                 if (passwd->text().toStdString() == g_managementPassword) {
-                    MainRouter::getInstance()->addPage(MAIN_PAGE_SETTING_TMP);
+                    MainRouter::getInstance()->addPage(MAIN_PAGE_SETTING_MAIN);
                 }
                 passwd->setText("");
             });

@@ -48,6 +48,7 @@ enum MainPage {
     MAIN_PAGE_HOME,
     MAIN_PAGE_SETTING_LOGIN,
     MAIN_PAGE_SETTING_TMP,
+    MAIN_PAGE_SETTING_MAIN,
 };
 
 enum ZFCardType {
