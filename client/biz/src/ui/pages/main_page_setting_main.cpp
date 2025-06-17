@@ -27,7 +27,7 @@ void setSettingMainItem(QToolButton *button, const string &name, const string &a
             font-size: 14px;
         }
     )");
-#elif
+#else
     button->setFixedSize(100, 100);
     button->setFixedSize(230, 230);
     button->setStyleSheet(R"(
