@@ -80,7 +80,7 @@ MainSettingMain::MainSettingMain(QWidget *parent): QWidget(parent) {
     settingDoor = new QToolButton(settingBody);
     setSettingMainItem(settingDoor, "开发中", g_appWorkDir + "static/images/setting-door.svg");
     settingMaintain = new QToolButton(settingBody);
-    setSettingMainItem(settingMaintain, "开发中", g_appWorkDir + "static/images/setting-maintain.svg");
+    setSettingMainItem(settingMaintain, "开发中", g_appWorkDir + "static/images/setting-maintain.png");
 
     settingMainLayout->addWidget(settingInfo, 0, 0);
     settingMainLayout->addWidget(settingNetwork, 0, 1);
