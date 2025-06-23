@@ -53,10 +53,10 @@ MainSettingServer::MainSettingServer(QWidget *parent): QWidget(parent) {
         addressLayout->setSpacing(20);
 #ifdef WIN32
         address->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 8px; font-size: 14px; color: white");
-        address->setFixedHeight(60);
+        address->setFixedHeight(50);
 #else
         address->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: white");
-        address->setFixedHeight(120);
+        address->setFixedHeight(100);
 #endif
         addressLabel = new QLabel("服务器地址", address);
         addressInput = new QLineEditPro(address);
@@ -66,11 +66,16 @@ MainSettingServer::MainSettingServer(QWidget *parent): QWidget(parent) {
                 QLineEdit {
                         padding-right: 20px;
                 }
-                QLineEdit:focus {
-                        background-color: rgb(27, 50, 77);
-                        border: 2px solid rgb(13, 133, 255);
-                }
         )");
+        // addressInput->setStyleSheet(R"(
+        //         QLineEdit {
+        //                 padding-right: 20px;
+        //         }
+        //         QLineEdit:focus {
+        //                 background-color: rgb(27, 50, 77);
+        //                 border: 2px solid rgb(13, 133, 255);
+        //         }
+        // )");
         connect(addressInput, &QLineEdit::textChanged, this, [this](const QString &text) {
             if (save == nullptr) {
                 return;
