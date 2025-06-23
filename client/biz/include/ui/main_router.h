@@ -18,7 +18,7 @@ public:
         return &instance;
     }
 
-    void addPage(MainPage page) const;
+    void addPage(MainPage page);
 
     void removePageFromTop(MainPage page) const;
 
@@ -28,11 +28,11 @@ public:
 
     void backUntilPage(MainPage page) const;
 
-    void showFaceRegister(const cv::Mat &frame) const;
+    void showFaceRegister(const cv::Mat &frame);
 
-    void hideFaceRegister() const;
+    void hideFaceRegister();
 
-    void mainNotificationShow(const std::string &text, const std::function<void(bool)>& callback) const;
+    void mainNotificationShow(const std::string &text, const std::function<void(bool)> &callback);
 
 private:
     explicit MainRouter(QWidget *parent = nullptr);

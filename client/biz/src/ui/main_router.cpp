@@ -30,28 +30,64 @@ void printMainRouterQueue(const string &functionName) {
     logPrintln(oss.str(), airstrip::INFO, functionName);
 }
 
-void MainRouter::showFaceRegister(const cv::Mat &frame) const {
+void MainRouter::showFaceRegister(const cv::Mat &frame) {
+    // 投递到主线程
+    if (QThread::currentThread() != this->thread()) {
+        QMetaObject::invokeMethod(this, [this, frame] {
+            showFaceRegister(frame);
+        }, Qt::QueuedConnection);
+        return;
+    }
+
+
     if (nullptr != faceRegister) {
         faceRegister->setLastFrame(frame);
         faceRegister->show();
     }
 }
 
-void MainRouter::hideFaceRegister() const {
+void MainRouter::hideFaceRegister() {
+    // 投递到主线程
+    if (QThread::currentThread() != this->thread()) {
+        QMetaObject::invokeMethod(this, [this] {
+            hideFaceRegister();
+        }, Qt::QueuedConnection);
+        return;
+    }
+
+
     if (nullptr != faceRegister) {
         faceRegister->hide();
     }
 }
 
-void MainRouter::mainNotificationShow(const std::string &text, const std::function<void(bool)> &callback) const {
+void MainRouter::mainNotificationShow(const std::string &text, const std::function<void(bool)> &callback) {
+    // 投递到主线程
+    if (QThread::currentThread() != this->thread()) {
+        QMetaObject::invokeMethod(this, [this, text, callback] {
+            mainNotificationShow(text, callback);
+        }, Qt::QueuedConnection);
+        return;
+    }
+
+
     if (nullptr != notification) {
         notification->setMessage(text, callback);
     }
 }
 
 
-void MainRouter::addPage(const MainPage page) const {
+void MainRouter::addPage(const MainPage page) {
     if (nullptr == stackedWidget) return;
+
+    // 投递到主线程
+    if (QThread::currentThread() != this->thread()) {
+        QMetaObject::invokeMethod(this, [this, page] {
+            addPage(page);
+        }, Qt::QueuedConnection);
+        return;
+    }
+
 
     lock_guard<mutex> lock(stackChangeMutex);
 

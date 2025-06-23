@@ -4,6 +4,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QThread>
 
 class VirtualKeyboardNumberMaskEventFilter final : public QObject {
 protected:
@@ -23,11 +24,27 @@ public:
     }
 
     void hideKeyboard() {
+        // 投递到主线程
+        if (QThread::currentThread() != this->thread()) {
+            QMetaObject::invokeMethod(this, [this] {
+                hideKeyboard();
+            }, Qt::QueuedConnection);
+            return;
+        }
+
         currentInput = nullptr;
         this->hide();
     }
 
     void showKeyboard(QLineEdit *input) {
+        // 投递到主线程
+        if (QThread::currentThread() != this->thread()) {
+            QMetaObject::invokeMethod(this, [this, input] {
+                showKeyboard(input);
+            }, Qt::QueuedConnection);
+            return;
+        }
+
         currentInput = input;
         this->show();
     }

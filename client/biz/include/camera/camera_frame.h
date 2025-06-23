@@ -3,6 +3,7 @@
 #include <QLabel>
 #include <QWidget>
 #include <QVBoxLayout>
+#include <QThread>
 #include <opencv2/core.hpp>
 #ifdef Q_OS_WIN
 #include <QCamera>
@@ -30,10 +31,19 @@ public:
 
     void updateFrameRK(const cv::Mat &frame);
 
-    void positiveMessage(const std::string &extraStr = "") const {
+    void positiveMessage(const std::string &extraStr = "") {
         if (nullptr == successLabel) {
             return;
         }
+
+        // 投递到主线程
+        if (QThread::currentThread() != this->thread()) {
+            QMetaObject::invokeMethod(this, [this, extraStr] {
+                positiveMessage(extraStr);
+            }, Qt::QueuedConnection);
+            return;
+        }
+
         if (extraStr.empty()) {
             successLabel->setText("核验通过");
         } else {
@@ -43,18 +53,36 @@ public:
         successLabel->show();
     }
 
-    void negativeMessage() const {
+    void negativeMessage() {
         if (nullptr == failLabel) {
             return;
         }
+
+        // 投递到主线程
+        if (QThread::currentThread() != this->thread()) {
+            QMetaObject::invokeMethod(this, [this] {
+                negativeMessage();
+            }, Qt::QueuedConnection);
+            return;
+        }
+
         successLabel->hide();
         failLabel->show();
     }
 
-    void hideAllMessage() const {
+    void hideAllMessage() {
         if (nullptr == failLabel || nullptr == successLabel) {
             return;
         }
+
+        // 投递到主线程
+        if (QThread::currentThread() != this->thread()) {
+            QMetaObject::invokeMethod(this, [this] {
+                hideAllMessage();
+            }, Qt::QueuedConnection);
+            return;
+        }
+
         successLabel->hide();
         failLabel->hide();
     }

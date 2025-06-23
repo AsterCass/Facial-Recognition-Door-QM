@@ -2,6 +2,7 @@
 
 #include <QLabel>
 #include <QWidget>
+#include <QThread>
 
 
 Notification::Notification(QWidget *parent): QWidget(parent) {
@@ -80,6 +81,13 @@ Notification::~Notification() = default;
 
 
 void Notification::setMessage(const std::string &message, const std::function<void(bool)> &callback) {
+    // 投递到主线程
+    if (QThread::currentThread() != this->thread()) {
+        QMetaObject::invokeMethod(this, [this, message, callback] {
+            setMessage(message, callback);
+        }, Qt::QueuedConnection);
+        return;
+    }
     confirmCallback = callback;
     messageLabel->setText(QString::fromStdString(message));
     this->show();

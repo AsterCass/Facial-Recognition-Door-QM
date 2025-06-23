@@ -6,6 +6,7 @@
 #include <QMovie>
 #include <QPushButton>
 #include <opencv2/opencv.hpp>
+#include <QThread>
 
 #include "ui/components/common_components.h"
 
@@ -19,7 +20,15 @@ public:
         lastFrame = frame.clone();
     }
 
-    void enableRegisterBtn(const bool isEnable) const {
+    void enableRegisterBtn(const bool isEnable) {
+        // 投递到主线程
+        if (QThread::currentThread() != this->thread()) {
+            QMetaObject::invokeMethod(this, [this, isEnable] {
+                enableRegisterBtn(isEnable);
+            }, Qt::QueuedConnection);
+            return;
+        }
+
         if (registerBtn) {
             if (isEnable) {
                 registerBtn->setStyleSheet("background-color: rgb(13, 133, 255);");
@@ -31,7 +40,15 @@ public:
         }
     }
 
-    void loadingApi(const bool isStart) const {
+    void loadingApi(const bool isStart) {
+        // 投递到主线程
+        if (QThread::currentThread() != this->thread()) {
+            QMetaObject::invokeMethod(this, [this, isStart] {
+                loadingApi(isStart);
+            }, Qt::QueuedConnection);
+            return;
+        }
+
         if (errorTips && loadGif) {
             if (isStart) {
                 errorTips->setMovie(loadGif);
@@ -43,7 +60,16 @@ public:
         }
     }
 
-    void resetTips(const bool isPositive, const std::string &data) const {
+    void resetTips(const bool isPositive, const std::string &data) {
+        // 投递到主线程
+        if (QThread::currentThread() != this->thread()) {
+            QMetaObject::invokeMethod(this, [this, isPositive, data] {
+                resetTips(isPositive, data);
+            }, Qt::QueuedConnection);
+            return;
+        }
+
+
         if (errorTips) {
             if (isPositive) {
 #ifdef WIN32
@@ -84,8 +110,8 @@ private:
     QPushButton *cancelBtn = nullptr;
     QPushButton *registerBtn = nullptr;
 
-    QWidget* errorTipsWidget = nullptr;
-    QVBoxLayout* errorTipsLayout = nullptr;
+    QWidget *errorTipsWidget = nullptr;
+    QVBoxLayout *errorTipsLayout = nullptr;
     QLabel *errorTips = nullptr;
     QMovie *loadGif = nullptr;
 
