@@ -60,11 +60,7 @@ MainSettingMain::MainSettingMain(QWidget *parent): QWidget(parent) {
     settingMainLayout->setContentsMargins(0, 10, 0, 0);
 
     settingInfo = new QToolButton(settingBody);
-    setSettingMainItem(settingInfo, "门禁参数设置", g_appWorkDir + "static/images/setting-info.svg");
-    connect(settingInfo, &QPushButton::clicked, this,
-            [=] {
-                MainRouter::getInstance()->addPage(MAIN_PAGE_SETTING_TMP);
-            });
+    setSettingMainItem(settingInfo, "开发中", g_appWorkDir + "static/images/setting-info.svg");
     settingNetwork = new QToolButton(settingBody);
     setSettingMainItem(settingNetwork, "开发中", g_appWorkDir + "static/images/setting-network.svg");
     settingLog = new QToolButton(settingBody);
@@ -75,7 +71,11 @@ MainSettingMain::MainSettingMain(QWidget *parent): QWidget(parent) {
     settingSystem = new QToolButton(settingBody);
     setSettingMainItem(settingSystem, "开发中", g_appWorkDir + "static/images/setting-system.svg");
     settingServer = new QToolButton(settingBody);
-    setSettingMainItem(settingServer, "开发中", g_appWorkDir + "static/images/setting-server.svg");
+    setSettingMainItem(settingServer, "服务器设置", g_appWorkDir + "static/images/setting-server.svg");
+    connect(settingServer, &QPushButton::clicked, this,
+            [=] {
+                MainRouter::getInstance()->addPage(MAIN_PAGE_SETTING_SERVER);
+            });
 
     settingDoor = new QToolButton(settingBody);
     setSettingMainItem(settingDoor, "开发中", g_appWorkDir + "static/images/setting-door.svg");

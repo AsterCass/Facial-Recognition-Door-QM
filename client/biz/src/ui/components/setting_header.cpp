@@ -12,7 +12,7 @@ SettingHeader::SettingHeader(QWidget *parent, const std::string &titleStr,
 #else
     setFixedHeight(100);
 #endif
-    setStyleSheet("background-color: rgb(4, 9, 12);");
+    setStyleSheet("background-color: rgb(31, 31, 31);");
 
     // 主布局（用于撑满宽度）
     mainLayout = new QHBoxLayout(this);
@@ -68,6 +68,25 @@ SettingHeader::SettingHeader(QWidget *parent, const std::string &titleStr,
     rightLayout->setContentsMargins(0, 0, 20, 0);
     rightLayout->addStretch();
     if (btn) {
+        btn->setParent(this);
+        btn->setStyleSheet(R"(
+    QPushButton {
+        border: none;
+        background: transparent;
+        color: rgb(13, 133, 255);
+        font-size: 24px;
+        font: inherit;
+    }
+    QPushButton:hover {
+        text-decoration: underline;
+    }
+    QPushButton:focus {
+        outline: none;
+    }
+    QPushButton:disabled {
+        color: #888888;
+    }
+)");
         rightLayout->addWidget(btn, 0, Qt::AlignRight);
     }
     rightLayout->addStretch();

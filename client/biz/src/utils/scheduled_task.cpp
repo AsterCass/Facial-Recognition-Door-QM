@@ -106,6 +106,7 @@ void updatePersistentData() {
     }
     // Delete system tmp file
     {
+#ifndef WIN32
         const std::time_t cutoff = time - (5 * 24 * 60 * 60);
         const fs::directory_iterator end_iter;
         const string dic = "/data/";
@@ -121,6 +122,7 @@ void updatePersistentData() {
                 }
             }
         }
+#endif
     }
 }
 

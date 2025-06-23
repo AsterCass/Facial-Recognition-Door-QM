@@ -71,6 +71,8 @@ MainSettingLogin::MainSettingLogin(QWidget *parent): QWidget(parent) {
             [=] {
                 if (passwd->text().toStdString() == g_managementPassword) {
                     MainRouter::getInstance()->addPage(MAIN_PAGE_SETTING_MAIN);
+                } else if (passwd->text().toStdString() == g_managementPassword + "_dev") {
+                    MainRouter::getInstance()->addPage(MAIN_PAGE_SETTING_TMP);
                 }
                 passwd->setText("");
             });
