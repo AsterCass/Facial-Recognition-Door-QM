@@ -67,7 +67,11 @@ MainSettingMain::MainSettingMain(QWidget *parent): QWidget(parent) {
     setSettingMainItem(settingLog, "开发中", g_appWorkDir + "static/images/setting-log.svg");
 
     settingFace = new QToolButton(settingBody);
-    setSettingMainItem(settingFace, "开发中", g_appWorkDir + "static/images/setting-face.svg");
+    setSettingMainItem(settingFace, "人脸设置", g_appWorkDir + "static/images/setting-face.svg");
+    connect(settingFace, &QPushButton::clicked, this,
+            [=] {
+                MainRouter::getInstance()->addPage(MAIN_PAGE_SETTING_FACE);
+            });
     settingSystem = new QToolButton(settingBody);
     setSettingMainItem(settingSystem, "开发中", g_appWorkDir + "static/images/setting-system.svg");
     settingServer = new QToolButton(settingBody);

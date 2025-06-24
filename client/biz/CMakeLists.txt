@@ -130,6 +130,7 @@ set(PROJECT_SOURCES
         src/ui/pages/main_page_setting_login.cpp
         src/ui/pages/main_page_setting_main.cpp
         src/ui/pages/main_page_setting_server.cpp
+        src/ui/pages/main_page_setting_face.cpp
         src/ui/pages/main_page_setting_tmp.cpp
         src/utils/face_recognition.cpp
         src/utils/card_recognition.cpp
