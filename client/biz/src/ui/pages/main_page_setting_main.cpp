@@ -82,7 +82,12 @@ MainSettingMain::MainSettingMain(QWidget *parent): QWidget(parent) {
             });
 
     settingDoor = new QToolButton(settingBody);
-    setSettingMainItem(settingDoor, "开发中", g_appWorkDir + "static/images/setting-door.svg");
+    setSettingMainItem(settingDoor, "门禁参数设置", g_appWorkDir + "static/images/setting-door.svg");
+    connect(settingDoor, &QPushButton::clicked, this,
+            [=] {
+                MainRouter::getInstance()->addPage(MAIN_PAGE_SETTING_DOOR);
+            });
+
     settingMaintain = new QToolButton(settingBody);
     setSettingMainItem(settingMaintain, "开发中", g_appWorkDir + "static/images/setting-maintain.png");
 

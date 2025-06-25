@@ -8,6 +8,7 @@
 #include "ui/pages/main_page_home.h"
 #include "ui/pages/main_page_init.h"
 #include <sstream>
+#include <ui/pages/main_page_setting_door.h>
 #include <ui/pages/main_page_setting_face.h>
 #include <ui/pages/main_page_setting_main.h>
 
@@ -205,6 +206,7 @@ MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
     stackedWidget->insertWidget(MAIN_PAGE_SETTING_MAIN, new MainSettingMain(this));
     stackedWidget->insertWidget(MAIN_PAGE_SETTING_SERVER, new MainSettingServer(this));
     stackedWidget->insertWidget(MAIN_PAGE_SETTING_FACE, new MainSettingFace(this));
+    stackedWidget->insertWidget(MAIN_PAGE_SETTING_DOOR, new MainSettingDoor(this));
     addPage(MAIN_PAGE_INIT);
     stackedWidget->show();
 
