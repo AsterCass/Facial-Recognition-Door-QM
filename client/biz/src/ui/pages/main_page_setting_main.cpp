@@ -89,7 +89,11 @@ MainSettingMain::MainSettingMain(QWidget *parent): QWidget(parent) {
             });
 
     settingMaintain = new QToolButton(settingBody);
-    setSettingMainItem(settingMaintain, "开发中", g_appWorkDir + "static/images/setting-maintain.png");
+    setSettingMainItem(settingMaintain, "设备维护", g_appWorkDir + "static/images/setting-maintain.png");
+    connect(settingMaintain, &QPushButton::clicked, this,
+            [=] {
+                MainRouter::getInstance()->addPage(MAIN_PAGE_SETTING_MAINTAIN);
+            });
 
     settingMainLayout->addWidget(settingInfo, 0, 0);
     settingMainLayout->addWidget(settingNetwork, 0, 1);
