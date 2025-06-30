@@ -75,7 +75,7 @@ MainSettingFace::MainSettingFace(QWidget *parent): QWidget(parent) {
 #ifdef WIN32
         faceThresholdTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin: 8px");
 #else
-        faceThresholdTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin: 8px");
+        faceThresholdTips->setStyleSheet("font-size: 16px; color: rgb(150, 150, 150); margin: 16px");
 #endif
 
         faceThreshold = new QWidget(body);
@@ -112,7 +112,7 @@ MainSettingFace::MainSettingFace(QWidget *parent): QWidget(parent) {
 #ifdef WIN32
         faceThresholdNightTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin: 8px");
 #else
-        faceThresholdNightTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin: 8px");
+        faceThresholdNightTips->setStyleSheet("font-size: 16px; color: rgb(150, 150, 150); margin: 16px");
 #endif
 
         faceThresholdNight = new QWidget(body);
@@ -149,7 +149,7 @@ MainSettingFace::MainSettingFace(QWidget *parent): QWidget(parent) {
 #ifdef WIN32
         faceRegIvSecTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin: 8px");
 #else
-            faceRegIvSecTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin: 8px");
+            faceRegIvSecTips->setStyleSheet("font-size: 16px; color: rgb(150, 150, 150); margin: 16px");
 #endif
 
         faceRegIvSec = new QWidget(body);
@@ -186,7 +186,7 @@ MainSettingFace::MainSettingFace(QWidget *parent): QWidget(parent) {
 #ifdef WIN32
         faceRegCountTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin: 8px");
 #else
-        faceRegCountTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin: 8px");
+        faceRegCountTips->setStyleSheet("font-size: 16px; color: rgb(150, 150, 150); margin: 16px");
 #endif
 
         faceRegCount = new QWidget(body);
