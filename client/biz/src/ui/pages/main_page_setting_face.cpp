@@ -34,6 +34,13 @@ MainSettingFace::MainSettingFace(QWidget *parent): QWidget(parent) {
                                 PRO_DB_FACE_THRESHOLD_NIG, to_string(g_faceThresholdNight));
                         }
                     }
+                    if (nullptr != faceRegIvSecInput) {
+                        const auto newFaceRegIvSec = faceRegIvSecInput->text().trimmed().toInt();
+                        if (g_faceRegIvSec != newFaceRegIvSec) {
+                            g_faceRegIvSec = newFaceRegIvSec;
+                            g_commonDb.upsertConfig(PRO_DB_FACE_REG_IV_SEC, to_string(g_faceRegIvSec));
+                        }
+                    }
                     if (nullptr != faceRegCountInput) {
                         const auto newFaceRegCount = faceRegCountInput->text().trimmed().toInt();
                         if (g_faceRegCount != newFaceRegCount) {
@@ -136,6 +143,43 @@ MainSettingFace::MainSettingFace(QWidget *parent): QWidget(parent) {
         bodyLayout->addWidget(faceThresholdNightTips);
 
 
+        // faceRegIvSec
+        faceRegIvSecTips = new QLabel("N秒内不重复报错", body);
+        faceRegIvSecTips->setWordWrap(true);
+#ifdef WIN32
+        faceRegIvSecTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin: 8px");
+#else
+            faceRegIvSecTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin: 8px");
+#endif
+
+        faceRegIvSec = new QWidget(body);
+        faceRegIvSecLayout = new QHBoxLayout(faceRegIvSec);
+        faceRegIvSecLayout->setContentsMargins(20, 0, 0, 0);
+        faceRegIvSecLayout->setSpacing(20);
+#ifdef WIN32
+        faceRegIvSec->setStyleSheet(
+            "background-color: rgb(31, 31, 31);  border-radius: 8px; font-size: 14px; color: white");
+        faceRegIvSec->setFixedHeight(50);
+#else
+            faceRegIvSec->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: white");
+            faceRegIvSec->setFixedHeight(100);
+#endif
+        faceRegIvSecLabel = new QLabel("验证复位时间（s）", faceRegIvSec);
+        faceRegIvSecInput = new QLineEditPro(faceRegIvSec);
+        faceRegIvSecInput->setAlignment(Qt::AlignRight);
+        faceRegIvSecInput->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        faceRegIvSecInput->setStyleSheet(R"(
+                QLineEdit {
+                        padding-right: 20px;
+                }
+        )");
+
+        faceRegIvSecLayout->addWidget(faceRegIvSecLabel);
+        faceRegIvSecLayout->addWidget(faceRegIvSecInput);
+        bodyLayout->addWidget(faceRegIvSec);
+        bodyLayout->addWidget(faceRegIvSecTips);
+
+
         // faceRegCount
         faceRegCountTips = new QLabel("失败N次触发人脸信息验证", body);
         faceRegCountTips->setWordWrap(true);
@@ -193,6 +237,9 @@ void MainSettingFace::showEvent(QShowEvent *) {
     }
     if (faceThresholdNightInput) {
         faceThresholdNightInput->setText(QString::number(g_faceThresholdNight));
+    }
+    if (faceRegIvSecInput) {
+        faceRegIvSecInput->setText(QString::number(g_faceRegIvSec));
     }
     if (faceRegCountInput) {
         faceRegCountInput->setText(QString::number(g_faceRegCount));

@@ -40,17 +40,17 @@ private:
     QLineEditPro *faceThresholdNightInput = nullptr;
     QLabel *faceThresholdNightTips = nullptr;
 
-    QWidget *faceRegCount = nullptr;
-    QHBoxLayout *faceRegCountLayout = nullptr;
-    QLabel *faceRegCountLabel = nullptr;
-    QLineEditPro *faceRegCountInput = nullptr;
-    QLabel *faceRegCountTips = nullptr;
-
     QWidget *faceRegIvSec = nullptr;
     QHBoxLayout *faceRegIvSecLayout = nullptr;
     QLabel *faceRegIvSecLabel = nullptr;
     QLineEditPro *faceRegIvSecInput = nullptr;
     QLabel *faceRegIvSecTips = nullptr;
+
+    QWidget *faceRegCount = nullptr;
+    QHBoxLayout *faceRegCountLayout = nullptr;
+    QLabel *faceRegCountLabel = nullptr;
+    QLineEditPro *faceRegCountInput = nullptr;
+    QLabel *faceRegCountTips = nullptr;
 
     QWidget *fullFaceCompare = nullptr;
     QHBoxLayout *fullFaceCompareLayout = nullptr;
