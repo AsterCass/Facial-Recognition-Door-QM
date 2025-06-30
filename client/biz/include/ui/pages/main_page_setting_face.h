@@ -1,6 +1,7 @@
 #ifndef MAIN_PAGE_SETTING_FACE_H
 #define MAIN_PAGE_SETTING_FACE_H
 
+#include <QCheckBox>
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -26,6 +27,38 @@ private:
     QVBoxLayout *bodyLayout = nullptr;
 
     QPushButton *save = nullptr;
+
+    QWidget *faceThreshold = nullptr;
+    QHBoxLayout *faceThresholdLayout = nullptr;
+    QLabel *faceThresholdLabel = nullptr;
+    QLineEditPro *faceThresholdInput = nullptr;
+    QLabel *faceThresholdTips = nullptr;
+
+    QWidget *faceThresholdNight = nullptr;
+    QHBoxLayout *faceThresholdNightLayout = nullptr;
+    QLabel *faceThresholdNightLabel = nullptr;
+    QLineEditPro *faceThresholdNightInput = nullptr;
+    QLabel *faceThresholdNightTips = nullptr;
+
+    QWidget *faceRegCount = nullptr;
+    QHBoxLayout *faceRegCountLayout = nullptr;
+    QLabel *faceRegCountLabel = nullptr;
+    QLineEditPro *faceRegCountInput = nullptr;
+
+    QWidget *faceRegIvSec = nullptr;
+    QHBoxLayout *faceRegIvSecLayout = nullptr;
+    QLabel *faceRegIvSecLabel = nullptr;
+    QLineEditPro *faceRegIvSecInput = nullptr;
+
+    QWidget *fullFaceCompare = nullptr;
+    QHBoxLayout *fullFaceCompareLayout = nullptr;
+    QLabel *fullFaceCompareLabel = nullptr;
+    QCheckBox *fullFaceCompareInput = nullptr;
+
+    QWidget *faceDistant = nullptr;
+    QHBoxLayout *faceDistantLayout = nullptr;
+    QLabel *faceDistantLabel = nullptr;
+    QLineEditPro *faceDistantInput = nullptr;
 
 
     SettingHeader *settingHeader = nullptr;

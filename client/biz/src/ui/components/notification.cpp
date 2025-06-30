@@ -13,26 +13,27 @@ Notification::Notification(QWidget *parent): QWidget(parent) {
     mainLayout->setAlignment(Qt::AlignCenter);
     mainScreenWidget = new QWidget(this);
     messageLabel = new QLabel("", mainScreenWidget);
+    messageLabel->setAlignment(Qt::AlignHCenter);
     btnWidget = new QWidget(mainScreenWidget);
 
     notificationLayout = new QVBoxLayout(mainScreenWidget);
-    notificationLayout->setAlignment(Qt::AlignCenter);
+    notificationLayout->setMargin(10);
     notificationLayout->addWidget(messageLabel);
     notificationLayout->addWidget(btnWidget);
 
 #ifdef WIN32
     mainScreenWidget->setStyleSheet(
-        "background-color: rgb(31, 31, 31); border-radius: 8px; color: white; font-size: 16px");
+        "background-color: rgb(31, 31, 31); border-radius: 8px; color: white; font-size: 14px");
     mainScreenWidget->setFixedWidth(300);
 #else
     mainScreenWidget->setStyleSheet(
-    "background-color: rgb(31, 31, 31); border-radius: 16px; color: white; font-size: 32px");
+    "background-color: rgb(31, 31, 31); border-radius: 16px; color: white; font-size: 28px");
     mainScreenWidget->setFixedWidth(600);
 #endif
 
-    mainLayout->addStretch(1);
+    mainLayout->addStretch();
     mainLayout->addWidget(mainScreenWidget);
-    mainLayout->addStretch(2);
+    mainLayout->addStretch();
 
     // Content
 #ifdef WIN32
@@ -44,6 +45,7 @@ Notification::Notification(QWidget *parent): QWidget(parent) {
 
     // Buttons
     btnLayout = new QHBoxLayout(btnWidget);
+    btnLayout->setMargin(0);
     cancelBtn = new QPushButton("取消", btnWidget);
     connect(cancelBtn, &QPushButton::clicked, this,
             [=] {
@@ -52,12 +54,6 @@ Notification::Notification(QWidget *parent): QWidget(parent) {
                 }
                 this->hide();
             });
-    cancelBtn->setStyleSheet("background-color: rgb(101, 101, 101);");
-#ifdef WIN32
-    cancelBtn->setFixedSize(120, 30);
-#else
-    cancelBtn->setFixedSize(240, 60);
-#endif
     confirmBtn = new QPushButton("确认", btnWidget);
     connect(confirmBtn, &QPushButton::clicked, this,
             [=] {
@@ -66,11 +62,20 @@ Notification::Notification(QWidget *parent): QWidget(parent) {
                 }
                 this->hide();
             });
-    confirmBtn->setStyleSheet("background-color: rgb(13, 133, 255);");
 #ifdef WIN32
-    confirmBtn->setFixedSize(120, 30);
+    confirmBtn->setStyleSheet(
+        "background-color: rgb(13, 133, 255); color: white; border-radius: 8px;box-shadow: none;"
+        " height: 25px; font-size: 14px");
+    cancelBtn->setStyleSheet(
+        "background-color: rgb(101, 101, 101); color: white; border-radius: 8px;box-shadow: none;"
+        " height: 25px; font-size: 14px");
 #else
-    confirmBtn->setFixedSize(240, 60);
+    confirmBtn->setStyleSheet(
+        "background-color: rgb(13, 133, 255); color: white; border-radius: 16px;box-shadow: none;"
+        " height: 50px; font-size: 28px");
+    cancelBtn->setStyleSheet(
+        "background-color: rgb(101, 101, 101); color: white; border-radius: 16px;box-shadow: none;"
+        " height: 50px; font-size: 28px");
 #endif
     btnLayout->addWidget(cancelBtn);
     btnLayout->addWidget(confirmBtn);

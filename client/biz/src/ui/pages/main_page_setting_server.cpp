@@ -16,7 +16,6 @@ MainSettingServer::MainSettingServer(QWidget *parent): QWidget(parent) {
 
     // save
     save = new QPushButton("保存");
-    save->setEnabled(false);
     connect(save, &QPushButton::clicked, this,
             [=] {
                 try {
@@ -28,12 +27,13 @@ MainSettingServer::MainSettingServer(QWidget *parent): QWidget(parent) {
                         g_serverAddress = newServerAddress;
                         g_commonDb.upsertConfig(PRO_DB_COMMON_KEY_SERVER_ADD, g_serverAddress);
                     }
-                    save->clearFocus();
-                    save->setEnabled(false);
+                    MainRouter::getInstance()->mainNotificationShow("保存成功", nullptr);
                 } catch (const std::exception &e) {
                     ostringstream errMsg;
                     errMsg << "Save server config data error :" << e.what();
                     logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                    MainRouter::getInstance()->mainNotificationShow(
+                        "保存失败，请确认填写内容有效性", nullptr);
                 }
             });
 
@@ -67,25 +67,6 @@ MainSettingServer::MainSettingServer(QWidget *parent): QWidget(parent) {
                         padding-right: 20px;
                 }
         )");
-        // addressInput->setStyleSheet(R"(
-        //         QLineEdit {
-        //                 padding-right: 20px;
-        //         }
-        //         QLineEdit:focus {
-        //                 background-color: rgb(27, 50, 77);
-        //                 border: 2px solid rgb(13, 133, 255);
-        //         }
-        // )");
-        connect(addressInput, &QLineEdit::textChanged, this, [this](const QString &text) {
-            if (save == nullptr) {
-                return;
-            }
-            if (text.toStdString() == g_serverAddress) {
-                save->setEnabled(false);
-            } else {
-                save->setEnabled(true);
-            }
-        });
 
         addressLayout->addWidget(addressLabel);
         addressLayout->addWidget(addressInput);
@@ -105,5 +86,7 @@ MainSettingServer::~MainSettingServer() = default;
 
 void MainSettingServer::showEvent(QShowEvent *) {
     // data
-    addressInput->setText(QString::fromStdString(g_serverAddress));
+    if (addressInput) {
+        addressInput->setText(QString::fromStdString(g_serverAddress));
+    }
 }
