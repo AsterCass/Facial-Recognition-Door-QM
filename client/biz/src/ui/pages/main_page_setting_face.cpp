@@ -34,6 +34,13 @@ MainSettingFace::MainSettingFace(QWidget *parent): QWidget(parent) {
                                 PRO_DB_FACE_THRESHOLD_NIG, to_string(g_faceThresholdNight));
                         }
                     }
+                    if (nullptr != faceRegCountInput) {
+                        const auto newFaceRegCount = faceRegCountInput->text().trimmed().toInt();
+                        if (g_faceRegCount != newFaceRegCount) {
+                            g_faceRegCount = newFaceRegCount;
+                            g_commonDb.upsertConfig(PRO_DB_FACE_REG_COUNT, to_string(g_faceRegCount));
+                        }
+                    }
 
                     MainRouter::getInstance()->mainNotificationShow("保存成功", nullptr);
                 } catch (const std::exception &e) {
@@ -129,6 +136,42 @@ MainSettingFace::MainSettingFace(QWidget *parent): QWidget(parent) {
         bodyLayout->addWidget(faceThresholdNightTips);
 
 
+        // faceRegCount
+        faceRegCountTips = new QLabel("失败N次触发人脸信息验证", body);
+        faceRegCountTips->setWordWrap(true);
+#ifdef WIN32
+        faceRegCountTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin: 8px");
+#else
+        faceRegCountTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin: 8px");
+#endif
+
+        faceRegCount = new QWidget(body);
+        faceRegCountLayout = new QHBoxLayout(faceRegCount);
+        faceRegCountLayout->setContentsMargins(20, 0, 0, 0);
+        faceRegCountLayout->setSpacing(20);
+#ifdef WIN32
+        faceRegCount->setStyleSheet(
+            "background-color: rgb(31, 31, 31);  border-radius: 8px; font-size: 14px; color: white");
+        faceRegCount->setFixedHeight(50);
+#else
+        faceRegCount->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: white");
+        faceRegCount->setFixedHeight(100);
+#endif
+        faceRegCountLabel = new QLabel("不识别登记（次）", faceRegCount);
+        faceRegCountInput = new QLineEditPro(faceRegCount);
+        faceRegCountInput->setAlignment(Qt::AlignRight);
+        faceRegCountInput->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        faceRegCountInput->setStyleSheet(R"(
+                QLineEdit {
+                        padding-right: 20px;
+                }
+        )");
+
+        faceRegCountLayout->addWidget(faceRegCountLabel);
+        faceRegCountLayout->addWidget(faceRegCountInput);
+        bodyLayout->addWidget(faceRegCount);
+        bodyLayout->addWidget(faceRegCountTips);
+
         //else
     }
     bodyLayout->addStretch();
@@ -149,6 +192,9 @@ void MainSettingFace::showEvent(QShowEvent *) {
         faceThresholdInput->setText(QString::number(g_faceThreshold));
     }
     if (faceThresholdNightInput) {
-        faceThresholdNightInput->setText(QString::number(g_faceThreshold));
+        faceThresholdNightInput->setText(QString::number(g_faceThresholdNight));
+    }
+    if (faceRegCountInput) {
+        faceRegCountInput->setText(QString::number(g_faceRegCount));
     }
 }
