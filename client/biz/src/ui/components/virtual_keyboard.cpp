@@ -49,7 +49,8 @@ VirtualKeyboard::VirtualKeyboard(QWidget *parent): QWidget(parent) {
             key.btn = new QPushButton(QString::fromStdString(key.key), keyboardWidget);
             key.btn->setFlat(true);
             key.btn->setStyleSheet(
-                "background-color: rgb(113, 113, 113); color: white; border-radius: 4px;");
+                "QPushButton { background-color: rgb(113, 113, 113); color: white; border-radius: 4px;} "
+                "QPushButton:pressed {background-color: rgb(13, 133, 255);}");
             QFont font = key.btn->font();
             font.setPointSize(5);
             key.btn->setFont(font);
