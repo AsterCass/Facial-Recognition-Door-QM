@@ -115,6 +115,10 @@ extern int g_currentLightLevel;
 extern std::string g_prepareUpdateUrl;
 extern std::string g_prepareUpdateVersion;
 
+extern std::string g_wiredIp;
+extern std::string g_wirelessIp;
+extern std::string g_fourGIp;
+
 extern airstrip::CommonBackendConfigDbManager g_commonDb;
 
 extern std::string g_appWorkDir;

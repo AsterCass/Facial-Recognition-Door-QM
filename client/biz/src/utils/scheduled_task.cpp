@@ -192,31 +192,29 @@ void updateUIMainComponentHeader() {
     // Wired
     logPrintln("Start update wired", DEBUG, __FUNCTION__); {
 #ifdef WIN32
-        const string wiredIp = execScript(g_appWorkDir + "script/win/get_wired_ip.ps1");
+        g_wiredIp = execScript(g_appWorkDir + "script/win/get_wired_ip.ps1");
 #else
-        const string wiredIp = execScript(g_appWorkDir + "script/linux/get_wired_ip.sh");
+        g_wiredIp = execScript(g_appWorkDir + "script/linux/get_wired_ip.sh");
 #endif
-        GlobalDataManager::getInstance()->updateHeaderWired(wiredIp);
+        GlobalDataManager::getInstance()->updateHeaderWired(g_wiredIp);
     }
 
     // Wireless
-    logPrintln("Start update wireless", DEBUG, __FUNCTION__);
-    string wirelessIp; {
+    logPrintln("Start update wireless", DEBUG, __FUNCTION__); {
 #ifdef WIN32
-        wirelessIp = execScript(g_appWorkDir + "script/win/get_wireless_ip.ps1");
+        g_wirelessIp = execScript(g_appWorkDir + "script/win/get_wireless_ip.ps1");
 #else
-         wirelessIp = execScript(g_appWorkDir + "script/linux/get_wireless_ip.sh");
+         g_wirelessIp = execScript(g_appWorkDir + "script/linux/get_wireless_ip.sh");
 #endif
-        GlobalDataManager::getInstance()->updateHeaderWireless(wirelessIp);
+        GlobalDataManager::getInstance()->updateHeaderWireless(g_wirelessIp);
     }
 
     // 4g
-    logPrintln("Start update 4g", DEBUG, __FUNCTION__);
-    string fourGIp; {
+    logPrintln("Start update 4g", DEBUG, __FUNCTION__); {
 #ifndef WIN32
-        fourGIp = execScript(g_appWorkDir + "script/linux/get_4g_ip.sh");
+        g_fourGIp = execScript(g_appWorkDir + "script/linux/get_4g_ip.sh");
 #endif
-        GlobalDataManager::getInstance()->updateHeaderFourG(fourGIp);
+        GlobalDataManager::getInstance()->updateHeaderFourG(g_fourGIp);
     }
 
     // Cloud
@@ -240,7 +238,7 @@ void updateUIMainComponentHeader() {
             reconnectCount = 0;
             static string lastPasswd = g_wifiPasswd;
             static string lastSSid = g_wifiAccount;
-            if (wirelessIp.empty() || lastSSid != g_wifiAccount || lastPasswd != g_wifiPasswd) {
+            if (g_wirelessIp.empty() || lastSSid != g_wifiAccount || lastPasswd != g_wifiPasswd) {
                 logPrintln("Connect to wifi ...", INFO, __FUNCTION__);
                 lastSSid = g_wifiAccount;
                 lastPasswd = g_wifiPasswd;
@@ -249,7 +247,7 @@ void updateUIMainComponentHeader() {
                             g_wifiAccount + "' '" + g_wifiPasswd + "'");
 #endif
             }
-        } else if (g_netModel != 2 && !wirelessIp.empty()) {
+        } else if (g_netModel != 2 && !g_wirelessIp.empty()) {
             logPrintln("Disconnect wifi ...", INFO, __FUNCTION__);
 #ifndef WIN32
             execCommandNoReturn("sh " + g_appWorkDir + "script/linux/reset_wifi.sh off");
@@ -260,13 +258,13 @@ void updateUIMainComponentHeader() {
         static int reconnectCountFourG = 3;
         if (g_netModel == 3 && ++reconnectCountFourG > 3) {
             reconnectCountFourG = 0;
-            if (fourGIp.empty()) {
+            if (g_fourGIp.empty()) {
                 logPrintln("Connect to 4g ...", INFO, __FUNCTION__);
 #ifndef WIN32
                 execCommandNoReturn("sh " + g_appWorkDir + "script/linux/reset_4g.sh on");
 #endif
             }
-        } else if (g_netModel != 3 && !fourGIp.empty()) {
+        } else if (g_netModel != 3 && !g_fourGIp.empty()) {
             logPrintln("Disconnect 4g ...", INFO, __FUNCTION__);
 #ifndef WIN32
             execCommandNoReturn("sh " + g_appWorkDir + "script/linux/reset_4g.sh off");

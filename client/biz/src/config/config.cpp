@@ -18,6 +18,10 @@ int g_currentLightLevel = 13;
 std::string g_prepareUpdateUrl;
 std::string g_prepareUpdateVersion;
 
+std::string g_wiredIp;
+std::string g_wirelessIp;
+std::string g_fourGIp;
+
 airstrip::CommonBackendConfigDbManager g_commonDb;
 
 std::string g_appWorkDir;

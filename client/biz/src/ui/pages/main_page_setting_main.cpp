@@ -60,7 +60,12 @@ MainSettingMain::MainSettingMain(QWidget *parent): QWidget(parent) {
     settingMainLayout->setContentsMargins(0, 10, 0, 0);
 
     settingInfo = new QToolButton(settingBody);
-    setSettingMainItem(settingInfo, "开发中", g_appWorkDir + "static/images/setting-info.svg");
+    setSettingMainItem(settingInfo, "设备信息", g_appWorkDir + "static/images/setting-info.svg");
+    connect(settingInfo, &QPushButton::clicked, this,
+            [=] {
+                MainRouter::getInstance()->addPage(MAIN_PAGE_SETTING_INFO);
+            });
+
     settingNetwork = new QToolButton(settingBody);
     setSettingMainItem(settingNetwork, "开发中", g_appWorkDir + "static/images/setting-network.svg");
     settingLog = new QToolButton(settingBody);
