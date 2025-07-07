@@ -46,6 +46,9 @@ constexpr auto PRO_DB_FULL_FACE_COMPARE = "fullFaceCompare";
 constexpr auto PRO_DB_FACE_REG_IV_SEC = "faceRegIvSec";
 constexpr auto PRO_DB_FACE_REG_CORE_IV_MILL_SEC = "faceRegCoreIvMillSec";
 constexpr auto PRO_DB_NEED_BACKUP = "needBackup";
+constexpr auto PRO_DB_AUTO_CLOSE_DOOR_SEC = "autoCloseDoorSec";
+constexpr auto PRO_DB_ALLOW_CARD_OPEN = "allowCardOpen";
+constexpr auto PRO_DB_ALLOW_FACE_OPEN = "allowFaceOpen";
 
 
 const std::vector<std::string> CHINESE_WEEK = {
@@ -152,6 +155,9 @@ extern int g_fullFaceCompare;
 extern int g_faceRegIvSec;
 extern int g_faceRegCoreIvMillSec;
 extern int g_needBackup;
+extern int g_autoCloseDoorSec;
+extern int g_allowCardOpen;
+extern int g_allowFaceOpen;
 
 // function
 

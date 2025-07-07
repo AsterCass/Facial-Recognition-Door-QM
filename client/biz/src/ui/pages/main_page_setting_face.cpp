@@ -20,14 +20,16 @@ MainSettingFace::MainSettingFace(QWidget *parent): QWidget(parent) {
             [=] {
                 try {
                     if (nullptr != faceThresholdInput) {
-                        const auto newFaceThreshold = faceThresholdInput->text().trimmed().toDouble();
+                        const auto newFaceThreshold = std::stod(
+                            faceThresholdInput->text().trimmed().toStdString());
                         if (g_faceThreshold != newFaceThreshold) {
                             g_faceThreshold = newFaceThreshold;
                             g_commonDb.upsertConfig(PRO_DB_FACE_THRESHOLD, to_string(g_faceThreshold));
                         }
                     }
                     if (nullptr != faceThresholdNightInput) {
-                        const auto newFaceThresholdNight = faceThresholdNightInput->text().trimmed().toDouble();
+                        const auto newFaceThresholdNight = std::stod(
+                            faceThresholdNightInput->text().trimmed().toStdString());
                         if (g_faceThresholdNight != newFaceThresholdNight) {
                             g_faceThresholdNight = newFaceThresholdNight;
                             g_commonDb.upsertConfig(
@@ -35,14 +37,16 @@ MainSettingFace::MainSettingFace(QWidget *parent): QWidget(parent) {
                         }
                     }
                     if (nullptr != faceRegIvSecInput) {
-                        const auto newFaceRegIvSec = faceRegIvSecInput->text().trimmed().toInt();
+                        const auto newFaceRegIvSec = std::stoi(
+                            faceRegIvSecInput->text().trimmed().toStdString());
                         if (g_faceRegIvSec != newFaceRegIvSec) {
                             g_faceRegIvSec = newFaceRegIvSec;
                             g_commonDb.upsertConfig(PRO_DB_FACE_REG_IV_SEC, to_string(g_faceRegIvSec));
                         }
                     }
                     if (nullptr != faceRegCountInput) {
-                        const auto newFaceRegCount = faceRegCountInput->text().trimmed().toInt();
+                        const auto newFaceRegCount = std::stoi(
+                            faceRegCountInput->text().trimmed().toStdString());
                         if (g_faceRegCount != newFaceRegCount) {
                             g_faceRegCount = newFaceRegCount;
                             g_commonDb.upsertConfig(PRO_DB_FACE_REG_COUNT, to_string(g_faceRegCount));

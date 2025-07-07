@@ -55,3 +55,6 @@ int g_fullFaceCompare;
 int g_faceRegIvSec;
 int g_faceRegCoreIvMillSec;
 int g_needBackup;
+int g_autoCloseDoorSec;
+int g_allowCardOpen;
+int g_allowFaceOpen;

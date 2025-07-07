@@ -27,6 +27,21 @@ private:
 
     QPushButton *save = nullptr;
 
+    QWidget *doorOpenTime = nullptr;
+    QHBoxLayout *doorOpenTimeLayout = nullptr;
+    QLabel *doorOpenTimeLabel = nullptr;
+    QLineEditPro *doorOpenTimeInput = nullptr;
+
+    QWidget *cardOpen = nullptr;
+    QHBoxLayout *cardOpenLayout = nullptr;
+    QLabel *cardOpenLabel = nullptr;
+    QLineEditPro *cardOpenInput = nullptr;
+
+    QWidget *faceOpen = nullptr;
+    QHBoxLayout *faceOpenLayout = nullptr;
+    QLabel *faceOpenLabel = nullptr;
+    QLineEditPro *faceOpenInput = nullptr;
+
 
     SettingHeader *settingHeader = nullptr;
     MainComponentHeader *mainHeader = nullptr;

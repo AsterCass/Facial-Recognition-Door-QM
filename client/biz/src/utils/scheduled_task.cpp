@@ -361,7 +361,7 @@ void getNfcCode() {
 // Every (taskIvCnt + executionTime) sec
 void doorAutoClose() {
     if (doorOpenSec <= 0) return;
-    if (++doorOpenSec > 5) {
+    if (++doorOpenSec > g_autoCloseDoorSec) {
         logPrintln("Start close door", DEBUG, __FUNCTION__);
         closeDoor();
         doorOpenSec = -1;

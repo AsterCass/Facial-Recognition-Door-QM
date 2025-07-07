@@ -141,6 +141,7 @@ set(PROJECT_SOURCES
         src/utils/face_recognition.cpp
         src/utils/card_recognition.cpp
         src/utils/general_utils.cpp
+        src/utils/init_config_db.cpp
         src/utils/scheduled_task.cpp
         src/utils/global_data_manager.cpp
 )
