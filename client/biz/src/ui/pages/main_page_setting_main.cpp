@@ -67,7 +67,12 @@ MainSettingMain::MainSettingMain(QWidget *parent): QWidget(parent) {
             });
 
     settingNetwork = new QToolButton(settingBody);
-    setSettingMainItem(settingNetwork, "开发中", g_appWorkDir + "static/images/setting-network.svg");
+    setSettingMainItem(settingNetwork, "网络设置", g_appWorkDir + "static/images/setting-network.svg");
+    connect(settingNetwork, &QPushButton::clicked, this,
+            [=] {
+                MainRouter::getInstance()->addPage(MAIN_PAGE_SETTING_NETWORK);
+            });
+
     settingLog = new QToolButton(settingBody);
     setSettingMainItem(settingLog, "开发中", g_appWorkDir + "static/images/setting-log.svg");
 
