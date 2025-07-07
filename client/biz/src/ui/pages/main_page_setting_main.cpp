@@ -74,7 +74,11 @@ MainSettingMain::MainSettingMain(QWidget *parent): QWidget(parent) {
             });
 
     settingLog = new QToolButton(settingBody);
-    setSettingMainItem(settingLog, "开发中", g_appWorkDir + "static/images/setting-log.svg");
+    setSettingMainItem(settingLog, "识别记录", g_appWorkDir + "static/images/setting-log.svg");
+    connect(settingLog, &QPushButton::clicked, this,
+            [=] {
+                MainRouter::getInstance()->addPage(MAIN_PAGE_SETTING_LOG);
+            });
 
     settingFace = new QToolButton(settingBody);
     setSettingMainItem(settingFace, "人脸设置", g_appWorkDir + "static/images/setting-face.svg");
@@ -83,7 +87,12 @@ MainSettingMain::MainSettingMain(QWidget *parent): QWidget(parent) {
                 MainRouter::getInstance()->addPage(MAIN_PAGE_SETTING_FACE);
             });
     settingSystem = new QToolButton(settingBody);
-    setSettingMainItem(settingSystem, "开发中", g_appWorkDir + "static/images/setting-system.svg");
+    setSettingMainItem(settingSystem, "系统参数设置", g_appWorkDir + "static/images/setting-system.svg");
+    connect(settingSystem, &QPushButton::clicked, this,
+            [=] {
+                MainRouter::getInstance()->addPage(MAIN_PAGE_SETTING_SYSTEM);
+            });
+
     settingServer = new QToolButton(settingBody);
     setSettingMainItem(settingServer, "服务器设置", g_appWorkDir + "static/images/setting-server.svg");
     connect(settingServer, &QPushButton::clicked, this,

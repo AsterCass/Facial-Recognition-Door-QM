@@ -11,9 +11,11 @@
 #include <ui/pages/main_page_setting_door.h>
 #include <ui/pages/main_page_setting_face.h>
 #include <ui/pages/main_page_setting_info.h>
+#include <ui/pages/main_page_setting_log.h>
 #include <ui/pages/main_page_setting_main.h>
 #include <ui/pages/main_page_setting_maintain.h>
 #include <ui/pages/main_page_setting_network.h>
+#include <ui/pages/main_page_setting_system.h>
 
 #include "airstrip_program_options.h"
 #include "ui/components/virtual_keyboard_number.h"
@@ -213,6 +215,8 @@ MainRouter::MainRouter(QWidget *parent): QWidget(parent) {
     stackedWidget->insertWidget(MAIN_PAGE_SETTING_MAINTAIN, new MainSettingMaintain(this));
     stackedWidget->insertWidget(MAIN_PAGE_SETTING_INFO, new MainSettingInfo(this));
     stackedWidget->insertWidget(MAIN_PAGE_SETTING_NETWORK, new MainSettingNetwork(this));
+    stackedWidget->insertWidget(MAIN_PAGE_SETTING_LOG, new MainSettingLog(this));
+    stackedWidget->insertWidget(MAIN_PAGE_SETTING_SYSTEM, new MainSettingSystem(this));
     addPage(MAIN_PAGE_INIT);
     stackedWidget->show();
 
