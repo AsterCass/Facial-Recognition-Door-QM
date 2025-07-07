@@ -416,6 +416,9 @@ void onceTaskBefore() {
     // Login
     login();
 
+    // Check latest version
+    appUpdate();
+
     // Init Db
     initCardDB();
     initFaceDB();

@@ -48,6 +48,28 @@ void updateAppVersion(const bool confirm) {
 #endif
 }
 
+void checkVersionAndNotification() {
+    const auto updateNotification = appUpdate();
+    if (!updateNotification.isSuccessful) {
+        MainRouter::getInstance()->
+                mainNotificationShow("获取版本信息失败，请稍后再试",
+                                     bind(updateAppVersion, false));
+    } else if (!updateNotification.isNeedUpdate) {
+        MainRouter::getInstance()->
+                mainNotificationShow("当前版本已经是最新版本，无需升级",
+                                     bind(updateAppVersion, false));
+    } else {
+        g_prepareUpdateVersion = updateNotification.updateVersion;
+        g_prepareUpdateUrl = updateNotification.updateUrl;
+        MainRouter::getInstance()->
+                mainNotificationShow(
+                    "检测到最新版本：" + updateNotification.updateVersion + "，是否现在升级？",
+                    bind(updateAppVersion, std::placeholders::_1)
+                );
+    }
+    g_isCheckVersion = false;
+}
+
 MainSettingInfo::MainSettingInfo(QWidget *parent): QWidget(parent) {
     setStyleSheet("background-color: rgb(4, 9, 12)");
 
@@ -183,7 +205,7 @@ MainSettingInfo::MainSettingInfo(QWidget *parent): QWidget(parent) {
         version->setFixedHeight(100);
 #endif
         versionLabel = new QLabel("当前版本号", version);
-        versionLabelFlag = new QLabel("●", version);
+        versionLabelFlag = new QPushButton("", version);
         versionLabelFlag->setStyleSheet("color: red; font-size: 15px");
         versionValue = new QPushButton(getSn().c_str(), version);
         versionValue->setStyleSheet(R"(
@@ -193,6 +215,26 @@ MainSettingInfo::MainSettingInfo(QWidget *parent): QWidget(parent) {
                         padding-left: 10px;
                 }
         )");
+        connect(versionLabelFlag, &QPushButton::clicked, this,
+                [=] {
+                    if (g_isCheckVersion) {
+                        return;
+                    }
+                    g_isCheckVersion = true;
+                    static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([] {
+                        checkVersionAndNotification();
+                    });
+                });
+        connect(versionValue, &QPushButton::clicked, this,
+                [=] {
+                    if (g_isCheckVersion) {
+                        return;
+                    }
+                    g_isCheckVersion = true;
+                    static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([] {
+                        checkVersionAndNotification();
+                    });
+                });
 
         versionLayout->addWidget(versionLabel);
         versionLayout->addStretch();
@@ -228,6 +270,9 @@ void MainSettingInfo::showEvent(QShowEvent *) {
     }
     if (versionValue) {
         versionValue->setText(APP_VERSION);
+    }
+    if (versionLabelFlag) {
+        versionLabelFlag->setText(APP_VERSION == g_latestVersion ? "" : "●");
     }
 
     // status

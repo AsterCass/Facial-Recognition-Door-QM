@@ -3,6 +3,9 @@
 using namespace std;
 
 // variable
+std::string g_latestVersion;
+bool g_isCheckVersion = false;
+
 void *g_mainThreadPool = nullptr;
 
 int g_tryGoManagementCount = 0;

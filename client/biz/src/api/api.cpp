@@ -617,6 +617,7 @@ AppUpdateNotification appUpdate() {
                 const auto app = parsed.at("data").as_object();
                 const auto url = app.at("deviceVersionUrl").as_string().c_str();
                 const auto version = app.at("deviceVersion").as_string();
+                g_latestVersion = version.c_str();
                 if (version != APP_VERSION) {
                     notification.isNeedUpdate = true;
                     notification.updateVersion = version.c_str();
