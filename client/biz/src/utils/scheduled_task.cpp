@@ -315,6 +315,9 @@ void gotoManagement() {
 
 // Every (taskIvCnt + executionTime) sec
 void getNfcCode() {
+    if (!g_allowCardOpen) {
+        return;
+    }
     const NfcCardData ret = getCardData();
     if (!ret.isExist) {
         return;

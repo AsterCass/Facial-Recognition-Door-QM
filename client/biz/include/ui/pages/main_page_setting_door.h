@@ -1,6 +1,7 @@
 #ifndef MAIN_PAGE_SETTING_DOOR_H
 #define MAIN_PAGE_SETTING_DOOR_H
 
+#include <QCheckBox>
 #include <QLabel>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -35,12 +36,14 @@ private:
     QWidget *cardOpen = nullptr;
     QHBoxLayout *cardOpenLayout = nullptr;
     QLabel *cardOpenLabel = nullptr;
-    QLineEditPro *cardOpenInput = nullptr;
+    QPushButton *cardOpenInput = nullptr;
+    int cardOpenValue = 0;
 
     QWidget *faceOpen = nullptr;
     QHBoxLayout *faceOpenLayout = nullptr;
     QLabel *faceOpenLabel = nullptr;
-    QLineEditPro *faceOpenInput = nullptr;
+    QPushButton *faceOpenInput = nullptr;
+    int faceOpenValue = 0;
 
 
     SettingHeader *settingHeader = nullptr;
