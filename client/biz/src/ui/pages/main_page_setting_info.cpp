@@ -206,7 +206,8 @@ MainSettingInfo::MainSettingInfo(QWidget *parent): QWidget(parent) {
         version->setFixedHeight(100);
 #endif
         versionLabel = new QLabel("当前版本号", version);
-        versionLabelFlag = new QPushButton("", version);
+        versionLabelFlag = new QLabel("", version);
+        versionLabelFlag->setEnabled(false);
         versionLabelFlag->setStyleSheet("color: red; font-size: 15px");
         versionValue = new QPushButton(getSn().c_str(), version);
         versionValue->setStyleSheet(R"(
@@ -214,18 +215,13 @@ MainSettingInfo::MainSettingInfo(QWidget *parent): QWidget(parent) {
                         text-align: right;
                         padding-right: 20px;
                         padding-left: 10px;
+                        padding-top: 40px;
+                        padding-bottom: 40px;
+                }
+                QPushButton:focus {
+                        outline: none;
                 }
         )");
-        connect(versionLabelFlag, &QPushButton::clicked, this,
-                [=] {
-                    if (g_isCheckVersion) {
-                        return;
-                    }
-                    g_isCheckVersion = true;
-                    static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([] {
-                        checkVersionAndNotification();
-                    });
-                });
         connect(versionValue, &QPushButton::clicked, this,
                 [=] {
                     if (g_isCheckVersion) {

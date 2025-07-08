@@ -8,12 +8,18 @@ constexpr auto SWITCH_BUTTON_ENABLE_STYLE = R"(
         background-color: rgb(50, 215, 75);
         color: white;
         margin-right: 20px;
-        padding: 0px;
-        font-size: 24px;
+        padding-left: 0px;
+        padding-right: 0px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+        font-size: 22px;
         width: 40px;
         height: 22px;
         text-align: right;
         border-radius: 10px;
+    }
+    QPushButton:focus {
+        outline: none;
     }
 )";
 constexpr auto SWITCH_BUTTON_DISABLE_STYLE = R"(
@@ -21,12 +27,18 @@ constexpr auto SWITCH_BUTTON_DISABLE_STYLE = R"(
         background-color: rgb(61, 61, 61);
         color: white;
         margin-right: 20px;
-        padding: 0px;
-        font-size: 24px;
+        padding-left: 0px;
+        padding-right: 0px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+        font-size: 22px;
         width: 40px;
         height: 22px;
         text-align: left;
         border-radius: 10px;
+    }
+    QPushButton:focus {
+        outline: none;
     }
 )";
 #else
@@ -35,12 +47,18 @@ constexpr auto SWITCH_BUTTON_ENABLE_STYLE = R"(
         background-color: rgb(50, 215, 75);
         color: white;
         margin-right: 20px;
-        padding: 0px;
-        font-size: 48px;
+        padding-left: 0px;
+        padding-right: 0px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+        font-size: 44px;
         width: 80px;
         height: 44px;
         text-align: right;
         border-radius: 20px;
+    }
+    QPushButton:focus {
+        outline: none;
     }
 )";
 constexpr auto SWITCH_BUTTON_DISABLE_STYLE = R"(
@@ -48,12 +66,18 @@ constexpr auto SWITCH_BUTTON_DISABLE_STYLE = R"(
         background-color: rgb(61, 61, 61);
         color: white;
         margin-right: 20px;
-        padding: 0px;
-        font-size: 48px;
+        padding-left: 0px;
+        padding-right: 0px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+        font-size: 44px;
         width: 80px;
         height: 44px;
         text-align: left;
         border-radius: 20px;
+    }
+    QPushButton:focus {
+        outline: none;
     }
 )";
 #endif

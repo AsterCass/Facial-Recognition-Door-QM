@@ -48,7 +48,7 @@ private:
     QWidget *version = nullptr;
     QHBoxLayout *versionLayout = nullptr;
     QLabel *versionLabel = nullptr;
-    QPushButton *versionLabelFlag = nullptr;
+    QLabel *versionLabelFlag = nullptr;
     QPushButton *versionValue = nullptr;
 
     SettingHeader *settingHeader = nullptr;

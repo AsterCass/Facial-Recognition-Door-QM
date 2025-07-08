@@ -132,7 +132,7 @@ MainSettingDoor::MainSettingDoor(QWidget *parent): QWidget(parent) {
         faceOpen->setFixedHeight(100);
 #endif
         faceOpenLabel = new QLabel("人脸开门", faceOpen);
-        faceOpenInput = new QPushButton("●", faceOpen);
+        faceOpenInput = new QPushButton("⬤", faceOpen);
         faceOpenInput->setStyleSheet(SWITCH_BUTTON_DISABLE_STYLE);
         connect(faceOpenInput, &QPushButton::clicked, this,
                 [=] {
