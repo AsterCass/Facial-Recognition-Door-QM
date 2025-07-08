@@ -215,8 +215,8 @@ MainSettingInfo::MainSettingInfo(QWidget *parent): QWidget(parent) {
                         text-align: right;
                         padding-right: 20px;
                         padding-left: 10px;
-                        padding-top: 40px;
-                        padding-bottom: 40px;
+                        padding-top: 35px;
+                        padding-bottom: 35px;
                 }
                 QPushButton:focus {
                         outline: none;

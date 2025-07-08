@@ -102,7 +102,7 @@ MainSettingDoor::MainSettingDoor(QWidget *parent): QWidget(parent) {
         cardOpen->setFixedHeight(100);
 #endif
         cardOpenLabel = new QLabel("刷卡开门", cardOpen);
-        cardOpenInput = new QPushButton("●", cardOpen);
+        cardOpenInput = new QPushButton("⬤", cardOpen);
         cardOpenInput->setStyleSheet(SWITCH_BUTTON_DISABLE_STYLE);
         connect(cardOpenInput, &QPushButton::clicked, this,
                 [=] {
