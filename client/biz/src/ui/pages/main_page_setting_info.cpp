@@ -1,5 +1,6 @@
 #include "ui/pages/main_page_setting_info.h"
 
+#include <airstrip_command.h>
 #include <airstrip_log.h>
 #include <airstrip_thread_pool.h>
 #include <sstream>
