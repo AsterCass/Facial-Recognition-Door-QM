@@ -58,3 +58,4 @@ int g_needBackup;
 int g_autoCloseDoorSec;
 int g_allowCardOpen;
 int g_allowFaceOpen;
+int g_voice;

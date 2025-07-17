@@ -27,8 +27,41 @@ private:
 
     QPushButton *save = nullptr;
 
-    QLabel *inDevelop = nullptr;
+    QWidget *voice = nullptr;
+    QHBoxLayout *voiceLayout = nullptr;
+    QLabel *voiceLabel = nullptr;
+    QPushButton *voiceInput = nullptr;
+    int voiceValue = 0;
 
+    QWidget *voiceVol = nullptr;
+    QHBoxLayout *voiceVolLayout = nullptr;
+    QLabel *voiceVolLabel = nullptr;
+    QLineEditPro *voiceVolInput = nullptr;
+
+    QWidget *faceRegCoreIvMillSecTime = nullptr;
+    QHBoxLayout *faceRegCoreIvMillSecTimeLayout = nullptr;
+    QLabel *faceRegCoreIvMillSecTimeLabel = nullptr;
+    QLineEditPro *faceRegCoreIvMillSecTimeInput = nullptr;
+    QLabel *faceRegCoreIvMillSecTimeTips = nullptr;
+
+    QWidget *taskIvSecTime = nullptr;
+    QHBoxLayout *taskIvSecTimeLayout = nullptr;
+    QLabel *taskIvSecTimeLabel = nullptr;
+    QLineEditPro *taskIvSecTimeInput = nullptr;
+    QLabel *taskIvSecTimeTips = nullptr;
+
+    QWidget *lightOnlyCheck = nullptr;
+    QHBoxLayout *lightOnlyCheckLayout = nullptr;
+    QLabel *lightOnlyCheckLabel = nullptr;
+    QPushButton *lightOnlyCheckInput = nullptr;
+    int lightOnlyCheckValue = 0;
+
+    QWidget *needBackup = nullptr;
+    QHBoxLayout *needBackupLayout = nullptr;
+    QLabel *needBackupLabel = nullptr;
+    QPushButton *needBackupInput = nullptr;
+    int needBackupValue = 0;
+    QLabel *needBackupTips = nullptr;
 
     SettingHeader *settingHeader = nullptr;
     MainComponentHeader *mainHeader = nullptr;

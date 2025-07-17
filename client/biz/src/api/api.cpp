@@ -100,6 +100,9 @@ void closeDoor() {
 }
 
 void playWav(const string &voiceTemplate) {
+    if (!g_voice) {
+        return;
+    }
     if (!voiceTemplate.empty()) {
         try {
             const int rental = stoi(voiceTemplate.substr(1, 1));
@@ -147,6 +150,9 @@ void playWav(const string &voiceTemplate) {
 }
 
 void playWav(const PlayWavType type) {
+    if (!g_voice) {
+        return;
+    }
     if (staticSoundsDir.empty()) {
         staticSoundsDir = g_appWorkDir + "static/sounds/";
     }

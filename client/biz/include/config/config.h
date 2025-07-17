@@ -49,6 +49,7 @@ constexpr auto PRO_DB_NEED_BACKUP = "needBackup";
 constexpr auto PRO_DB_AUTO_CLOSE_DOOR_SEC = "autoCloseDoorSec";
 constexpr auto PRO_DB_ALLOW_CARD_OPEN = "allowCardOpen";
 constexpr auto PRO_DB_ALLOW_FACE_OPEN = "allowFaceOpen";
+constexpr auto PRO_DB_VOICE = "voice";
 
 
 const std::vector<std::string> CHINESE_WEEK = {
@@ -158,6 +159,7 @@ extern int g_needBackup;
 extern int g_autoCloseDoorSec;
 extern int g_allowCardOpen;
 extern int g_allowFaceOpen;
+extern int g_voice;
 
 // function
 
