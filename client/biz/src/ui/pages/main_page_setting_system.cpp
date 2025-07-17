@@ -1,5 +1,6 @@
 #include "ui/pages/main_page_setting_system.h"
 
+#include <airstrip_command.h>
 #include <airstrip_log.h>
 #include <airstrip_thread_pool.h>
 #include <sstream>
@@ -33,6 +34,10 @@ MainSettingSystem::MainSettingSystem(QWidget *parent): QWidget(parent) {
                             const auto newData = std::stoi(voiceVolInput->text().trimmed().toStdString());
                             if (g_volNum != newData) {
                                 g_volNum = newData;
+#ifndef WIN32
+                                airstrip::execScript(
+                                    g_appWorkDir + "script/linux/reset_vol.sh " + std::to_string(g_volNum));
+#endif
                                 g_commonDb.upsertConfig(
                                     PRO_DB_VOL_NUM, to_string(g_volNum));
                             }
