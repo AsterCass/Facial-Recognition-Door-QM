@@ -15,3 +15,6 @@ rm -rf /data/frd/db/*
 rm -rf /data/frd/face/*
 
 cp $DATA_BK_FILE $DATA_FILE
+
+/etc/init.d/S99zplay stop
+reboot
