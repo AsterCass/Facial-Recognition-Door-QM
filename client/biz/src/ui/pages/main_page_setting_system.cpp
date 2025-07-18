@@ -152,9 +152,9 @@ MainSettingSystem::MainSettingSystem(QWidget *parent): QWidget(parent) {
         faceRegCoreIvMillSecTimeTips = new QLabel("机器识别超频（0-1000，推荐500）（0为极致超频，高温下可能会过热关机）", body);
         faceRegCoreIvMillSecTimeTips->setWordWrap(true);
 #ifdef WIN32
-        faceRegCoreIvMillSecTimeTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin-right: 8px");
+        faceRegCoreIvMillSecTimeTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin-left: 8px");
 #else
-            faceRegCoreIvMillSecTimeTips->setStyleSheet("font-size: 16px; color: rgb(150, 150, 150); margin-right: 16px");
+            faceRegCoreIvMillSecTimeTips->setStyleSheet("font-size: 16px; color: rgb(150, 150, 150); margin-left: 16px");
 #endif
 
         faceRegCoreIvMillSecTime = new QWidget(body);
@@ -188,9 +188,9 @@ MainSettingSystem::MainSettingSystem(QWidget *parent): QWidget(parent) {
         taskIvSecTimeTips = new QLabel("机器从服务器获取任务时钟，生效值最低为5", body);
         taskIvSecTimeTips->setWordWrap(true);
 #ifdef WIN32
-        taskIvSecTimeTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin-right: 8px");
+        taskIvSecTimeTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin-left: 8px");
 #else
-            taskIvSecTimeTips->setStyleSheet("font-size: 16px; color: rgb(150, 150, 150); margin-right: 16px");
+            taskIvSecTimeTips->setStyleSheet("font-size: 16px; color: rgb(150, 150, 150); margin-left: 16px");
 #endif
         taskIvSecTime = new QWidget(body);
         taskIvSecTimeLayout = new QHBoxLayout(taskIvSecTime);
@@ -252,9 +252,9 @@ MainSettingSystem::MainSettingSystem(QWidget *parent): QWidget(parent) {
         needBackupTips = new QLabel("消耗较多流量，4G模式慎用", body);
         needBackupTips->setWordWrap(true);
 #ifdef WIN32
-        needBackupTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin-right: 8px");
+        needBackupTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin-left: 8px");
 #else
-            needBackupTips->setStyleSheet("font-size: 16px; color: rgb(150, 150, 150); margin-right: 16px");
+            needBackupTips->setStyleSheet("font-size: 16px; color: rgb(150, 150, 150); margin-left: 16px");
 #endif
         needBackup = new QWidget(body);
         needBackupLayout = new QHBoxLayout(needBackup);
