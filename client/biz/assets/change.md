@@ -16,9 +16,10 @@
     `sqlite3 /data/frd/db/common.db "update common set v='localhost:5525' where k='serverAddress';"`
     `sqlite3 /data/frd/db/common.db "update common set v='123456' where k='managementPassword';"`
     `sqlite3 /data/frd/db/common.db "update common set v='adbcde' where k='signId';"`
-    改完之后再次重启
-13. 根据需求更改其他配置，比如获取任务时间间隔（同时影响断网/重连之后右上角云图标的反馈）等
-14. 创建定时任务
+13. 创建`/data/frd/script/linux/common.origin.bk.db`放入相同的初始化值，也可以直接
+    `cp common.db /data/frd/script/linux/common.origin.bk.db`用于提供用户恢复出场设置值
+14. 根据需求更改其他配置，比如获取任务时间间隔（同时影响断网/重连之后右上角云图标的反馈）等
+15. 创建定时任务
     ```shell
     cat <<'EOF' > /etc/init.d/S97cron
     #!/bin/sh
@@ -49,7 +50,7 @@
     ```
     重启后修改定时任务`crontab -e`
     最后输入`0 4 * * * sh /data/frd/script/linux/reboot_app.sh`以及`* * * * * sh /data/frd/script/linux/check_app_live.sh`
-15. 
+16.
 
 ## 注意事项
 
