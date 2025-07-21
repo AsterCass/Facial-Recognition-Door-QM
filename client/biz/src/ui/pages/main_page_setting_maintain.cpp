@@ -62,8 +62,8 @@ MainSettingMaintain::MainSettingMaintain(QWidget *parent): QWidget(parent) {
             "text-align: left; padding-left: 20px; background-color: rgb(31, 31, 31);  border-radius: 8px; font-size: 14px; color: rgb(13, 133, 255)");
         reboot->setFixedHeight(50);
 #else
-            reboot->setStyleSheet("text-align: left; padding-left: 20px; background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; rgb(13, 133, 255)");
-            reboot->setFixedHeight(100);
+        reboot->setStyleSheet("text-align: left; padding-left: 20px; background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: rgb(13, 133, 255)");
+        reboot->setFixedHeight(100);
 #endif
         connect(reboot, &QPushButton::clicked, this,
                 [=] {
