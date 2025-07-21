@@ -1,5 +1,6 @@
 #include "ui/pages/main_page_setting_maintain.h"
 
+#include <airstrip_command.h>
 #include <airstrip_log.h>
 #include <sstream>
 #include <config/style.h>
