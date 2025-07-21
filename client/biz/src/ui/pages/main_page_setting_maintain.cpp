@@ -40,11 +40,34 @@ MainSettingMaintain::MainSettingMaintain(QWidget *parent): QWidget(parent) {
         // resetData
         resetData = new QPushButton("恢复出场设置", body);
 #ifdef WIN32
-        resetData->setStyleSheet(
-            "text-align: left; padding-left: 20px; background-color: rgb(31, 31, 31);  border-radius: 8px; font-size: 14px; color: rgb(255, 71, 60)");
+        resetData->setStyleSheet(R"(
+    QPushButton {
+        text-align: left;
+        padding-left: 20px;
+        background-color: rgb(31, 31, 31);
+        color: rgb(255, 71, 60);
+        border-radius: 8px;
+        font-size: 14px;
+    }
+    QPushButton:focus {
+        outline: none;
+    }
+)");
         resetData->setFixedHeight(50);
 #else
-        resetData->setStyleSheet("text-align: left; padding-left: 20px; background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: rgb(255, 71, 60)");
+        resetData->setStyleSheet(R"(
+    QPushButton {
+        text-align: left;
+        padding-left: 20px;
+        background-color: rgb(31, 31, 31);
+        color: rgb(255, 71, 60);
+        border-radius: 16px;
+        font-size: 28px;
+    }
+    QPushButton:focus {
+        outline: none;
+    }
+)");
         resetData->setFixedHeight(100);
 #endif
         connect(resetData, &QPushButton::clicked, this,
@@ -58,11 +81,34 @@ MainSettingMaintain::MainSettingMaintain(QWidget *parent): QWidget(parent) {
         // reboot
         reboot = new QPushButton("重启设备", body);
 #ifdef WIN32
-        reboot->setStyleSheet(
-            "text-align: left; padding-left: 20px; background-color: rgb(31, 31, 31);  border-radius: 8px; font-size: 14px; color: rgb(13, 133, 255)");
+        reboot->setStyleSheet(R"(
+    QPushButton {
+        text-align: left;
+        padding-left: 20px;
+        background-color: rgb(31, 31, 31);
+        color: rgb(13, 133, 255);
+        border-radius: 8px;
+        font-size: 14px;
+    }
+    QPushButton:focus {
+        outline: none;
+    }
+)");
         reboot->setFixedHeight(50);
 #else
-        reboot->setStyleSheet("text-align: left; padding-left: 20px; background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: rgb(13, 133, 255)");
+        reboot->setStyleSheet(R"(
+    QPushButton {
+        text-align: left;
+        padding-left: 20px;
+        background-color: rgb(31, 31, 31);
+        color: rgb(13, 133, 255);
+        border-radius: 16px;
+        font-size: 28px;
+    }
+    QPushButton:focus {
+        outline: none;
+    }
+)");
         reboot->setFixedHeight(100);
 #endif
         connect(reboot, &QPushButton::clicked, this,
