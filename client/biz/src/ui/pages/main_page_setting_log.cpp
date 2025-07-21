@@ -33,7 +33,7 @@ MainSettingLog::MainSettingLog(QWidget *parent): QWidget(parent) {
     bodyLayout->setSpacing(20);
     //body
     {
-        inDevelop = new QLabel("功能开发中", body);
+        inDevelop = new QLabel("该设备版本不支持该功能", body);
         inDevelop->setStyleSheet("color: white; font-size: 24px");
         inDevelop->setAlignment(Qt::AlignCenter);
         bodyLayout->addWidget(inDevelop);

@@ -25,7 +25,16 @@ private:
     QWidget *body = nullptr;
     QVBoxLayout *bodyLayout = nullptr;
 
-    QPushButton *save = nullptr;
+    QPushButton *resetData = nullptr;
+
+    QPushButton *reboot = nullptr;
+
+    QWidget *cronReboot = nullptr;
+    QHBoxLayout *cronRebootLayout = nullptr;
+    QLabel *cronRebootLabel = nullptr;
+    QPushButton *cronRebootInput = nullptr;
+    int cronRebootValue = 0;
+    QLabel *cronRebootTips = nullptr;
 
 
     SettingHeader *settingHeader = nullptr;

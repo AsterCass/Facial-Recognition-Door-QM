@@ -70,16 +70,16 @@ MainSettingFace::MainSettingFace(QWidget *parent): QWidget(parent) {
     body = new QWidget(this);
     bodyLayout = new QVBoxLayout(body);
     bodyLayout->setMargin(20);
-    bodyLayout->setSpacing(0);
+    bodyLayout->setSpacing(20);
     //body
     {
         // faceThreshold
         faceThresholdTips = new QLabel("人脸识别阈值（0 - 0.6）（推荐 0.48）（重启生效）", body);
         faceThresholdTips->setWordWrap(true);
 #ifdef WIN32
-        faceThresholdTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin: 8px");
+        faceThresholdTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin-left: 8px");
 #else
-        faceThresholdTips->setStyleSheet("font-size: 16px; color: rgb(150, 150, 150); margin: 16px");
+        faceThresholdTips->setStyleSheet("font-size: 16px; color: rgb(150, 150, 150); margin-left: 16px");
 #endif
 
         faceThreshold = new QWidget(body);
@@ -114,9 +114,9 @@ MainSettingFace::MainSettingFace(QWidget *parent): QWidget(parent) {
         faceThresholdNightTips = new QLabel("夜间人脸识别阈值（0 - 0.6）（推荐 0.42）（重启生效）", body);
         faceThresholdNightTips->setWordWrap(true);
 #ifdef WIN32
-        faceThresholdNightTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin: 8px");
+        faceThresholdNightTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin-left: 8px");
 #else
-        faceThresholdNightTips->setStyleSheet("font-size: 16px; color: rgb(150, 150, 150); margin: 16px");
+        faceThresholdNightTips->setStyleSheet("font-size: 16px; color: rgb(150, 150, 150); margin-left: 16px");
 #endif
 
         faceThresholdNight = new QWidget(body);
@@ -151,9 +151,9 @@ MainSettingFace::MainSettingFace(QWidget *parent): QWidget(parent) {
         faceRegIvSecTips = new QLabel("N秒内不重复报错", body);
         faceRegIvSecTips->setWordWrap(true);
 #ifdef WIN32
-        faceRegIvSecTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin: 8px");
+        faceRegIvSecTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin-left: 8px");
 #else
-            faceRegIvSecTips->setStyleSheet("font-size: 16px; color: rgb(150, 150, 150); margin: 16px");
+            faceRegIvSecTips->setStyleSheet("font-size: 16px; color: rgb(150, 150, 150); margin-left: 16px");
 #endif
 
         faceRegIvSec = new QWidget(body);
@@ -188,9 +188,9 @@ MainSettingFace::MainSettingFace(QWidget *parent): QWidget(parent) {
         faceRegCountTips = new QLabel("失败N次触发人脸信息验证", body);
         faceRegCountTips->setWordWrap(true);
 #ifdef WIN32
-        faceRegCountTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin: 8px");
+        faceRegCountTips->setStyleSheet("font-size: 8px; color: rgb(150, 150, 150); margin-left: 8px");
 #else
-        faceRegCountTips->setStyleSheet("font-size: 16px; color: rgb(150, 150, 150); margin: 16px");
+        faceRegCountTips->setStyleSheet("font-size: 16px; color: rgb(150, 150, 150); margin-left: 16px");
 #endif
 
         faceRegCount = new QWidget(body);

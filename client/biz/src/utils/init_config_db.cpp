@@ -90,4 +90,5 @@ void initConfigDb() {
     initConfigValue<int>(PRO_DB_ALLOW_CARD_OPEN, "1", g_allowCardOpen);
     initConfigValue<int>(PRO_DB_ALLOW_FACE_OPEN, "1", g_allowFaceOpen);
     initConfigValue<int>(PRO_DB_VOICE, "1", g_voice);
+    initConfigValue<int>(PRO_DB_CRON_REBOOT, "1", g_cronReboot);
 }

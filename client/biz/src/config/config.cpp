@@ -59,3 +59,4 @@ int g_autoCloseDoorSec;
 int g_allowCardOpen;
 int g_allowFaceOpen;
 int g_voice;
+int g_cronReboot;
