@@ -245,7 +245,7 @@ MainSettingNetwork::MainSettingNetwork(QWidget *parent): QWidget(parent) {
                             wirelessPasswd->hide();
                         }
                     } else {
-                        wiredInput->setText("▼");
+                        wirelessInput->setText("▼");
                         wirelessEnable->hide();
                         wirelessSsid->hide();
                         wirelessPasswd->hide();
@@ -381,7 +381,7 @@ MainSettingNetwork::MainSettingNetwork(QWidget *parent): QWidget(parent) {
                         fourGInput->setText("▲");
                         fourGEnable->show();
                     } else {
-                        wiredInput->setText("▼");
+                        fourGInput->setText("▼");
                         fourGEnable->hide();
                     }
                 });
