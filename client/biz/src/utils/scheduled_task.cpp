@@ -232,22 +232,35 @@ void updateUIMainComponentHeader() {
 
     // Connect
     logPrintln("Start update connect", DEBUG, __FUNCTION__); {
-        static int reconnectCount = 1;
+        // dns
+        static int resetDns = 1;
+        static std::string dns1 = "";
+        static std::string dns2 = "";
+        if (resetDns++ > 0 && (dns1 != g_netDns1 || dns2 != g_netDns2)) {
+            resetDns = 0;
+            dns1 = g_netDns1;
+            dns2 = g_netDns2;
+            // todo update dns
+        }
+
+        // todo wired set
+
         // wireless
-        if (g_netModel == 2 && reconnectCount++ > 0) {
+        static int reconnectCount = 1;
+        if (g_netWirelessEnable && reconnectCount++ > 0) {
             reconnectCount = 0;
-            static string lastPasswd = g_wifiPasswd;
-            static string lastSSid = g_wifiAccount;
-            if (g_wirelessIp.empty() || lastSSid != g_wifiAccount || lastPasswd != g_wifiPasswd) {
+            static string lastPasswd = g_netWirelessPasswd;
+            static string lastSSid = g_netWirelessSsid;
+            if (g_wirelessIp.empty() || lastSSid != g_netWirelessSsid || lastPasswd != g_netWirelessPasswd) {
                 logPrintln("Connect to wifi ...", INFO, __FUNCTION__);
-                lastSSid = g_wifiAccount;
-                lastPasswd = g_wifiPasswd;
+                lastSSid = g_netWirelessSsid;
+                lastPasswd = g_netWirelessPasswd;
 #ifndef WIN32
                 execCommandNoReturn("sh " + g_appWorkDir + "script/linux/reset_wifi.sh on '" +
-                            g_wifiAccount + "' '" + g_wifiPasswd + "'");
+                            g_netWirelessSsid + "' '" + g_netWirelessPasswd + "'");
 #endif
             }
-        } else if (g_netModel != 2 && !g_wirelessIp.empty()) {
+        } else if (!g_netWirelessEnable && !g_wirelessIp.empty()) {
             logPrintln("Disconnect wifi ...", INFO, __FUNCTION__);
 #ifndef WIN32
             execCommandNoReturn("sh " + g_appWorkDir + "script/linux/reset_wifi.sh off");
@@ -256,7 +269,7 @@ void updateUIMainComponentHeader() {
 
         // 4g
         static int reconnectCountFourG = 3;
-        if (g_netModel == 3 && ++reconnectCountFourG > 3) {
+        if (g_netFourEnable && ++reconnectCountFourG > 3) {
             reconnectCountFourG = 0;
             if (g_fourGIp.empty()) {
                 logPrintln("Connect to 4g ...", INFO, __FUNCTION__);
@@ -264,7 +277,7 @@ void updateUIMainComponentHeader() {
                 execCommandNoReturn("sh " + g_appWorkDir + "script/linux/reset_4g.sh on");
 #endif
             }
-        } else if (g_netModel != 3 && !g_fourGIp.empty()) {
+        } else if (!g_netFourEnable && !g_fourGIp.empty()) {
             logPrintln("Disconnect 4g ...", INFO, __FUNCTION__);
 #ifndef WIN32
             execCommandNoReturn("sh " + g_appWorkDir + "script/linux/reset_4g.sh off");
