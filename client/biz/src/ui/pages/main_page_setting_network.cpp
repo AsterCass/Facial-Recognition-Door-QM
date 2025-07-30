@@ -22,6 +22,87 @@ MainSettingNetwork::MainSettingNetwork(QWidget *parent): QWidget(parent) {
     save = new QPushButton("保存");
     connect(save, &QPushButton::clicked, this,
             [=] {
+                try {
+                    if (g_netWiredDhcp != wiredDhcpValue) {
+                        g_netWiredDhcp = wiredDhcpValue;
+                        g_commonDb.upsertConfig(
+                            PRO_NET_WIRED_DHCP, to_string(g_netWiredDhcp));
+                    }
+                    if (g_netWirelessEnable != wirelessEnableValue) {
+                        g_netWirelessEnable = wirelessEnableValue;
+                        g_commonDb.upsertConfig(
+                            PRO_NET_WIRELESS_ENABLE, to_string(g_netWirelessEnable));
+                    }
+                    if (g_netFourEnable != fourGEnableValue) {
+                        g_netFourEnable = fourGEnableValue;
+                        g_commonDb.upsertConfig(
+                            PRO_NET_FOUR_ENABLE, to_string(g_netFourEnable));
+                    }
+                    // dns1
+                    {
+                        const auto newData = dns1Input->text().trimmed().toStdString();
+                        if (g_netDns1 != newData) {
+                            g_netDns1 = newData;
+                            g_commonDb.upsertConfig(PRO_NET_DNS1, g_netDns1);
+                        }
+                    }
+                    // dns2
+                    {
+                        const auto newData = dns2Input->text().trimmed().toStdString();
+                        if (g_netDns2 != newData) {
+                            g_netDns2 = newData;
+                            g_commonDb.upsertConfig(PRO_NET_DNS2, g_netDns2);
+                        }
+                    }
+                    // wiredIp
+                    {
+                        const auto newData = wiredIpInput->text().trimmed().toStdString();
+                        if (g_netWiredIp != newData) {
+                            g_netWiredIp = newData;
+                            g_commonDb.upsertConfig(PRO_NET_WIRED_IP, g_netWiredIp);
+                        }
+                    }
+                    // wiredMask
+                    {
+                        const auto newData = wiredMaskInput->text().trimmed().toStdString();
+                        if (g_netWiredMask != newData) {
+                            g_netWiredMask = newData;
+                            g_commonDb.upsertConfig(PRO_NET_WIRED_MASK, g_netWiredMask);
+                        }
+                    }
+                    // wiredGateway
+                    {
+                        const auto newData = wiredGatewayInput->text().trimmed().toStdString();
+                        if (g_netWiredGateway != newData) {
+                            g_netWiredGateway = newData;
+                            g_commonDb.upsertConfig(PRO_NET_WIRED_GATEWAY, g_netWiredGateway);
+                        }
+                    }
+                    // wirelessSsid
+                    {
+                        const auto newData = wirelessSsidInput->text().trimmed().toStdString();
+                        if (g_netWirelessSsid != newData) {
+                            g_netWirelessSsid = newData;
+                            g_commonDb.upsertConfig(PRO_NET_WIRELESS_SSID, g_netWirelessSsid);
+                        }
+                    }
+                    // wirelessPasswd
+                    {
+                        const auto newData = wirelessPasswdInput->text().trimmed().toStdString();
+                        if (g_netWirelessPasswd != newData) {
+                            g_netWirelessPasswd = newData;
+                            g_commonDb.upsertConfig(PRO_NET_WIRELESS_PASSWD, g_netWirelessPasswd);
+                        }
+                    }
+
+                    MainRouter::getInstance()->mainNotificationShow("保存成功", nullptr);
+                } catch (const std::exception &e) {
+                    ostringstream errMsg;
+                    errMsg << "Save network config data error :" << e.what();
+                    logPrintln(errMsg.str(), airstrip::ERROR, __FUNCTION__);
+                    MainRouter::getInstance()->mainNotificationShow(
+                        "保存失败，请确认填写内容有效性", nullptr);
+                }
             });
 
     mainHeader = new MainComponentHeader(this);
@@ -61,9 +142,17 @@ MainSettingNetwork::MainSettingNetwork(QWidget *parent): QWidget(parent) {
                 [=] {
                     showMoreWiredConfig = !showMoreWiredConfig;
                     if (showMoreWiredConfig) {
+                        // close other
+                        if (showMoreWirelessConfig) {
+                            wirelessInput->click();
+                        }
+                        if (showMoreFourGConfig) {
+                            fourGInput->click();
+                        }
+                        // change sub
                         wiredInput->setText("▲");
                         wiredDhcp->show();
-                        if (wiredDhcpValue) {
+                        if (!wiredDhcpValue) {
                             wiredIp->show();
                             wiredMask->show();
                             wiredGateway->show();
@@ -107,7 +196,7 @@ MainSettingNetwork::MainSettingNetwork(QWidget *parent): QWidget(parent) {
                         wiredDhcpInput->setStyleSheet(wiredDhcpValue
                                                           ? SWITCH_BUTTON_ENABLE_STYLE
                                                           : SWITCH_BUTTON_DISABLE_STYLE);
-                        if (wiredDhcpValue) {
+                        if (!wiredDhcpValue) {
                             wiredIp->show();
                             wiredMask->show();
                             wiredGateway->show();
@@ -135,7 +224,7 @@ MainSettingNetwork::MainSettingNetwork(QWidget *parent): QWidget(parent) {
                     "background-color: rgb(31, 31, 31);  border-radius: 8px; font-size: 14px; color: white; margin-left: 30px");
                 wiredIp->setFixedHeight(50);
 #else
-            wiredIp->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: white; margin-left: 30px");
+            wiredIp->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: white; margin-left: 60px");
             wiredIp->setFixedHeight(100);
 #endif
                 wiredIpLabel = new QLabel("IP地址", wiredIp);
@@ -162,7 +251,7 @@ MainSettingNetwork::MainSettingNetwork(QWidget *parent): QWidget(parent) {
                     "background-color: rgb(31, 31, 31);  border-radius: 8px; font-size: 14px; color: white; margin-left: 30px");
                 wiredMask->setFixedHeight(50);
 #else
-            wiredMask->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: white; margin-left: 30px");
+            wiredMask->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: white; margin-left: 60px");
             wiredMask->setFixedHeight(100);
 #endif
                 wiredMaskLabel = new QLabel("子网掩码", wiredMask);
@@ -189,7 +278,7 @@ MainSettingNetwork::MainSettingNetwork(QWidget *parent): QWidget(parent) {
                     "background-color: rgb(31, 31, 31);  border-radius: 8px; font-size: 14px; color: white; margin-left: 30px");
                 wiredGateway->setFixedHeight(50);
 #else
-            wiredGateway->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: white; margin-left: 30px");
+            wiredGateway->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: white; margin-left: 60px");
             wiredGateway->setFixedHeight(100);
 #endif
                 wiredGatewayLabel = new QLabel("网关", wiredGateway);
@@ -235,6 +324,14 @@ MainSettingNetwork::MainSettingNetwork(QWidget *parent): QWidget(parent) {
                 [=] {
                     showMoreWirelessConfig = !showMoreWirelessConfig;
                     if (showMoreWirelessConfig) {
+                        // close other
+                        if (showMoreWiredConfig) {
+                            wiredInput->click();
+                        }
+                        if (showMoreFourGConfig) {
+                            fourGInput->click();
+                        }
+                        // change sub
                         wirelessInput->setText("▲");
                         wirelessEnable->show();
                         if (wirelessEnableValue) {
@@ -304,7 +401,7 @@ MainSettingNetwork::MainSettingNetwork(QWidget *parent): QWidget(parent) {
                     "background-color: rgb(31, 31, 31);  border-radius: 8px; font-size: 14px; color: white; margin-left: 30px");
                 wirelessSsid->setFixedHeight(50);
 #else
-            wirelessSsid->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: white; margin-left: 30px");
+            wirelessSsid->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: white; margin-left: 60px");
             wirelessSsid->setFixedHeight(100);
 #endif
                 wirelessSsidLabel = new QLabel("网络名称", wirelessSsid);
@@ -331,7 +428,7 @@ MainSettingNetwork::MainSettingNetwork(QWidget *parent): QWidget(parent) {
                     "background-color: rgb(31, 31, 31);  border-radius: 8px; font-size: 14px; color: white; margin-left: 30px");
                 wirelessPasswd->setFixedHeight(50);
 #else
-            wirelessPasswd->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: white; margin-left: 30px");
+            wirelessPasswd->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: white; margin-left: 60px");
             wirelessPasswd->setFixedHeight(100);
 #endif
                 wirelessPasswdLabel = new QLabel("网络密码", wirelessPasswd);
@@ -378,6 +475,14 @@ MainSettingNetwork::MainSettingNetwork(QWidget *parent): QWidget(parent) {
                 [=] {
                     showMoreFourGConfig = !showMoreFourGConfig;
                     if (showMoreFourGConfig) {
+                        // close other
+                        if (showMoreWiredConfig) {
+                            wiredInput->click();
+                        }
+                        if (showMoreWirelessConfig) {
+                            wirelessInput->click();
+                        }
+                        // change sub
                         fourGInput->setText("▲");
                         fourGEnable->show();
                     } else {
@@ -501,4 +606,39 @@ void MainSettingNetwork::showEvent(QShowEvent *) {
     fourGEnable->hide();
 
     // data
+    if (wiredDhcpInput) {
+        wiredDhcpInput->setStyleSheet(g_netWiredDhcp ? SWITCH_BUTTON_ENABLE_STYLE : SWITCH_BUTTON_DISABLE_STYLE);
+        wiredDhcpValue = g_netWiredDhcp;
+    }
+    if (wirelessEnableInput) {
+        wirelessEnableInput->setStyleSheet(g_netWirelessEnable
+                                               ? SWITCH_BUTTON_ENABLE_STYLE
+                                               : SWITCH_BUTTON_DISABLE_STYLE);
+        wirelessEnableValue = g_netWirelessEnable;
+    }
+    if (fourGEnableInput) {
+        fourGEnableInput->setStyleSheet(g_netFourEnable ? SWITCH_BUTTON_ENABLE_STYLE : SWITCH_BUTTON_DISABLE_STYLE);
+        fourGEnableValue = g_netFourEnable;
+    }
+    if (dns1Input) {
+        dns1Input->setText(QString::fromStdString(g_netDns1));
+    }
+    if (dns2Input) {
+        dns2Input->setText(QString::fromStdString(g_netDns2));
+    }
+    if (wiredIpInput) {
+        wiredIpInput->setText(QString::fromStdString(g_netWiredIp));
+    }
+    if (wiredMaskInput) {
+        wiredMaskInput->setText(QString::fromStdString(g_netWiredMask));
+    }
+    if (wiredGatewayInput) {
+        wiredGatewayInput->setText(QString::fromStdString(g_netWiredGateway));
+    }
+    if (wirelessSsidInput) {
+        wirelessSsidInput->setText(QString::fromStdString(g_netWirelessSsid));
+    }
+    if (wirelessPasswdInput) {
+        wirelessPasswdInput->setText(QString::fromStdString(g_netWirelessPasswd));
+    }
 }

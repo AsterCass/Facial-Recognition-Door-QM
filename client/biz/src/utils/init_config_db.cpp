@@ -56,10 +56,26 @@ void initConfigDb() {
         PRO_DB_COMMON_KEY_MANA_PASS, "123456", g_managementPassword);
     initConfigValue<std::string>(
         PRO_DB_SIGN_ID, "abcdefg", g_signId);
+    // __attribute__((deprecated))
     initConfigValue<std::string>(
         PRO_DB_WIFI_ACCOUNT, "", g_wifiAccount);
+    // __attribute__((deprecated))
     initConfigValue<std::string>(
         PRO_DB_WIFI_PASSWD, "", g_wifiPasswd);
+    initConfigValue<std::string>(
+        PRO_NET_DNS1, "8.8.8.8", g_netDns1);
+    initConfigValue<std::string>(
+        PRO_NET_DNS2, "8.8.4.4", g_netDns2);
+    initConfigValue<std::string>(
+        PRO_NET_WIRED_IP, "", g_netWiredIp);
+    initConfigValue<std::string>(
+        PRO_NET_WIRED_MASK, "", g_netWiredMask);
+    initConfigValue<std::string>(
+        PRO_NET_WIRED_GATEWAY, "", g_netWiredGateway);
+    initConfigValue<std::string>(
+        PRO_NET_WIRELESS_SSID, "", g_netWirelessSsid);
+    initConfigValue<std::string>(
+        PRO_NET_WIRELESS_PASSWD, "", g_netWirelessPasswd);
 
     // double
     initConfigValue<double>(PRO_DB_FACE_THRESHOLD, "0.48", g_faceThreshold);
@@ -91,4 +107,7 @@ void initConfigDb() {
     initConfigValue<int>(PRO_DB_ALLOW_FACE_OPEN, "1", g_allowFaceOpen);
     initConfigValue<int>(PRO_DB_VOICE, "1", g_voice);
     initConfigValue<int>(PRO_DB_CRON_REBOOT, "1", g_cronReboot);
+    initConfigValue<int>(PRO_NET_WIRED_DHCP, "1", g_netWiredDhcp);
+    initConfigValue<int>(PRO_NET_WIRELESS_ENABLE, "0", g_netWirelessEnable);
+    initConfigValue<int>(PRO_NET_FOUR_ENABLE, "0", g_netFourEnable);
 }

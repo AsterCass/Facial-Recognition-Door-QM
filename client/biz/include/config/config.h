@@ -51,6 +51,16 @@ constexpr auto PRO_DB_ALLOW_CARD_OPEN = "allowCardOpen";
 constexpr auto PRO_DB_ALLOW_FACE_OPEN = "allowFaceOpen";
 constexpr auto PRO_DB_VOICE = "voice";
 constexpr auto PRO_DB_CRON_REBOOT = "cronReboot";
+constexpr auto PRO_NET_DNS1 = "netDns1";
+constexpr auto PRO_NET_DNS2 = "netDns2";
+constexpr auto PRO_NET_WIRED_DHCP = "netWiredDhcp";
+constexpr auto PRO_NET_WIRED_IP = "netWiredIp";
+constexpr auto PRO_NET_WIRED_MASK = "netWiredMask";
+constexpr auto PRO_NET_WIRED_GATEWAY = "netWiredGateway";
+constexpr auto PRO_NET_WIRELESS_ENABLE = "netWirelessEnable";
+constexpr auto PRO_NET_WIRELESS_SSID = "netWirelessSsid";
+constexpr auto PRO_NET_WIRELESS_PASSWD = "netWirelessPasswd";
+constexpr auto PRO_NET_FOUR_ENABLE = "netFourEnable";
 
 
 const std::vector<std::string> CHINESE_WEEK = {
@@ -162,6 +172,16 @@ extern int g_allowCardOpen;
 extern int g_allowFaceOpen;
 extern int g_voice;
 extern int g_cronReboot;
+extern std::string g_netDns1;
+extern std::string g_netDns2;
+extern int g_netWiredDhcp;
+extern std::string g_netWiredIp;
+extern std::string g_netWiredMask;
+extern std::string g_netWiredGateway;
+extern int g_netWirelessEnable;
+extern std::string g_netWirelessSsid;
+extern std::string g_netWirelessPasswd;
+extern int g_netFourEnable;
 
 // function
 
