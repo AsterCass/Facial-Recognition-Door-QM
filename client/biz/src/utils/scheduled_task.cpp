@@ -238,12 +238,35 @@ void updateUIMainComponentHeader() {
         static std::string dns2 = "";
         if (resetDns++ > 0 && (dns1 != g_netDns1 || dns2 != g_netDns2)) {
             resetDns = 0;
+            logPrintln("Reset dns " + g_netDns1 + " " + g_netDns2, INFO, __FUNCTION__);
             dns1 = g_netDns1;
             dns2 = g_netDns2;
-            // todo update dns
+#ifndef WIN32
+            execCommandNoReturn("sh " + g_appWorkDir + "script/linux/reset_dns.sh " + g_netDns1 + " " + g_netDns2);
+#endif
         }
 
-        // todo wired set
+        //wired
+        static int resetDhcp = 1;
+        static int netWiredDhcp = -1;
+        if (resetDhcp++ > 0 && netWiredDhcp != g_netWiredDhcp) {
+            resetDhcp = 0;
+            netWiredDhcp = g_netWiredDhcp;
+            logPrintln("Reset wired dhcp " + std::to_string(g_netWiredDhcp), INFO, __FUNCTION__);
+            if (g_netWiredDhcp) {
+#ifndef WIN32
+                execCommandNoReturn("sh " + g_appWorkDir + "script/linux/reset_wired.sh dhcp");
+#endif
+            } else {
+#ifndef WIN32
+                std::ostringstream oss;
+                oss << "sh " << g_appWorkDir + "script/linux/reset_wired.sh static " << g_netWiredIp << " ";
+                oss << g_netWiredMask << " " << g_netWiredGateway << " " << g_netDns1 << " " << g_netDns2;
+                logPrintln("Reset wired static " + oss.str(), INFO, __FUNCTION__);
+                execCommandNoReturn(oss.str());
+#endif
+            }
+        }
 
         // wireless
         static int reconnectCount = 1;
