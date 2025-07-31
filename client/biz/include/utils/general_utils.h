@@ -16,6 +16,8 @@ namespace generalUtils {
     std::string matToBase64(const cv::Mat &img);
 
     cv::Mat matCompress(const cv::Mat &img);
+
+    int subnetMaskToCIDR(const std::string& mask);
 }
 
 

@@ -107,4 +107,19 @@ namespace generalUtils {
         imencode(".jpg", resizedImage, buffer, compressionParams);
         return imdecode(buffer, cv::IMREAD_COLOR);
     }
+
+    int subnetMaskToCIDR(const std::string &mask) {
+        std::istringstream iss(mask);
+        std::string token;
+        int cidr = 0;
+        while (std::getline(iss, token, '.')) {
+            const int octet = std::stoi(token);
+            for (int i = 0; i < 8; ++i) {
+                if (octet & (1 << i)) {
+                    ++cidr;
+                }
+            }
+        }
+        return cidr;
+    }
 }

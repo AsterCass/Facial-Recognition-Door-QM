@@ -261,7 +261,8 @@ void updateUIMainComponentHeader() {
 #ifndef WIN32
                 std::ostringstream oss;
                 oss << "sh " << g_appWorkDir + "script/linux/reset_wired.sh static " << g_netWiredIp << " ";
-                oss << g_netWiredMask << " " << g_netWiredGateway << " " << g_netDns1 << " " << g_netDns2;
+                oss << std::to_string(generalUtils::subnetMaskToCIDR(g_netWiredMask)) << " "
+                        << g_netWiredGateway << " " << g_netDns1 << " " << g_netDns2;
                 logPrintln("Reset wired static " + oss.str(), INFO, __FUNCTION__);
                 execCommandNoReturn(oss.str());
 #endif
