@@ -27,7 +27,7 @@ elseif (UNIX)
     set(QT_ROOT /data/src/Qt5.12.2/_install/lib/cmake/Qt5)
     set(BREAKPAD_ROOT /data/src/breakpad/_install)
     set(RK_ROOT /data/src/rockchip/_install)
-    set(INSPIRE_ROOT /data/src/InspireFace/InspireFace-master/build/inspireface-linux-armv7-armhf/InspireFace)
+    set(INSPIRE_ROOT /data/src/InspireFace/InspireFace-master/build/inspireface-linux-armv7-rv1109rv1126-armhf/InspireFace)
     set(CMAKE_PREFIX_PATH
             "${INSPIRE_ROOT}"
             "${BOOST_ROOT}"
@@ -181,6 +181,7 @@ elseif (UNIX)
             # Rock chip
             -lrkaiq -leasymedia -ldrm -lrockchip_mpp -lavformat -lavcodec -lswresample -lavutil -lasound
             -lRKAP_3A -lRKAP_ANR -lRKAP_Common -lv4l2 -lrga -lmd_share -lod_share -lrkaiq -lz -lv4lconvert -ljpeg
+            -lVSC_Lite -lGAL -lArchModelSw -lNNArchPerf -lOpenVX -lrknn_runtime -lrknn_api
             # Face
             -lfacedetection -fopenmp
             # Nfc
