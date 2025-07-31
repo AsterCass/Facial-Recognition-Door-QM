@@ -139,7 +139,7 @@ void initFaceRecognition() {
 
     logPrintln("Start init face model", airstrip::INFO, __FUNCTION__);
 
-    const string modelPath = g_appWorkDir + "model/Pikachu";
+    const string modelPath = g_appWorkDir + "model/Gundam_RV1109";
     HResult ret = HFLaunchInspireFace(modelPath.c_str());
     if (ret != HSUCCEED) {
         logPrintln("Load resource error: " + ret, airstrip::CRITICAL, __FUNCTION__);
