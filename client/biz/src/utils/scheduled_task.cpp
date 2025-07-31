@@ -249,9 +249,16 @@ void updateUIMainComponentHeader() {
         //wired
         static int resetDhcp = 1;
         static int netWiredDhcp = -1;
-        if (resetDhcp++ > 0 && netWiredDhcp != g_netWiredDhcp) {
+        static std::string netWiredIp;
+        static std::string netWiredMask;
+        static std::string netWiredGateway;
+        if (resetDhcp++ > 0 && (netWiredDhcp != g_netWiredDhcp || netWiredIp != g_netWiredIp ||
+                                netWiredMask != g_netWiredMask || netWiredGateway != g_netWiredGateway)) {
             resetDhcp = 0;
             netWiredDhcp = g_netWiredDhcp;
+            netWiredIp = g_netWiredIp;
+            netWiredMask = g_netWiredMask;
+            netWiredGateway = g_netWiredGateway;
             logPrintln("Reset wired dhcp " + std::to_string(g_netWiredDhcp), INFO, __FUNCTION__);
             if (g_netWiredDhcp) {
 #ifndef WIN32
