@@ -1,4 +1,4 @@
-#ifndef WIN32
+#ifndef WIN32x
 
 #include <rkmedia_api.h>
 #include <mutex>
@@ -63,7 +63,7 @@ void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
                 // } else {
                 //     faceRecognition(frameRga, rect);
                 // }
-
+                CameraFrame::getInstance()->setFaceRects(rect.x, rect.y, rect.width, rect.height);
                 faceRecognition(frameRga, rect);
             } catch (const exception &e) {
                 logPrintln("Face Recognition fail : " + string(e.what()),

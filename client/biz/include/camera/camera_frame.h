@@ -12,7 +12,7 @@
 #include <QLabel>
 #include <QImage>
 #endif
-
+#include <QPainter>
 
 class CameraFrame final : public QWidget {
 public:
@@ -87,12 +87,36 @@ public:
         failLabel->hide();
     }
 
+    void setFaceRects(const double x, const double y, const double w, const double h) {
+        // 投递到主线程
+        if (QThread::currentThread() != this->thread()) {
+            QMetaObject::invokeMethod(this, [this, x, y, w, h] {
+                setFaceRects(x, y, w, h);
+            }, Qt::QueuedConnection);
+            return;
+        }
+
+        faceRect = QRect(x, y, w, h);
+        update();
+    }
+
+protected:
+    void paintEvent(QPaintEvent *event) override {
+        QWidget::paintEvent(event);
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setPen(QPen(Qt::green, 2));
+        painter.drawRect(faceRect);
+    }
+
 private:
     explicit CameraFrame(QWidget *parent = nullptr);
 
     void resizeEvent(QResizeEvent *event) override;
 
     ~CameraFrame() override;
+
+    QRect faceRect;
 
     QWidget *mask = nullptr;
     QVBoxLayout *mainLayout = nullptr;
