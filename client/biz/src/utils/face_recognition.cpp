@@ -1,5 +1,6 @@
 #include "utils/face_recognition.h"
 
+#include <airstrip_thread_pool.h>
 #include <camera/camera_frame.h>
 #include <utils/general_utils.h>
 #include "db/face_db.h"
@@ -571,7 +572,7 @@ bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, i
     return ret;
 }
 
-void faceRecognition(const std::string &address, const cv::Rect &rect) {
+void faceRecognition(const std::string &address, const std::string &addressIr) {
     if (!initializedFaceRec) {
         return;
     }
@@ -580,10 +581,15 @@ void faceRecognition(const std::string &address, const cv::Rect &rect) {
         logPrintln("Read pic error " + address, airstrip::WARN, __FUNCTION__);
         return;
     }
-    return faceRecognition(image, rect);
+    const auto imageIr = cv::imread(addressIr);
+    if (imageIr.empty()) {
+        logPrintln("Read pic ir error " + address, airstrip::WARN, __FUNCTION__);
+        return;
+    }
+    return faceRecognition(image, imageIr);
 }
 
-void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
+void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
     if (!initializedFaceRec) {
         return;
     }
@@ -639,50 +645,74 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
     const int64_t currentMillisecondCount =
             std::chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
     if (currentMillisecondCount - lastMillisecondCount < g_faceRegCoreIvMillSec) {
+        HFReleaseImageStream(stream);
+        return;
+    }
+
+    if (g_isCheckFace) {
+        HFReleaseImageStream(stream);
+        return;
+    }
+    g_isCheckFace = true;
+    cv::Mat frameCopy = frame.clone();
+    cv::Mat frameIrCopy = frameIr.clone();
+    HFFaceBasicToken tokens = multipleFaceData.tokens[0];
+    static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([stream, frameCopy, frameIrCopy, tokens] {
         lastMillisecondCount = currentMillisecondCount;
+
+        // todo 这里只检查了帧有没有红外人脸，应该检查人脸所在区域有没有红外人脸
+        if (g_enableFaceSpoof) {
+            cv::Rect rect;
+            if (!faceDetect(frameIrCopy, frameCopy, rect, frameCopy.cols, frameCopy.rows)) {
+                logPrintln("Face recognition fake face !!!!!",
+                           airstrip::WARN, __FUNCTION__);
+                HFReleaseImageStream(stream);
+                g_isCheckFace = false;
+                return;
+            }
+        }
+
+        HFFaceFeature feature = {};
+        HResult rets = HFFaceFeatureExtract(faceRecognitionSession, stream, tokens, &feature);
+        if (rets != HSUCCEED) {
+            logPrintln("Face recognition feature extract fail " + rets,
+                       airstrip::WARN, __FUNCTION__);
+            HFReleaseImageStream(stream);
+            g_isCheckFace = false;
+            return;
+        }
+
+        HFloat confidence;
+        HFFaceFeatureIdentity searchResult = {};
+        rets = HFFeatureHubFaceSearch(feature, &confidence, &searchResult);
+        if (rets != HSUCCEED) {
+            logPrintln("Face recognition feature search fail " + rets,
+                       airstrip::WARN, __FUNCTION__);
+            HFReleaseImageStream(stream);
+            g_isCheckFace = false;
+            return;
+        }
+
+        if (searchResult.id <= 0 || faceUserInfoMap.find(searchResult.id) == faceUserInfoMap.end()) {
+            ScheduledTask::sendFaceRegRes({}, frameCopy, 0.0);
+            HFReleaseImageStream(stream);
+            g_isCheckFace = false;
+            return;
+        }
+
+        const auto userData = faceUserInfoMap[searchResult.id];
+        logPrintln("Face recognition ret id = " + to_string(searchResult.id)
+                   + " userId = " + userData.userId + " " + to_string(confidence),
+                   airstrip::INFO, __FUNCTION__);
+        if ((!currentIsNight() && confidence < g_faceThreshold) || (
+                currentIsNight() && confidence < g_faceThresholdNight)) {
+            ScheduledTask::sendFaceRegRes({}, frameCopy, 0.0);
+        } else {
+            ScheduledTask::sendFaceRegRes(userData, frameCopy, confidence);
+        }
         HFReleaseImageStream(stream);
-        return;
-    }
-
-
-    HFFaceFeature feature = {};
-    ret = HFFaceFeatureExtract(faceRecognitionSession, stream,
-                               multipleFaceData.tokens[0], &feature);
-    if (ret != HSUCCEED) {
-        logPrintln("Face recognition feature extract fail " + ret,
-                   airstrip::WARN, __FUNCTION__);
-        HFReleaseImageStream(stream);
-        return;
-    }
-
-    HFloat confidence;
-    HFFaceFeatureIdentity searchResult = {};
-    ret = HFFeatureHubFaceSearch(feature, &confidence, &searchResult);
-    if (ret != HSUCCEED) {
-        logPrintln("Face recognition feature search fail " + ret,
-                   airstrip::WARN, __FUNCTION__);
-        HFReleaseImageStream(stream);
-        return;
-    }
-
-    if (searchResult.id <= 0 || faceUserInfoMap.find(searchResult.id) == faceUserInfoMap.end()) {
-        ScheduledTask::sendFaceRegRes({}, frame, 0.0);
-        HFReleaseImageStream(stream);
-        return;
-    }
-
-    const auto userData = faceUserInfoMap[searchResult.id];
-    logPrintln("Face recognition ret id = " + to_string(searchResult.id)
-               + " userId = " + userData.userId + " " + to_string(confidence),
-               airstrip::INFO, __FUNCTION__);
-    if ((!currentIsNight() && confidence < g_faceThreshold) || (
-            currentIsNight() && confidence < g_faceThresholdNight)) {
-        ScheduledTask::sendFaceRegRes({}, frame, 0.0);
-    } else {
-        ScheduledTask::sendFaceRegRes(userData, frame, confidence);
-    }
-
-    HFReleaseImageStream(stream);
+        g_isCheckFace = false;
+    });
 }
 
 #else

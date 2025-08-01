@@ -50,33 +50,22 @@ void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
 
     const cv::Mat frameIr(g_appHeightIr, g_appWidthIr, CV_8UC3, s_irFrame);
     const cv::Mat frameRga(g_appHeight, g_appWidth, CV_8UC3, s_rgaFrame);
-    cv::Rect rect;
-    if (g_enableFaceSpoof) {
-        if (faceDetect(frameIr, frameRga, rect, frameRga.cols, frameRga.rows)) {
-            try {
-                //rectangle(frameRga, rect, cv::Scalar(255, 0, 0), 2);
-                //cv::imwrite("/data/frd/test.jpg", frameRga);
+    try {
+        //rectangle(frameRga, rect, cv::Scalar(255, 0, 0), 2);
+        //cv::imwrite("/data/frd/test.jpg", frameRga);
 
-                // if (currentIsNight()) {
-                //     cv::imwrite("/data/frd/current.jpg", frameRga);
-                //     faceRecognition("/data/frd/current.jpg", rect);
-                // } else {
-                //     faceRecognition(frameRga, rect);
-                // }
-                //CameraFrame::getInstance()->setFaceRects(rect.x, rect.y, rect.width, rect.height);
-                faceRecognition(frameRga, rect);
-            } catch (const exception &e) {
-                logPrintln("Face Recognition fail : " + string(e.what()),
-                           airstrip::ERROR, __FUNCTION__);
-            }
-        }
-    } else {
-        faceRecognition(frameRga, rect);
+        // if (currentIsNight()) {
+        //     cv::imwrite("/data/frd/current.jpg", frameRga);
+        //     faceRecognition("/data/frd/current.jpg", rect);
+        // } else {
+        //     faceRecognition(frameRga, rect);
+        // }
+        //CameraFrame::getInstance()->setFaceRects(rect.x, rect.y, rect.width, rect.height);
+        faceRecognition(frameRga, frameIr);
+    } catch (const exception &e) {
+        logPrintln("Face Recognition fail : " + string(e.what()),
+                   airstrip::ERROR, __FUNCTION__);
     }
-
-    // if (g_faceRegCoreIvMillSec >= 0) {
-    //     usleep(g_faceRegCoreIvMillSec * 1000);
-    // }
 
     delete [] s_irFrame;
     delete [] s_rgaFrame;

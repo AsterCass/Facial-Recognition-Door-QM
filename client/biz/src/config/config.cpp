@@ -5,6 +5,7 @@ using namespace std;
 // variable
 std::string g_latestVersion;
 bool g_isCheckVersion = false;
+bool g_isCheckFace = false;
 
 void *g_mainThreadPool = nullptr;
 

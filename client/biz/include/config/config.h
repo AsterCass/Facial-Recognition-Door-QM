@@ -117,6 +117,7 @@ const std::vector<std::vector<int> > EXPOSE_AND_GAIN_PARAM = {
 // variable
 extern std::string g_latestVersion;
 extern bool g_isCheckVersion;
+extern bool g_isCheckFace;
 
 extern void *g_mainThreadPool;
 
