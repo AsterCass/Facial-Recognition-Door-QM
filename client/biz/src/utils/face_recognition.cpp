@@ -644,21 +644,16 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
     static int64_t lastMillisecondCount = 0L;
     const int64_t currentMillisecondCount =
             std::chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
-    if (currentMillisecondCount - lastMillisecondCount < g_faceRegCoreIvMillSec) {
-        HFReleaseImageStream(stream);
-        return;
-    }
-
-    if (g_isCheckFace) {
+    if (currentMillisecondCount - lastMillisecondCount < g_faceRegCoreIvMillSec || g_isCheckFace) {
         HFReleaseImageStream(stream);
         return;
     }
     g_isCheckFace = true;
+    lastMillisecondCount = currentMillisecondCount;
     cv::Mat frameCopy = frame.clone();
     cv::Mat frameIrCopy = frameIr.clone();
     HFFaceBasicToken tokens = multipleFaceData.tokens[0];
     static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([stream, frameCopy, frameIrCopy, tokens] {
-        lastMillisecondCount = currentMillisecondCount;
 
         // todo 这里只检查了帧有没有红外人脸，应该检查人脸所在区域有没有红外人脸
         if (g_enableFaceSpoof) {
