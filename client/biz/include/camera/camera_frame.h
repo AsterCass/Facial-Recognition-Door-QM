@@ -96,6 +96,8 @@ public:
             return;
         }
 
+        // todo 更大的人脸范围，观感更好
+
         faceRect = QRect(x, y, w, h);
         update();
     }
