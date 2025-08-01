@@ -105,7 +105,7 @@ protected:
         QWidget::paintEvent(event);
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing);
-        painter.setPen(QPen(Qt::green, 2));
+        painter.setPen(QPen(Qt::green, 3));
         painter.drawRect(faceRect);
     }
 

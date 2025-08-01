@@ -1,4 +1,6 @@
 #include "utils/face_recognition.h"
+
+#include <camera/camera_frame.h>
 #include <utils/general_utils.h>
 #include "db/face_db.h"
 #include "airstrip_log.h"
@@ -12,7 +14,7 @@ using namespace std;
 
 std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
 
-#ifndef WIN32
+#ifndef WIN32x
 
 #include "inspireface.h"
 #include "intypedef.h"
@@ -613,6 +615,7 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
 
     if (multipleFaceData.detectedNum <= 0) {
         // logPrintln("Face recognition face not found",airstrip::WARN, __FUNCTION__);
+        CameraFrame::getInstance()->setFaceRects(0, 0, 0, 0);
         HFReleaseImageStream(stream);
         return;
     }
@@ -627,6 +630,20 @@ void faceRecognition(const cv::Mat &frame, const cv::Rect &rect) {
     //     HFReleaseImageStream(stream);
     //     return;
     // }
+
+
+    CameraFrame::getInstance()->setFaceRects(multipleFaceData.rects->x, multipleFaceData.rects->y,
+                                             multipleFaceData.rects->width, multipleFaceData.rects->height);
+
+    static int64_t lastMillisecondCount = 0L;
+    const int64_t currentMillisecondCount =
+            std::chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).count();
+    if (currentMillisecondCount - lastMillisecondCount < g_faceRegCoreIvMillSec) {
+        lastMillisecondCount = currentMillisecondCount;
+        HFReleaseImageStream(stream);
+        return;
+    }
+
 
     HFFaceFeature feature = {};
     ret = HFFaceFeatureExtract(faceRecognitionSession, stream,
