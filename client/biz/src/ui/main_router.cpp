@@ -41,8 +41,10 @@ void printMainRouterQueue(const string &functionName) {
 void MainRouter::showFaceRegister(const cv::Mat &frame) {
     // 投递到主线程
     if (QThread::currentThread() != this->thread()) {
-        QMetaObject::invokeMethod(this, [this, frame] {
-            showFaceRegister(frame);
+        // 做深拷贝再捕获
+        cv::Mat frameCopy = frame.clone();
+        QMetaObject::invokeMethod(this, [this, frameCopy] {
+            showFaceRegister(frameCopy);
         }, Qt::QueuedConnection);
         return;
     }

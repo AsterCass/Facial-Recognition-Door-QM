@@ -1,6 +1,7 @@
 #ifndef FACE_REGISTER_H
 #define FACE_REGISTER_H
 
+#include <airstrip_log.h>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMovie>
@@ -17,7 +18,11 @@ public:
     ~FaceRegister() override;
 
     void setLastFrame(const cv::Mat &frame) {
-        lastFrame = frame.clone();
+        if (!frame.empty()) {
+            lastFrame = frame.clone();
+        } else {
+            airstrip::logPrintln("FaceRegister::setLastFrame: empty frame");
+        }
     }
 
     void enableRegisterBtn(const bool isEnable) {
