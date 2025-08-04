@@ -157,12 +157,11 @@ void CameraFrame::setFaceRects(const double x, const double y, const double w, c
         double dy = abs(faceRect.y() - newRect.y());
 
         // 过滤微小变化并局部更新
-        if (dx > 1.0 || dy > 1.0 ||
-            abs(faceRect.width() - newRect.width()) > 1.0 ||
-            abs(faceRect.height() - newRect.height()) > 1.0) {
-            const QRect updateRegion = faceRect.united(newRect);
+        if (dx > 5.0 || dy > 5.0 ||
+            abs(faceRect.width() - newRect.width()) > 5.0 ||
+            abs(faceRect.height() - newRect.height()) > 5.0) {
             faceRect = newRect;
-            update(updateRegion);
+            update();
         }
     }
 }

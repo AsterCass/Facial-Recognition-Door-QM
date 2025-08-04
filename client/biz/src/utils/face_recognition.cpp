@@ -150,7 +150,7 @@ void initFaceRecognition() {
     }
 
     constexpr HOption option = HF_ENABLE_FACE_RECOGNITION;
-    constexpr HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
+    constexpr HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
     constexpr HInt32 maxDetectNum = 1;
     constexpr HInt32 detectPixelLevel = 160;
     ret = HFCreateInspireFaceSessionOptional(
@@ -586,15 +586,6 @@ void faceRecognition(const std::string &address) {
 
 void faceRecognition(const cv::Mat &frame) {
     if (!initializedFaceRec) {
-        return;
-    }
-
-    static int64_t lastFrameTime = 0L;
-    const int64_t currentFrameTime =
-            std::chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).
-            count();
-    if (currentFrameTime - lastFrameTime < 100) {
-        logPrintln("Give up frame ... ", airstrip::DEBUG, __FUNCTION__);
         return;
     }
 
