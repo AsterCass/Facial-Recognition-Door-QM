@@ -150,7 +150,7 @@ void initFaceRecognition() {
     }
 
     constexpr HOption option = HF_ENABLE_FACE_RECOGNITION;
-    constexpr HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
+    constexpr HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
     constexpr HInt32 maxDetectNum = 1;
     constexpr HInt32 detectPixelLevel = 160;
     ret = HFCreateInspireFaceSessionOptional(
@@ -572,7 +572,7 @@ bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, i
     return ret;
 }
 
-void faceRecognition(const std::string &address, const std::string &addressIr) {
+void faceRecognition(const std::string &address) {
     if (!initializedFaceRec) {
         return;
     }
@@ -581,15 +581,10 @@ void faceRecognition(const std::string &address, const std::string &addressIr) {
         logPrintln("Read pic error " + address, airstrip::WARN, __FUNCTION__);
         return;
     }
-    const auto imageIr = cv::imread(addressIr);
-    if (imageIr.empty()) {
-        logPrintln("Read pic ir error " + address, airstrip::WARN, __FUNCTION__);
-        return;
-    }
-    return faceRecognition(image, imageIr);
+    return faceRecognition(image);
 }
 
-void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
+void faceRecognition(const cv::Mat &frame) {
     if (!initializedFaceRec) {
         return;
     }
@@ -660,17 +655,20 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
 
 
         // todo 这里只检查了帧有没有红外人脸，应该检查人脸所在区域有没有红外人脸
-        // if (g_enableFaceSpoof) {
-        //     cv::Rect rect;
-        //     if (!faceDetect(frameIrCopy, frameCopy, rect, frameCopy.cols, frameCopy.rows)) {
-        //         logPrintln("Face recognition fake face !!!!!",
-        //                    airstrip::WARN, __FUNCTION__);
-        //         HFReleaseImageStream(stream);
-        //         g_isCheckFace = false;
-        //         free(copyToken.data);
-        //         return;
-        //     }
-        // }
+        if (g_enableFaceSpoof) {
+            g_isOperateOnIrFace = true;
+            cv::Rect rect;
+            const bool faceDetected = faceDetect(
+                g_currentIrFace, frameCopy, rect, frameCopy.cols, frameCopy.rows);
+            g_isOperateOnIrFace = false;
+            if (!faceDetected) {
+                logPrintln("Face fake face !!!!!", airstrip::WARN, __FUNCTION__);
+                HFReleaseImageStream(stream);
+                g_isCheckFace = false;
+                --isCheckFaceReco;
+                return;
+            }
+        }
 
         HFFaceFeature feature = {};
         ret = HFFaceFeatureExtract(faceRecognitionSession, stream, multipleFaceData.tokens[0], &feature);

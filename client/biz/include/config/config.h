@@ -4,6 +4,7 @@
 #include <string>
 #include <QStackedWidget>
 #include <airstrip_db.h>
+#include <opencv2/core.hpp>
 
 // const
 constexpr auto APP_VERSION = "3.3.0";
@@ -118,6 +119,8 @@ const std::vector<std::vector<int> > EXPOSE_AND_GAIN_PARAM = {
 extern std::string g_latestVersion;
 extern bool g_isCheckVersion;
 extern bool g_isCheckFace;
+extern bool g_isOperateOnIrFace;
+extern cv::Mat g_currentIrFace;
 
 extern void *g_mainThreadPool;
 

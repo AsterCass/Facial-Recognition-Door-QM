@@ -61,7 +61,7 @@ void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
         //     faceRecognition(frameRga, rect);
         // }
         //CameraFrame::getInstance()->setFaceRects(rect.x, rect.y, rect.width, rect.height);
-        faceRecognition(frameRga, frameIr);
+        faceRecognition(frameRga);
     } catch (const exception &e) {
         logPrintln("Face Recognition fail : " + string(e.what()),
                    airstrip::ERROR, __FUNCTION__);
@@ -92,13 +92,25 @@ void processWithMb(bool isIr, MEDIA_BUFFER mb) {
 
 void processWithMbIr(MEDIA_BUFFER mb) {
     if (closeProcess)return;
-    // if (g_onFaceFrameIr || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
-    //     RK_MPI_MB_ReleaseBuffer(mb);
-    //     return;
-    // }
-    // g_onFaceFrameIr = true;
-    // processWithMb(true, mb);
+    if (g_onFaceFrameIr || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen ||
+        g_isOperateOnIrFace) {
+        RK_MPI_MB_ReleaseBuffer(mb);
+        return;
+    }
+    g_onFaceFrameIr = true;
+
+    const void *data = RK_MPI_MB_GetPtr(mb);
+    const size_t size = RK_MPI_MB_GetSize(mb);
+    auto *buff = new uchar[size];
+    memcpy(buff, data, size);
+
+    const cv::Mat frameIr(g_appHeight, g_appWidth, CV_8UC3, buff);
+    g_currentIrFace = frameIr.clone();
+
+    delete [] buff;
+    buff = nullptr;
     RK_MPI_MB_ReleaseBuffer(mb);
+    g_onFaceFrameIr = false;
 }
 
 void processWithMbRga(MEDIA_BUFFER mb) {
@@ -108,7 +120,6 @@ void processWithMbRga(MEDIA_BUFFER mb) {
         return;
     }
     g_onFaceFrameRga = true;
-    // processWithMb(false, mb);
 
     const void *data = RK_MPI_MB_GetPtr(mb);
     const size_t size = RK_MPI_MB_GetSize(mb);
@@ -118,8 +129,7 @@ void processWithMbRga(MEDIA_BUFFER mb) {
 
     const cv::Mat frameRga(g_appHeight, g_appWidth, CV_8UC3, buff);
     try {
-        const cv::Mat frameIr;
-        faceRecognition(frameRga, frameIr);
+        faceRecognition(frameRga);
     } catch (const exception &e) {
         logPrintln("Face Recognition fail : " + string(e.what()),
                    airstrip::ERROR, __FUNCTION__);
@@ -216,7 +226,7 @@ void startCameraRk() {
 
     SAMPLE_COMM_ISP_Init(irCameraId, RK_AIQ_WORKING_MODE_NORMAL, RK_FALSE, "/etc/iqfiles");
     SAMPLE_COMM_ISP_Run(irCameraId);
-    SAMPLE_COMM_ISP_SetFrameRate(irCameraId, 5);
+    SAMPLE_COMM_ISP_SetFrameRate(irCameraId, 10);
 
 
     SAMPLE_COMM_ISP_SET_ManualExposureManualGain(1, 0, 0);
