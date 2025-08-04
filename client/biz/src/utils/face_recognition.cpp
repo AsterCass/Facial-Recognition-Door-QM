@@ -654,10 +654,22 @@ void faceRecognition(const cv::Mat &frame) {
         // todo 这里只检查了帧有没有红外人脸，应该检查人脸所在区域有没有红外人脸
         if (g_enableFaceSpoof) {
             g_isOperateOnIrFace = true;
-            cv::Rect rect;
-            const bool faceDetected = faceDetect(
-                g_currentIrFace, frameCopy, rect, frameCopy.cols, frameCopy.rows);
+            cv::Rect rectIr;
+            bool faceDetected = faceDetect(
+                g_currentIrFace, frameCopy, rectIr, frameCopy.cols, frameCopy.rows);
             g_isOperateOnIrFace = false;
+            if (rectIr.empty()) {
+                faceDetected = false;
+            } else {
+                const cv::Point centerIr(rectIr.x + rectIr.width / 2, rectIr.y + rectIr.height / 2);
+                const cv::Rect rectRgb(multipleFaceData.rects->x, multipleFaceData.rects->y,
+                                       multipleFaceData.rects->width, multipleFaceData.rects->height);
+                const cv::Point centerRgb(rectRgb.x + rectRgb.width / 2, rectRgb.y + rectRgb.height / 2);
+                if (!rectRgb.contains(centerIr) || !rectIr.contains(centerRgb)) {
+                    logPrintln("Someone try to sz !!!", airstrip::WARN, __FUNCTION__);
+                    faceDetected = false;
+                }
+            }
             if (!faceDetected) {
                 logPrintln("Face fake face !!!!!", airstrip::WARN, __FUNCTION__);
                 HFReleaseImageStream(stream);

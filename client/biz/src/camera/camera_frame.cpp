@@ -149,7 +149,10 @@ void CameraFrame::setFaceRects(const double x, const double y, const double w, c
         return;
     }
 
-    const QRect newRect(x, y, w, h);
+    // 矫正y的值，由于上部有个header
+    const double fixedY = y - 80 < 0 ? 0 : y - 80;
+
+    const QRect newRect(x, fixedY, w, h);
 
     // 计算变化幅度
     if (faceRect != newRect) {
