@@ -595,14 +595,15 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
     }
 
     cv::Mat frameCopy = frame.clone();
-    static bool isCheckFaceReco = false;
-    if (isCheckFaceReco) {
+    static int isCheckFaceReco = 0;
+    if (isCheckFaceReco > 2) {
         logPrintln("In Recognition ... ", airstrip::DEBUG, __FUNCTION__);
         return;
     }
 
+    logPrintln("Start Recognition enqueue thread ... ", airstrip::DEBUG, __FUNCTION__);
     static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([frameCopy] {
-        isCheckFaceReco = true;
+        isCheckFaceReco++;
         logPrintln("Start Recognition ... ", airstrip::DEBUG, __FUNCTION__);
 
         HFImageStream stream = nullptr;
@@ -616,7 +617,7 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
         if (ret != HSUCCEED) {
             logPrintln("Face recognition build image fail " + ret,
                        airstrip::WARN, __FUNCTION__);
-            isCheckFaceReco = false;
+            --isCheckFaceReco;
             return;
         }
 
@@ -626,7 +627,7 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
             logPrintln("Face recognition track image fail " + ret,
                        airstrip::WARN, __FUNCTION__);
             HFReleaseImageStream(stream);
-            isCheckFaceReco = false;
+            --isCheckFaceReco;
             return;
         }
 
@@ -636,7 +637,7 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
         if (multipleFaceData.detectedNum <= 0) {
             CameraFrame::getInstance()->setFaceRects(0, 0, 0, 0);
             HFReleaseImageStream(stream);
-            isCheckFaceReco = false;
+            --isCheckFaceReco;
             return;
         }
 
@@ -651,7 +652,7 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
                 count();
         if (currentMillisecondCount - lastMillisecondCount < g_faceRegCoreIvMillSec || g_isCheckFace) {
             HFReleaseImageStream(stream);
-            isCheckFaceReco = false;
+            --isCheckFaceReco;
             return;
         }
         g_isCheckFace = true;
@@ -678,7 +679,7 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
                        airstrip::WARN, __FUNCTION__);
             HFReleaseImageStream(stream);
             g_isCheckFace = false;
-            isCheckFaceReco = false;
+            --isCheckFaceReco;
             return;
         }
 
@@ -690,7 +691,7 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
                        airstrip::WARN, __FUNCTION__);
             HFReleaseImageStream(stream);
             g_isCheckFace = false;
-            isCheckFaceReco = false;
+            --isCheckFaceReco;
             return;
         }
 
@@ -698,7 +699,7 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
             ScheduledTask::sendFaceRegRes({}, frameCopy, 0.0);
             HFReleaseImageStream(stream);
             g_isCheckFace = false;
-            isCheckFaceReco = false;
+            --isCheckFaceReco;
             return;
         }
 
@@ -714,7 +715,7 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
         }
         HFReleaseImageStream(stream);
         g_isCheckFace = false;
-        isCheckFaceReco = false;
+        --isCheckFaceReco;
     });
 }
 
