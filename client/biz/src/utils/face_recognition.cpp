@@ -471,7 +471,7 @@ bool faceVoiceTemplate(const std::string &userId, const std::string &voiceFeatur
     return true;
 }
 
-bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, int orgCols, int orgRows) {
+bool faceDetect(const cv::Mat &frame) {
     bool ret = false;
     if (!initializedFaceRec) {
         return ret;
@@ -488,37 +488,10 @@ bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, i
         // 最大人脸
         const auto *p = (short *) (pResults + 1);
         const int confidence = p[0];
-        const int x = p[1];
-        const int y = p[2];
-        const int w = p[3];
-        const int h = p[4];
         char sScore[256];
         snprintf(sScore, 256, "%d", confidence);
 
-        // 校正
-        const int maxWidth = frame.cols;
-        const int maxHeight = frame.rows;
-        const int faceX = std::max(0, x);
-        const int faceY = std::max(0, y);
-        int faceW = std::max(0, w);
-        int faceH = std::max(0, h);
-        faceW = faceX + faceW > maxWidth ? maxWidth - faceX : faceW;
-        faceH = faceY + faceH > maxHeight ? maxHeight - faceY : faceH;
-
-        // 缩放前对应人形方框所在区域
-        const int origX = static_cast<int>(faceX / IR_SCALE);
-        const int origY = static_cast<int>(faceY / IR_SCALE);
-        const int origWidth = static_cast<int>(faceW / IR_SCALE);
-        const int origHeight = static_cast<int>(faceH / IR_SCALE);
-
-        // 二次校正
-        rect.x = std::min(origX, orgCols);
-        rect.y = std::min(origY, orgRows);;
-        rect.width = std::min(orgCols - origX, origWidth);
-        rect.height = std::min(orgRows - origY, origHeight);
-
-
-        const auto minSide = min(rect.width, rect.height);
+        const auto minSide = min(frame.cols, frame.rows);
         logPrintln("Size min side =  " + to_string(minSide) + " confidence is " + to_string(confidence) +
                    " faceDistance = " + to_string(g_faceDistance), airstrip::DEBUG, __FUNCTION__);
         if ((1 == g_faceDistance && minSide < 320) || (2 == g_faceDistance && minSide < 180)) {
@@ -529,9 +502,8 @@ bool faceDetect(const cv::Mat &frame, const cv::Mat &rgaFrame, cv::Rect &rect, i
         // }
 
         // 计算明暗矫正摄像头
-        const cv::Mat rgaFrameFace = rgaFrame(rect);
         cv::Mat grayFrameFace;
-        cvtColor(rgaFrameFace, grayFrameFace, cv::COLOR_BGR2GRAY);
+        cvtColor(frame, grayFrameFace, cv::COLOR_BGR2GRAY);
 
 
         //亮暗比例
@@ -650,26 +622,12 @@ void faceRecognition(const cv::Mat &frame) {
         g_isCheckFace = true;
         lastMillisecondCount = currentMillisecondCount;
 
-
-        // todo 这里只检查了帧有没有红外人脸，应该检查人脸所在区域有没有红外人脸
         if (g_enableFaceSpoof) {
             g_isOperateOnIrFace = true;
-            cv::Rect rectIr;
-            bool faceDetected = faceDetect(
-                g_currentIrFace, frameCopy, rectIr, frameCopy.cols, frameCopy.rows);
+            const cv::Rect rectRgb(multipleFaceData.rects->x, multipleFaceData.rects->y,
+                                   multipleFaceData.rects->width, multipleFaceData.rects->height);
+            const bool faceDetected = faceDetect(g_currentIrFace(rectRgb));
             g_isOperateOnIrFace = false;
-            if (rectIr.empty()) {
-                faceDetected = false;
-            } else {
-                const cv::Point centerIr(rectIr.x + rectIr.width / 2, rectIr.y + rectIr.height / 2);
-                const cv::Rect rectRgb(multipleFaceData.rects->x, multipleFaceData.rects->y,
-                                       multipleFaceData.rects->width, multipleFaceData.rects->height);
-                const cv::Point centerRgb(rectRgb.x + rectRgb.width / 2, rectRgb.y + rectRgb.height / 2);
-                if (!rectRgb.contains(centerIr) || !rectIr.contains(centerRgb)) {
-                    logPrintln("Someone try to sz !!!", airstrip::WARN, __FUNCTION__);
-                    faceDetected = false;
-                }
-            }
             if (!faceDetected) {
                 logPrintln("Face fake face !!!!!", airstrip::WARN, __FUNCTION__);
                 HFReleaseImageStream(stream);

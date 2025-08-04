@@ -31,8 +31,8 @@ int g_onFaceFrameRga = false;
 
 #define CAMERA_WIDTH 1920;
 #define CAMERA_HEIGHT 1080;
-#define CAMERA_WIDTH_VI 480;
-#define CAMERA_HEIGHT_VI 270;
+#define CAMERA_WIDTH_VI 1920;
+#define CAMERA_HEIGHT_VI 1080;
 
 
 void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
