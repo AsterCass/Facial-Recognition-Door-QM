@@ -12,6 +12,8 @@
 #include <QLabel>
 #include <QImage>
 #endif
+#include <qevent.h>
+#include <QEvent>
 #include <QPainter>
 
 class CameraFrame final : public QWidget {
@@ -87,28 +89,18 @@ public:
         failLabel->hide();
     }
 
-    void setFaceRects(const double x, const double y, const double w, const double h) {
-        // 投递到主线程
-        if (QThread::currentThread() != this->thread()) {
-            QMetaObject::invokeMethod(this, [this, x, y, w, h] {
-                setFaceRects(x, y, w, h);
-            }, Qt::QueuedConnection);
-            return;
-        }
-
-        // todo 更大的人脸范围，观感更好
-
-        faceRect = QRect(x, y, w, h);
-        update();
-    }
+    void setFaceRects(const double x, const double y, const double w, const double h);
 
 protected:
     void paintEvent(QPaintEvent *event) override {
         QWidget::paintEvent(event);
-        QPainter painter(this);
-        painter.setRenderHint(QPainter::Antialiasing);
-        painter.setPen(QPen(Qt::green, 3));
-        painter.drawRect(faceRect);
+
+        // 只有当faceRect有效且在可见区域内时才绘制
+        if (!faceRect.isEmpty() && faceRect.intersects(event->rect())) {
+            QPainter painter(this);
+            painter.setPen(QPen(Qt::green, 3));
+            painter.drawRect(faceRect);
+        }
     }
 
 private:

@@ -104,7 +104,7 @@ void processWithMbIr(MEDIA_BUFFER mb) {
     auto *buff = new uchar[size];
     memcpy(buff, data, size);
 
-    const cv::Mat frameIr(g_appHeight, g_appWidth, CV_8UC3, buff);
+    const cv::Mat frameIr(g_appHeightIr, g_appWidthIr, CV_8UC3, buff);
     g_currentIrFace = frameIr.clone();
 
     delete [] buff;

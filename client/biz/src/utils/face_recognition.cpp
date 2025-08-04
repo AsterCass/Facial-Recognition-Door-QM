@@ -589,18 +589,24 @@ void faceRecognition(const cv::Mat &frame) {
         return;
     }
 
-    cv::Mat frameCopy = frame.clone();
-    static int isCheckFaceReco = 0;
-    if (isCheckFaceReco > 2) {
-        logPrintln("In Recognition ... ", airstrip::DEBUG, __FUNCTION__);
+    static int64_t lastFrameTime = 0L;
+    const int64_t currentFrameTime =
+            std::chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).
+            count();
+    if (currentFrameTime - lastFrameTime < 100) {
+        logPrintln("Give up frame ... ", airstrip::DEBUG, __FUNCTION__);
         return;
     }
 
-    logPrintln("Start Recognition enqueue thread ... ", airstrip::DEBUG, __FUNCTION__);
-    static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([frameCopy] {
-        isCheckFaceReco++;
-        logPrintln("Start Recognition ... ", airstrip::DEBUG, __FUNCTION__);
+    static int isCheckFaceReco = 0;
+    if (isCheckFaceReco > 1) {
+        logPrintln("In Recognition ... ", airstrip::DEBUG, __FUNCTION__);
+        return;
+    }
+    isCheckFaceReco++;
+    cv::Mat frameCopy = frame.clone();
 
+    static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([frameCopy] {
         HFImageStream stream = nullptr;
         HFImageData imageData = {};
         imageData.data = frameCopy.data;
@@ -626,8 +632,8 @@ void faceRecognition(const cv::Mat &frame) {
             return;
         }
 
-        const auto faceNum = multipleFaceData.detectedNum;
-        logPrintln("Num of face: " + to_string(faceNum), airstrip::DEBUG, __FUNCTION__);
+        // const auto faceNum = multipleFaceData.detectedNum;
+        // logPrintln("Num of face: " + to_string(faceNum), airstrip::DEBUG, __FUNCTION__);
 
         if (multipleFaceData.detectedNum <= 0) {
             CameraFrame::getInstance()->setFaceRects(0, 0, 0, 0);

@@ -140,6 +140,33 @@ void CameraFrame::updateFrameRK(const cv::Mat &frame) {
 #endif
 }
 
+void CameraFrame::setFaceRects(const double x, const double y, const double w, const double h) {
+    // 投递到主线程
+    if (QThread::currentThread() != this->thread()) {
+        QMetaObject::invokeMethod(this, [this, x, y, w, h] {
+            setFaceRects(x, y, w, h);
+        }, Qt::QueuedConnection);
+        return;
+    }
+
+    const QRect newRect(x, y, w, h);
+
+    // 计算变化幅度
+    if (faceRect != newRect) {
+        double dx = abs(faceRect.x() - newRect.x());
+        double dy = abs(faceRect.y() - newRect.y());
+
+        // 过滤微小变化并局部更新
+        if (dx > 1.0 || dy > 1.0 ||
+            abs(faceRect.width() - newRect.width()) > 1.0 ||
+            abs(faceRect.height() - newRect.height()) > 1.0) {
+            const QRect updateRegion = faceRect.united(newRect);
+            faceRect = newRect;
+            update(updateRegion);
+        }
+    }
+}
+
 
 void CameraFrame::start() const {
 #ifdef Q_OS_WIN
