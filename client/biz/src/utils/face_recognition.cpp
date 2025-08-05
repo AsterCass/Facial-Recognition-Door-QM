@@ -720,7 +720,7 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
                 CameraFrame::getInstance()->setFaceRects(0, 0, 0, 0);
             }
 
-            if (onlyDetect) {
+            if (onlyDetect || !retDetect) {
                 --isCheckFaceReco;
                 return;
             }
