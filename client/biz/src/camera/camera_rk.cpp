@@ -61,7 +61,7 @@ void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
         //     faceRecognition(frameRga, rect);
         // }
         //CameraFrame::getInstance()->setFaceRects(rect.x, rect.y, rect.width, rect.height);
-        faceRecognition(frameRga);
+        faceRecognition(frameRga, frameIr);
     } catch (const exception &e) {
         logPrintln("Face Recognition fail : " + string(e.what()),
                    airstrip::ERROR, __FUNCTION__);
@@ -86,31 +86,32 @@ void processWithMb(bool isIr, MEDIA_BUFFER mb) {
                              ? bind(faceRecognitionPreFun, buff, otherBuff)
                              : bind(faceRecognitionPreFun, otherBuff, buff);
 
-    static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue(boundFunction);
+    boundFunction();
     RK_MPI_MB_ReleaseBuffer(mb);
 }
 
 void processWithMbIr(MEDIA_BUFFER mb) {
     if (closeProcess)return;
-    if (g_onFaceFrameIr || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen ||
-        g_isOperateOnIrFace) {
+    if (g_onFaceFrameIr || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
         RK_MPI_MB_ReleaseBuffer(mb);
         return;
     }
     g_onFaceFrameIr = true;
 
-    const void *data = RK_MPI_MB_GetPtr(mb);
-    const size_t size = RK_MPI_MB_GetSize(mb);
-    auto *buff = new uchar[size];
-    memcpy(buff, data, size);
+    // 限制帧率，人脸检测频率没必要那么高，浪费cpu
+    // static int64_t lastMillisecondCount = 0L;
+    // const int64_t currentMillisecondCount =
+    //         std::chrono::duration_cast<chrono::milliseconds>(
+    //             chrono::system_clock::now().time_since_epoch()).
+    //         count();
+    // if (currentMillisecondCount - lastMillisecondCount < 100) {
+    //     RK_MPI_MB_ReleaseBuffer(mb);
+    //     g_onFaceFrameIr = false;
+    //     return;
+    // }
+    // lastMillisecondCount = currentMillisecondCount;
 
-    const cv::Mat frameIr(g_appHeightIr, g_appWidthIr, CV_8UC3, buff);
-    g_currentIrFace = frameIr.clone();
-
-    delete [] buff;
-    buff = nullptr;
-    RK_MPI_MB_ReleaseBuffer(mb);
-    g_onFaceFrameIr = false;
+    processWithMb(true, mb);
 }
 
 void processWithMbRga(MEDIA_BUFFER mb) {
@@ -121,23 +122,21 @@ void processWithMbRga(MEDIA_BUFFER mb) {
     }
     g_onFaceFrameRga = true;
 
-    const void *data = RK_MPI_MB_GetPtr(mb);
-    const size_t size = RK_MPI_MB_GetSize(mb);
-    auto *buff = new uchar[size];
-    memcpy(buff, data, size);
 
+    // 限制帧率，人脸检测频率没必要那么高，浪费cpu
+    // static int64_t lastMillisecondCount = 0L;
+    // const int64_t currentMillisecondCount =
+    //         std::chrono::duration_cast<chrono::milliseconds>(
+    //             chrono::system_clock::now().time_since_epoch()).
+    //         count();
+    // if (currentMillisecondCount - lastMillisecondCount < 100) {
+    //     RK_MPI_MB_ReleaseBuffer(mb);
+    //     g_onFaceFrameRga = false;
+    //     return;
+    // }
+    // lastMillisecondCount = currentMillisecondCount;
 
-    const cv::Mat frameRga(g_appHeight, g_appWidth, CV_8UC3, buff);
-    try {
-        faceRecognition(frameRga);
-    } catch (const exception &e) {
-        logPrintln("Face Recognition fail : " + string(e.what()),
-                   airstrip::ERROR, __FUNCTION__);
-    }
-    delete [] buff;
-    buff = nullptr;
-    RK_MPI_MB_ReleaseBuffer(mb);
-    g_onFaceFrameRga = false;
+    processWithMb(false, mb);
 }
 
 

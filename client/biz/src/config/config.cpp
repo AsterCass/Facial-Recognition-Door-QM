@@ -6,8 +6,7 @@ using namespace std;
 std::string g_latestVersion;
 bool g_isCheckVersion = false;
 bool g_isCheckFace = false;
-bool g_isOperateOnIrFace = false;
-cv::Mat g_currentIrFace;
+
 
 void *g_mainThreadPool = nullptr;
 
