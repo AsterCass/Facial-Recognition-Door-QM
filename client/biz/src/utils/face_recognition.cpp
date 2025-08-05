@@ -471,11 +471,26 @@ bool faceVoiceTemplate(const std::string &userId, const std::string &voiceFeatur
     return true;
 }
 
-bool faceDetect(const cv::Mat &frame) {
+bool faceDetect(const cv::Mat &frameFull, const cv::Rect &rect) {
     bool ret = false;
     if (!initializedFaceRec) {
         return ret;
     }
+
+    const int maxWidth = frameFull.cols;
+    const int maxHeight = frameFull.rows;
+    const int faceX = std::max(0, rect.x);
+    const int faceY = std::max(0, rect.y);
+    int faceW = std::max(0, rect.width);
+    int faceH = std::max(0, rect.height);
+    faceW = faceX + faceW > maxWidth ? maxWidth - faceX : faceW;
+    faceH = faceY + faceH > maxHeight ? maxHeight - faceY : faceH;
+
+    auto frameFace = frameFull(cv::Rect(faceX, faceY, faceW, faceH));
+    cv::Mat frame;
+    resize(frameFace, frame, cv::Size(
+               frameFace.cols / 2, frameFace.rows / 2), 0, 0, cv::INTER_AREA);
+
 
     const int *pResults = nullptr;
     auto *pBuffer = static_cast<unsigned char *>(malloc(0x9000));
@@ -626,7 +641,7 @@ void faceRecognition(const cv::Mat &frame) {
             g_isOperateOnIrFace = true;
             const cv::Rect rectRgb(multipleFaceData.rects->x, multipleFaceData.rects->y,
                                    multipleFaceData.rects->width, multipleFaceData.rects->height);
-            const bool faceDetected = faceDetect(g_currentIrFace(rectRgb));
+            const bool faceDetected = faceDetect(g_currentIrFace, rectRgb);
             g_isOperateOnIrFace = false;
             if (!faceDetected) {
                 logPrintln("Face fake face !!!!!", airstrip::WARN, __FUNCTION__);
