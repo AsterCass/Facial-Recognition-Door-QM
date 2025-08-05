@@ -37,7 +37,7 @@ bool faceVoiceTemplate(const std::string &userId, const std::string &voiceFeatur
 
 bool faceDetect(const cv::Mat &frameFull, const cv::Rect &rect);
 
-bool faceDetectInspire(const cv::Mat &frame, const cv::Mat &frameIr, cv::Rect &rectOutput);
+bool faceDetectInspire(const cv::Mat &frame, const cv::Mat &frameIr, cv::Rect &rectOutput, bool moreAction);
 
 void faceRecognition(const std::string &address, const std::string &addressIr);
 

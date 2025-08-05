@@ -99,17 +99,17 @@ void processWithMbIr(MEDIA_BUFFER mb) {
     g_onFaceFrameIr = true;
 
     // 限制帧率，人脸检测频率没必要那么高，浪费cpu
-    // static int64_t lastMillisecondCount = 0L;
-    // const int64_t currentMillisecondCount =
-    //         std::chrono::duration_cast<chrono::milliseconds>(
-    //             chrono::system_clock::now().time_since_epoch()).
-    //         count();
-    // if (currentMillisecondCount - lastMillisecondCount < 100) {
-    //     RK_MPI_MB_ReleaseBuffer(mb);
-    //     g_onFaceFrameIr = false;
-    //     return;
-    // }
-    // lastMillisecondCount = currentMillisecondCount;
+    static int64_t lastMillisecondCount = 0L;
+    const int64_t currentMillisecondCount =
+            std::chrono::duration_cast<chrono::milliseconds>(
+                chrono::system_clock::now().time_since_epoch()).
+            count();
+    if (currentMillisecondCount - lastMillisecondCount < 100) {
+        RK_MPI_MB_ReleaseBuffer(mb);
+        g_onFaceFrameIr = false;
+        return;
+    }
+    lastMillisecondCount = currentMillisecondCount;
 
     processWithMb(true, mb);
 }
@@ -124,17 +124,17 @@ void processWithMbRga(MEDIA_BUFFER mb) {
 
 
     // 限制帧率，人脸检测频率没必要那么高，浪费cpu
-    // static int64_t lastMillisecondCount = 0L;
-    // const int64_t currentMillisecondCount =
-    //         std::chrono::duration_cast<chrono::milliseconds>(
-    //             chrono::system_clock::now().time_since_epoch()).
-    //         count();
-    // if (currentMillisecondCount - lastMillisecondCount < 100) {
-    //     RK_MPI_MB_ReleaseBuffer(mb);
-    //     g_onFaceFrameRga = false;
-    //     return;
-    // }
-    // lastMillisecondCount = currentMillisecondCount;
+    static int64_t lastMillisecondCount = 0L;
+    const int64_t currentMillisecondCount =
+            std::chrono::duration_cast<chrono::milliseconds>(
+                chrono::system_clock::now().time_since_epoch()).
+            count();
+    if (currentMillisecondCount - lastMillisecondCount < 100) {
+        RK_MPI_MB_ReleaseBuffer(mb);
+        g_onFaceFrameRga = false;
+        return;
+    }
+    lastMillisecondCount = currentMillisecondCount;
 
     processWithMb(false, mb);
 }

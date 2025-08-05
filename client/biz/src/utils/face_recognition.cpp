@@ -559,7 +559,7 @@ bool faceDetect(const cv::Mat &frameFull, const cv::Rect &rect) {
     return ret;
 }
 
-bool faceDetectInspire(const cv::Mat &frame, const cv::Mat &frameIr, cv::Rect &rectOutput) {
+bool faceDetectInspire(const cv::Mat &frame, const cv::Mat &frameIr, cv::Rect &rectOutput, bool moreAction) {
     bool ret = false;
     if (!initializedFaceRec || frame.empty() || frameIr.empty()) {
         return ret;
@@ -623,40 +623,42 @@ bool faceDetectInspire(const cv::Mat &frame, const cv::Mat &frameIr, cv::Rect &r
     }
 
     // 计算明暗矫正摄像头
-    cv::Mat grayFrameFace;
-    cvtColor(frameRgbFace, grayFrameFace, cv::COLOR_BGR2GRAY);
+    if (moreAction) {
+        cv::Mat grayFrameFace;
+        cvtColor(frameRgbFace, grayFrameFace, cv::COLOR_BGR2GRAY);
 
 
-    //亮暗比例
-    int darkPixels = 0;
-    int brightPixels = 0;
-    double brightnessSum = 0;
-    const int totalPixels = grayFrameFace.rows * grayFrameFace.cols;
+        //亮暗比例
+        int darkPixels = 0;
+        int brightPixels = 0;
+        double brightnessSum = 0;
+        const int totalPixels = grayFrameFace.rows * grayFrameFace.cols;
 
-    for (int i = 0; i < grayFrameFace.rows; i++) {
-        const uchar *row = grayFrameFace.ptr<uchar>(i);
-        for (int j = 0; j < grayFrameFace.cols; j++) {
-            const uchar pixel = row[j];
-            brightnessSum += pixel;
-            if (pixel < g_darkThreshold) {
-                darkPixels++;
-            }
-            if (pixel > g_lightThreshold) {
-                brightPixels++;
+        for (int i = 0; i < grayFrameFace.rows; i++) {
+            const uchar *row = grayFrameFace.ptr<uchar>(i);
+            for (int j = 0; j < grayFrameFace.cols; j++) {
+                const uchar pixel = row[j];
+                brightnessSum += pixel;
+                if (pixel < g_darkThreshold) {
+                    darkPixels++;
+                }
+                if (pixel > g_lightThreshold) {
+                    brightPixels++;
+                }
             }
         }
-    }
 
-    const double lightRatio = static_cast<double>(brightPixels) / totalPixels;
-    const double darkRatio = static_cast<double>(darkPixels) / totalPixels;
+        const double lightRatio = static_cast<double>(brightPixels) / totalPixels;
+        const double darkRatio = static_cast<double>(darkPixels) / totalPixels;
 
-    logPrintln("Face Detect light radio: " + to_string(lightRatio)
-               + " dark radio: " + to_string(darkRatio), airstrip::DEBUG, __FUNCTION__);
+        logPrintln("Face Detect light radio: " + to_string(lightRatio)
+                   + " dark radio: " + to_string(darkRatio), airstrip::DEBUG, __FUNCTION__);
 
-    if (lightRatio > g_lightRatio) {
-        updateExposeAndGain(false);
-    } else if (darkRatio > g_darkRatio) {
-        updateExposeAndGain(true);
+        if (lightRatio > g_lightRatio) {
+            updateExposeAndGain(false);
+        } else if (darkRatio > g_darkRatio) {
+            updateExposeAndGain(true);
+        }
     }
 
     HFReleaseImageStream(stream);
@@ -696,7 +698,7 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
 
     static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([frameCopy, frameIrCopy] {
         cv::Rect rect;
-        const bool ret = faceDetectInspire(frameCopy, frameCopy, rect);
+        const bool ret = faceDetectInspire(frameCopy, frameIrCopy, rect, false);
         if (ret) {
             CameraFrame::getInstance()->setFaceRects(rect.x, rect.y, rect.width, rect.height);
         } else {
