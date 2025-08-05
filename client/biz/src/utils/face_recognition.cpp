@@ -725,7 +725,7 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
                 return;
             }
 
-            if (!retDetect) {
+            if (!retDetect && g_enableFaceSpoof) {
                 g_isCheckFace = false;
                 --isCheckFaceReco;
                 return;
