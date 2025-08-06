@@ -52,16 +52,24 @@ private:
     QLineEditPro *faceRegCountInput = nullptr;
     QLabel *faceRegCountTips = nullptr;
 
-    QWidget *fullFaceCompare = nullptr;
-    QHBoxLayout *fullFaceCompareLayout = nullptr;
-    QLabel *fullFaceCompareLabel = nullptr;
-    QCheckBox *fullFaceCompareInput = nullptr;
 
-    QWidget *faceDistant = nullptr;
-    QHBoxLayout *faceDistantLayout = nullptr;
-    QLabel *faceDistantLabel = nullptr;
-    QLineEditPro *faceDistantInput = nullptr;
+    QWidget *enableFaceSpoof = nullptr;
+    QHBoxLayout *enableFaceSpoofLayout = nullptr;
+    QLabel *enableFaceSpoofLabel = nullptr;
+    QPushButton *enableFaceSpoofInput = nullptr;
+    int enableFaceSpoofValue = 0;
 
+    QWidget *showFaceRect = nullptr;
+    QHBoxLayout *showFaceRectLayout = nullptr;
+    QLabel *showFaceRectLabel = nullptr;
+    QPushButton *showFaceRectInput = nullptr;
+    int showFaceRectValue = 0;
+
+    QWidget *longDistanceDetect = nullptr;
+    QHBoxLayout *longDistanceDetectLayout = nullptr;
+    QLabel *longDistanceDetectLabel = nullptr;
+    QPushButton *longDistanceDetectInput = nullptr;
+    int longDistanceDetectValue = 0;
 
     SettingHeader *settingHeader = nullptr;
     MainComponentHeader *mainHeader = nullptr;

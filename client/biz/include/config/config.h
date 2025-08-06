@@ -62,6 +62,8 @@ constexpr auto PRO_NET_WIRELESS_ENABLE = "netWirelessEnable";
 constexpr auto PRO_NET_WIRELESS_SSID = "netWirelessSsid";
 constexpr auto PRO_NET_WIRELESS_PASSWD = "netWirelessPasswd";
 constexpr auto PRO_NET_FOUR_ENABLE = "netFourEnable";
+constexpr auto PRO_SHOW_FACE_RECT = "showFaceRect";
+constexpr auto PRO_LONG_DISTANCE_DETECT = "longDistanceDetect";
 
 
 const std::vector<std::string> CHINESE_WEEK = {
@@ -185,6 +187,8 @@ extern int g_netWirelessEnable;
 extern std::string g_netWirelessSsid;
 extern std::string g_netWirelessPasswd;
 extern int g_netFourEnable;
+extern int g_showFaceRect;
+extern int g_longDistanceDetect;
 
 // function
 

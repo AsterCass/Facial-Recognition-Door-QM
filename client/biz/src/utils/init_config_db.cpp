@@ -98,7 +98,7 @@ void initConfigDb() {
     initConfigValue<int>(PRO_DB_CAM_EXPOSE, "800", g_camExpose);
     initConfigValue<int>(PRO_DB_CAM_GAIN, "64", g_camGain);
     initConfigValue<int>(PRO_DB_CAM_LIGHT, "0", g_camLight);
-    initConfigValue<int>(PRO_DB_FULL_FACE_COMPARE, "0", g_fullFaceCompare);
+    initConfigValue<int>(PRO_DB_FULL_FACE_COMPARE, "1", g_fullFaceCompare);
     initConfigValue<int>(PRO_DB_FACE_REG_IV_SEC, "0", g_faceRegIvSec);
     initConfigValue<int>(PRO_DB_FACE_REG_CORE_IV_MILL_SEC, "500", g_faceRegCoreIvMillSec);
     initConfigValue<int>(PRO_DB_NEED_BACKUP, "0", g_needBackup);
@@ -110,4 +110,6 @@ void initConfigDb() {
     initConfigValue<int>(PRO_NET_WIRED_DHCP, "1", g_netWiredDhcp);
     initConfigValue<int>(PRO_NET_WIRELESS_ENABLE, "0", g_netWirelessEnable);
     initConfigValue<int>(PRO_NET_FOUR_ENABLE, "0", g_netFourEnable);
+    initConfigValue<int>(PRO_SHOW_FACE_RECT, "1", g_showFaceRect);
+    initConfigValue<int>(PRO_LONG_DISTANCE_DETECT, "1", g_longDistanceDetect);
 }

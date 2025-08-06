@@ -2,6 +2,7 @@
 
 #include <airstrip_log.h>
 #include <sstream>
+#include <config/style.h>
 #include <ui/main_router.h>
 
 
@@ -51,6 +52,24 @@ MainSettingFace::MainSettingFace(QWidget *parent): QWidget(parent) {
                             g_faceRegCount = newFaceRegCount;
                             g_commonDb.upsertConfig(PRO_DB_FACE_REG_COUNT, to_string(g_faceRegCount));
                         }
+                    }
+
+                    if (g_enableFaceSpoof != enableFaceSpoofValue) {
+                        g_enableFaceSpoof = enableFaceSpoofValue;
+                        g_commonDb.upsertConfig(
+                            PRO_DB_ENABLE_FACE_SPOOF, to_string(g_enableFaceSpoof));
+                    }
+
+                    if (g_showFaceRect != showFaceRectValue) {
+                        g_showFaceRect = showFaceRectValue;
+                        g_commonDb.upsertConfig(
+                            PRO_SHOW_FACE_RECT, to_string(g_showFaceRect));
+                    }
+
+                    if (g_longDistanceDetect != longDistanceDetectValue) {
+                        g_longDistanceDetect = longDistanceDetectValue;
+                        g_commonDb.upsertConfig(
+                            PRO_LONG_DISTANCE_DETECT, to_string(g_longDistanceDetect));
                     }
 
                     MainRouter::getInstance()->mainNotificationShow("保存成功", nullptr);
@@ -220,7 +239,95 @@ MainSettingFace::MainSettingFace(QWidget *parent): QWidget(parent) {
         bodyLayout->addWidget(faceRegCount);
         bodyLayout->addWidget(faceRegCountTips);
 
-        //else
+
+        // enableFaceSpoof
+        enableFaceSpoof = new QWidget(body);
+        enableFaceSpoofLayout = new QHBoxLayout(enableFaceSpoof);
+        enableFaceSpoofLayout->setContentsMargins(20, 0, 0, 0);
+        enableFaceSpoofLayout->setSpacing(20);
+#ifdef WIN32
+        enableFaceSpoof->setStyleSheet(
+            "background-color: rgb(31, 31, 31);  border-radius: 8px; font-size: 14px; color: white; ");
+        enableFaceSpoof->setFixedHeight(50);
+#else
+        enableFaceSpoof->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: white; ");
+        enableFaceSpoof->setFixedHeight(100);
+#endif
+        enableFaceSpoofLabel = new QLabel("活体检测", enableFaceSpoof);
+        enableFaceSpoofInput = new QPushButton("⬤", enableFaceSpoof);
+        enableFaceSpoofInput->setStyleSheet(SWITCH_BUTTON_DISABLE_STYLE);
+        connect(enableFaceSpoofInput, &QPushButton::clicked, this,
+                [=] {
+                    enableFaceSpoofValue = enableFaceSpoofValue ? 0 : 1;
+                    enableFaceSpoofInput->setStyleSheet(enableFaceSpoofValue
+                                                            ? SWITCH_BUTTON_ENABLE_STYLE
+                                                            : SWITCH_BUTTON_DISABLE_STYLE);
+                });
+
+        enableFaceSpoofLayout->addWidget(enableFaceSpoofLabel);
+        enableFaceSpoofLayout->addStretch();
+        enableFaceSpoofLayout->addWidget(enableFaceSpoofInput);
+        bodyLayout->addWidget(enableFaceSpoof);
+
+
+        // showFaceRect
+        showFaceRect = new QWidget(body);
+        showFaceRectLayout = new QHBoxLayout(showFaceRect);
+        showFaceRectLayout->setContentsMargins(20, 0, 0, 0);
+        showFaceRectLayout->setSpacing(20);
+#ifdef WIN32
+        showFaceRect->setStyleSheet(
+            "background-color: rgb(31, 31, 31);  border-radius: 8px; font-size: 14px; color: white; ");
+        showFaceRect->setFixedHeight(50);
+#else
+        showFaceRect->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: white; ");
+        showFaceRect->setFixedHeight(100);
+#endif
+        showFaceRectLabel = new QLabel("显示人脸方框", showFaceRect);
+        showFaceRectInput = new QPushButton("⬤", showFaceRect);
+        showFaceRectInput->setStyleSheet(SWITCH_BUTTON_DISABLE_STYLE);
+        connect(showFaceRectInput, &QPushButton::clicked, this,
+                [=] {
+                    showFaceRectValue = showFaceRectValue ? 0 : 1;
+                    showFaceRectInput->setStyleSheet(showFaceRectValue
+                                                         ? SWITCH_BUTTON_ENABLE_STYLE
+                                                         : SWITCH_BUTTON_DISABLE_STYLE);
+                });
+
+        showFaceRectLayout->addWidget(showFaceRectLabel);
+        showFaceRectLayout->addStretch();
+        showFaceRectLayout->addWidget(showFaceRectInput);
+        bodyLayout->addWidget(showFaceRect);
+
+
+        // longDistanceDetect
+        longDistanceDetect = new QWidget(body);
+        longDistanceDetectLayout = new QHBoxLayout(longDistanceDetect);
+        longDistanceDetectLayout->setContentsMargins(20, 0, 0, 0);
+        longDistanceDetectLayout->setSpacing(20);
+#ifdef WIN32
+        longDistanceDetect->setStyleSheet(
+            "background-color: rgb(31, 31, 31);  border-radius: 8px; font-size: 14px; color: white; ");
+        longDistanceDetect->setFixedHeight(50);
+#else
+        longDistanceDetect->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: white; ");
+        longDistanceDetect->setFixedHeight(100);
+#endif
+        longDistanceDetectLabel = new QLabel("检测远处人脸", longDistanceDetect);
+        longDistanceDetectInput = new QPushButton("⬤", longDistanceDetect);
+        longDistanceDetectInput->setStyleSheet(SWITCH_BUTTON_DISABLE_STYLE);
+        connect(longDistanceDetectInput, &QPushButton::clicked, this,
+                [=] {
+                    longDistanceDetectValue = longDistanceDetectValue ? 0 : 1;
+                    longDistanceDetectInput->setStyleSheet(longDistanceDetectValue
+                                                               ? SWITCH_BUTTON_ENABLE_STYLE
+                                                               : SWITCH_BUTTON_DISABLE_STYLE);
+                });
+
+        longDistanceDetectLayout->addWidget(longDistanceDetectLabel);
+        longDistanceDetectLayout->addStretch();
+        longDistanceDetectLayout->addWidget(longDistanceDetectInput);
+        bodyLayout->addWidget(longDistanceDetect);
     }
     bodyLayout->addStretch();
 
@@ -247,5 +354,24 @@ void MainSettingFace::showEvent(QShowEvent *) {
     }
     if (faceRegCountInput) {
         faceRegCountInput->setText(QString::number(g_faceRegCount));
+    }
+
+    if (enableFaceSpoofInput) {
+        enableFaceSpoofInput->setStyleSheet(g_enableFaceSpoof
+                                                ? SWITCH_BUTTON_ENABLE_STYLE
+                                                : SWITCH_BUTTON_DISABLE_STYLE);
+        enableFaceSpoofValue = g_enableFaceSpoof;
+    }
+    if (showFaceRectInput) {
+        showFaceRectInput->setStyleSheet(g_showFaceRect
+                                             ? SWITCH_BUTTON_ENABLE_STYLE
+                                             : SWITCH_BUTTON_DISABLE_STYLE);
+        showFaceRectValue = g_showFaceRect;
+    }
+    if (longDistanceDetectInput) {
+        longDistanceDetectInput->setStyleSheet(g_longDistanceDetect
+                                                   ? SWITCH_BUTTON_ENABLE_STYLE
+                                                   : SWITCH_BUTTON_DISABLE_STYLE);
+        longDistanceDetectValue = g_longDistanceDetect;
     }
 }

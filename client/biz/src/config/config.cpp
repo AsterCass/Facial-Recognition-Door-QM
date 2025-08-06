@@ -72,3 +72,6 @@ int g_netWirelessEnable;
 std::string g_netWirelessSsid;
 std::string g_netWirelessPasswd;
 int g_netFourEnable;
+int g_showFaceRect;
+int g_longDistanceDetect;
+

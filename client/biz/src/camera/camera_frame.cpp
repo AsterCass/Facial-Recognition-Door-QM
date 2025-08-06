@@ -141,6 +141,9 @@ void CameraFrame::updateFrameRK(const cv::Mat &frame) {
 }
 
 void CameraFrame::setFaceRects(const double x, const double y, const double w, const double h) {
+    if (!g_showFaceRect) {
+        return;
+    }
     // 投递到主线程
     if (QThread::currentThread() != this->thread()) {
         QMetaObject::invokeMethod(this, [this, x, y, w, h] {

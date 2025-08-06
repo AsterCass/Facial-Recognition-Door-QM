@@ -15,7 +15,7 @@ using namespace std;
 
 std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
 
-#ifndef WIN32x
+#ifndef WIN32
 
 #include "inspireface.h"
 #include "intypedef.h"
@@ -618,7 +618,7 @@ bool faceDetectInspire(const cv::Mat &frame, const cv::Mat &frameIr, cv::Rect &r
     const auto minSide = min(frameRgbFace.cols, frameRgbFace.rows);
     logPrintln("Size min side =  " + to_string(minSide) +
                " faceDistance = " + to_string(g_faceDistance), airstrip::DEBUG, __FUNCTION__);
-    if ((1 == g_faceDistance && minSide < 320) || (2 == g_faceDistance && minSide < 180)) {
+    if (!g_longDistanceDetect && minSide < 180) {
         ret = false;
     }
 
