@@ -618,7 +618,7 @@ bool faceDetectInspire(const cv::Mat &frame, const cv::Mat &frameIr, cv::Rect &r
     const auto minSide = min(frameRgbFace.cols, frameRgbFace.rows);
     logPrintln("Size min side =  " + to_string(minSide) +
                " faceDistance = " + to_string(g_faceDistance), airstrip::DEBUG, __FUNCTION__);
-    if (!g_longDistanceDetect && minSide < 180) {
+    if (!g_longDistanceDetect && minSide < 120) {
         ret = false;
     }
 

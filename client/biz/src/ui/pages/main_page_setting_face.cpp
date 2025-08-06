@@ -2,6 +2,7 @@
 
 #include <airstrip_log.h>
 #include <sstream>
+#include <camera/camera_frame.h>
 #include <config/style.h>
 #include <ui/main_router.h>
 
@@ -292,6 +293,7 @@ MainSettingFace::MainSettingFace(QWidget *parent): QWidget(parent) {
                     showFaceRectInput->setStyleSheet(showFaceRectValue
                                                          ? SWITCH_BUTTON_ENABLE_STYLE
                                                          : SWITCH_BUTTON_DISABLE_STYLE);
+                    CameraFrame::getInstance()->setFaceRects(0, 0, 0, 0);
                 });
 
         showFaceRectLayout->addWidget(showFaceRectLabel);
