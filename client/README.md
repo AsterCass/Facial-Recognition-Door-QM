@@ -41,5 +41,6 @@
 * [C++常用库交叉编译方法（二）（SQLiteCpp和Breakpad）](https://www.astercasc.com/article/detail?articleId=AT189279994756125900)
 * [C++常用库交叉编译方法（三）（OpenCV等视觉库）](https://www.astercasc.com/article/detail?articleId=AT190118321072192307)
 * 以上提供交叉编译的构建流程，我这里已经构建完成上传到docker仓库了，使用
-  `docker pull astercass/arm-gcc-8.3.0-dev-toolchain:1.0.0`拉取
+  `docker pull astercass/arm-gcc-8.3.0-dev-toolchain:1.1.0`拉取
+* 先编译airstrip，再编译biz，进入相应目录直接`mkdir build && cd build && cmake -DCMAKE_TOOLCHAIN_FILE=../toolchain.cmake .. && cmake --build . -j $(nproc)` 即可
 
