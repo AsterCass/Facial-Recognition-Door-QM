@@ -8,7 +8,7 @@
   `Linux`也作为开发环境，这样更简单，但是需要改变部分预编译代码
 * 编译`airstrip`和`biz`前，记得修改`CMakeList.txt`中关于所需库位置的环境变量
 * 本代码在X86_64 Windows（测试）和ARM Linux（正式）正常运行，其他平台未测试，需要修改部分预编译代码
-* 当前代码没有使用rk的npu进行相关计算，后期部分内容可以使用rknn实现
+* 如果不能正常使用人脸模型，参考 https://github.com/rockchip-linux/rknpu 更新驱动到 npu full driver
 
 ### Windows开发环境编译流程
 
