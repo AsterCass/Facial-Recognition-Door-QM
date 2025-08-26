@@ -661,6 +661,8 @@ bool faceDetectInspire(const cv::Mat &frame, const cv::Mat &frameIr, cv::Rect &r
         }
     }
 
+    logPrintln("Ir face release ... ", airstrip::DEBUG, __FUNCTION__);
+
     HFReleaseImageStream(stream);
     return ret;
 }
@@ -683,7 +685,7 @@ void faceRecognition(const std::string &address, const std::string &addressIr) {
 }
 
 void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
-    if (!initializedFaceRec) {
+    if (!initializedFaceRec || frame.empty() || frameIr.empty()) {
         return;
     }
 
@@ -710,10 +712,16 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
                 lastMillisecondCount = currentMillisecondCount;
             }
 
+            logPrintln("For check face in ... ", airstrip::DEBUG, __FUNCTION__);
 
             // 红外人脸检测
             cv::Rect rectIr;
             const bool retDetect = faceDetectInspire(frameCopy, frameIrCopy, rectIr, !onlyDetect);
+
+            logPrintln("For check face ret = " + to_string(retDetect) +
+                       " " + to_string(onlyDetect) + " " + to_string(g_isCheckFace),
+                       airstrip::DEBUG, __FUNCTION__);
+
             if (retDetect) {
                 CameraFrame::getInstance()->setFaceRects(rectIr.x, rectIr.y, rectIr.width, rectIr.height);
             } else {
@@ -730,6 +738,8 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
                 --isCheckFaceReco;
                 return;
             }
+
+            logPrintln("Start RGA face detect ...", airstrip::DEBUG, __FUNCTION__);
 
             // 执行人脸检测
             HFImageStream stream = nullptr;
