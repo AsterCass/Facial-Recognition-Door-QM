@@ -15,7 +15,7 @@ using namespace std;
 
 std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
 
-#ifndef WIN32
+#ifndef WIN32x
 
 #include "inspireface.h"
 #include "intypedef.h"
@@ -757,6 +757,8 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
                 --isCheckFaceReco;
                 return;
             }
+
+            logPrintln("RGA track to format ...", airstrip::DEBUG, __FUNCTION__);
 
             HFMultipleFaceData multipleFaceData = {};
             ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);

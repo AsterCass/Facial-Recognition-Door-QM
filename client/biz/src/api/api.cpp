@@ -166,71 +166,68 @@ void playWav(const PlayWavType type) {
 
 
     // get last item play
-    static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([] {
-        airstrip::logPrintln("Start play wav");
-        std::lock_guard<std::mutex> lock(lockPlayWav);
-        if (playWavQueue.empty()) {
-            airstrip::logPrintln("No wav to play");
-            return;
-        }
-        const auto toPlayType = playWavQueue.front();
-        playWavQueue.pop_front();
+    std::lock_guard<std::mutex> lock(lockPlayWav);
+    if (playWavQueue.empty()) {
+        airstrip::logPrintln("No wav to play");
+        return;
+    }
+    const auto toPlayType = playWavQueue.front();
+    playWavQueue.pop_front();
 
-        ostringstream playWavMsg;
-        playWavMsg << "aplay " << staticSoundsDir;
-        switch (toPlayType) {
-            case Di:
-                playWavMsg << "check_di.wav";
-                break;
-            case AuthSuccess:
-                playWavMsg << "check_success.wav";
-                break;
-            case AuthFail:
-                playWavMsg << "check_fail.wav";
-                break;
-            case AuthFailFirst:
-                playWavMsg << "check_fail_first.wav";
-                break;
-            case Disabled:
-                playWavMsg << "check_disabled.wav";
-                break;
-            case Expired:
-                playWavMsg << "check_expired.wav";
-                break;
-            case Charge_1:
-                playWavMsg << "charge_1.wav";
-                break;
-            case Charge_2:
-                playWavMsg << "charge_2.wav";
-                break;
-            case Charge_3:
-                playWavMsg << "charge_3.wav";
-                break;
-            case Charge_4:
-                playWavMsg << "charge_4.wav";
-                break;
-            case Charge_5:
-                playWavMsg << "charge_5.wav";
-                break;
-            case Rental_1:
-                playWavMsg << "rental_1.wav";
-                break;
-            case Rental_2:
-                playWavMsg << "rental_2.wav";
-                break;
-            default: {
-                logPrintln("Play wav not found type = " + to_string(toPlayType),
-                           airstrip::ERROR, __FUNCTION__);
-            }
+    ostringstream playWavMsg;
+    playWavMsg << "aplay " << staticSoundsDir;
+    switch (toPlayType) {
+        case Di:
+            playWavMsg << "check_di.wav";
+            break;
+        case AuthSuccess:
+            playWavMsg << "check_success.wav";
+            break;
+        case AuthFail:
+            playWavMsg << "check_fail.wav";
+            break;
+        case AuthFailFirst:
+            playWavMsg << "check_fail_first.wav";
+            break;
+        case Disabled:
+            playWavMsg << "check_disabled.wav";
+            break;
+        case Expired:
+            playWavMsg << "check_expired.wav";
+            break;
+        case Charge_1:
+            playWavMsg << "charge_1.wav";
+            break;
+        case Charge_2:
+            playWavMsg << "charge_2.wav";
+            break;
+        case Charge_3:
+            playWavMsg << "charge_3.wav";
+            break;
+        case Charge_4:
+            playWavMsg << "charge_4.wav";
+            break;
+        case Charge_5:
+            playWavMsg << "charge_5.wav";
+            break;
+        case Rental_1:
+            playWavMsg << "rental_1.wav";
+            break;
+        case Rental_2:
+            playWavMsg << "rental_2.wav";
+            break;
+        default: {
+            logPrintln("Play wav not found type = " + to_string(toPlayType),
+                       airstrip::ERROR, __FUNCTION__);
         }
+    }
 #ifdef WIN32
-        std::this_thread::sleep_for(std::chrono::seconds(2));
+    std::this_thread::sleep_for(std::chrono::seconds(2));
 #else
-        airstrip::execCommand(playWavMsg.str());
+    airstrip::execCommand(playWavMsg.str());
 #endif
-        logPrintln("Play wav " + playWavMsg.str() + " queue size = " + to_string(playWavQueue.size())
-                   , airstrip::INFO, __FUNCTION__);
-    });
+    logPrintln("Play wav " + playWavMsg.str() + " queue size = " + to_string(playWavQueue.size())
+               , airstrip::INFO, __FUNCTION__);
 }
 
 bool linkedServer() {
