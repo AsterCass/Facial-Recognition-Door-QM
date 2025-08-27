@@ -36,20 +36,24 @@ int g_onFaceFrameRga = false;
 
 
 void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
-    static uchar *s_irFrame = nullptr;
-    static uchar *s_rgaFrame = nullptr;
-    if (nullptr != irFrame) {
-        s_irFrame = irFrame;
+    static cv::Mat s_irFrame;
+    static cv::Mat s_rgaFrame;
+
+    if (irFrame) {
+        cv::Mat tmp(g_appHeightIr, g_appWidthIr, CV_8UC3, irFrame);
+        s_irFrame = tmp.clone(); // 深拷贝
+        delete[] irFrame; // 释放原始 buffer
     }
-    if (nullptr != rgaFrame) {
-        s_rgaFrame = rgaFrame;
+    if (rgaFrame) {
+        cv::Mat tmp(g_appHeight, g_appWidth, CV_8UC3, rgaFrame);
+        s_rgaFrame = tmp.clone(); // 深拷贝
+        delete[] rgaFrame; // 释放原始 buffer
     }
-    if (s_irFrame == nullptr || s_rgaFrame == nullptr) {
+
+    if (s_irFrame.empty() || s_rgaFrame.empty()) {
         return;
     }
 
-    const cv::Mat frameIr(g_appHeightIr, g_appWidthIr, CV_8UC3, s_irFrame);
-    const cv::Mat frameRga(g_appHeight, g_appWidth, CV_8UC3, s_rgaFrame);
     try {
         //rectangle(frameRga, rect, cv::Scalar(255, 0, 0), 2);
         //cv::imwrite("/data/frd/test.jpg", frameRga);
@@ -61,16 +65,15 @@ void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
         //     faceRecognition(frameRga, rect);
         // }
         //CameraFrame::getInstance()->setFaceRects(rect.x, rect.y, rect.width, rect.height);
-        faceRecognition(frameRga, frameIr);
+        faceRecognition(s_rgaFrame, s_irFrame);
     } catch (const exception &e) {
         logPrintln("Face Recognition fail : " + string(e.what()),
                    airstrip::ERROR, __FUNCTION__);
     }
 
-    delete [] s_irFrame;
-    delete [] s_rgaFrame;
-    s_irFrame = nullptr;
-    s_rgaFrame = nullptr;
+    s_irFrame.release();
+    s_rgaFrame.release();
+
     g_onFaceFrameRga = false;
     g_onFaceFrameIr = false;
 }
