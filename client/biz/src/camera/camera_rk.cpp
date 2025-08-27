@@ -107,7 +107,7 @@ void processWithMbIr(MEDIA_BUFFER mb) {
             std::chrono::duration_cast<chrono::milliseconds>(
                 chrono::system_clock::now().time_since_epoch()).
             count();
-    if (currentMillisecondCount - lastMillisecondCount < 100) {
+    if (currentMillisecondCount - lastMillisecondCount < 150) {
         RK_MPI_MB_ReleaseBuffer(mb);
         g_onFaceFrameIr = false;
         return;
@@ -132,7 +132,7 @@ void processWithMbRga(MEDIA_BUFFER mb) {
             std::chrono::duration_cast<chrono::milliseconds>(
                 chrono::system_clock::now().time_since_epoch()).
             count();
-    if (currentMillisecondCount - lastMillisecondCount < 100) {
+    if (currentMillisecondCount - lastMillisecondCount < 150) {
         RK_MPI_MB_ReleaseBuffer(mb);
         g_onFaceFrameRga = false;
         return;

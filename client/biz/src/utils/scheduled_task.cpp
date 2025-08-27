@@ -493,6 +493,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
     static time_t lastTime = 0;
     static bool lastPass = false;
     static int consecutiveFailCount = 0;
+    static int consecutiveErrorCount = 0;
     const auto currentTime = chrono::system_clock::now();
     const auto currentTimeSec = chrono::system_clock::to_time_t(currentTime);
 
@@ -528,6 +529,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
             recordInfo.faceId = userInfo.faceId;
             commonOpenDoor(recordInfo, userInfo.userId, confidence);
             consecutiveFailCount = 0;
+            consecutiveErrorCount = 0;
             playWav(AuthSuccess);
             playWav(userInfo.voiceTemplate);
             // todo save frame
@@ -541,24 +543,30 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
     } else {
         static time_t lastFailTime = 0;
         if (currentTimeSec - lastFailTime > g_faceRegIvSec) {
-            if (currentTimeSec - lastFailTime < 6) {
-                ostringstream oss;
-                oss << g_appWorkDir << "log-face/" <<
-                        put_time(localtime(&currentTimeSec), "%Y-%m-%d-%H-%M-%S") << "-Fail" << ".jpg";
-                imwrite(oss.str(), generalUtils::matCompress(frame));
-                CameraFrame::getInstance()->negativeMessage();
-                messageLabelSec = 1;
-                ++consecutiveFailCount;
-                playWav(AuthFail);
-                if (consecutiveFailCount >= g_faceRegCount) {
-                    consecutiveFailCount = 0;
-                    MainRouter::getInstance()->showFaceRegister(frame);
-                    lastShowFaceRegisterTime = currentTimeSec;
+            if (currentTimeSec - lastFailTime < 10) {
+                if (consecutiveFailCount == 0) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+                } else if (consecutiveFailCount == 1) {
+                    playWav(AuthFailFirst);
+                } else {
+                    ostringstream oss;
+                    oss << g_appWorkDir << "log-face/" <<
+                            put_time(localtime(&currentTimeSec), "%Y-%m-%d-%H-%M-%S") << "-Fail" << ".jpg";
+                    imwrite(oss.str(), generalUtils::matCompress(frame));
+                    CameraFrame::getInstance()->negativeMessage();
+                    messageLabelSec = 1;
+                    ++consecutiveErrorCount;
+                    playWav(AuthFail);
+                    if (consecutiveErrorCount >= g_faceRegCount) {
+                        consecutiveErrorCount = 0;
+                        MainRouter::getInstance()->showFaceRegister(frame);
+                        lastShowFaceRegisterTime = currentTimeSec;
+                    }
                 }
+                ++consecutiveFailCount;
                 //todo 如果任务时间间隔大于1分钟 则异步调获取任务接口，防止刚刚下发
             } else {
                 consecutiveFailCount = 0;
-                playWav(AuthFailFirst);
             }
             lastFailTime = currentTimeSec;
         }
