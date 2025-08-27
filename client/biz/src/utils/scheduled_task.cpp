@@ -545,7 +545,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
         if (currentTimeSec - lastFailTime > g_faceRegIvSec) {
             if (currentTimeSec - lastFailTime < 10) {
                 if (consecutiveFailCount == 0) {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
                 } else if (consecutiveFailCount == 1) {
                     playWav(AuthFailFirst);
                 } else {
