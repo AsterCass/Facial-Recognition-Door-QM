@@ -769,7 +769,11 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
                 return;
             }
 
+            logPrintln("RGA track loaded ...", airstrip::DEBUG, __FUNCTION__);
+
             if (multipleFaceData.detectedNum <= 0) {
+                logPrintln("Face recognition lay detect num" + ret,
+                           airstrip::DEBUG, __FUNCTION__);
                 HFReleaseImageStream(stream);
                 g_isCheckFace = false;
                 --isCheckFaceReco;
@@ -791,6 +795,8 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
                     return;
                 }
             }
+
+            logPrintln("RGA face detected ...", airstrip::DEBUG, __FUNCTION__);
 
             HFFaceFeature feature = {};
             ret = HFFaceFeatureExtract(faceRecognitionSession, stream, multipleFaceData.tokens[0], &feature);

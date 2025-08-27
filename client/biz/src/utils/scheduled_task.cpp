@@ -496,6 +496,8 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
     const auto currentTime = chrono::system_clock::now();
     const auto currentTimeSec = chrono::system_clock::to_time_t(currentTime);
 
+    logPrintln("For  user info " + to_string(confidence), DEBUG, __FUNCTION__);
+
     if (lastPass && currentTimeSec - lastTime < 5) {
         logPrintln("Already pass last", DEBUG, __FUNCTION__);
         return;
