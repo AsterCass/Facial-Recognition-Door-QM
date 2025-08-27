@@ -544,9 +544,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
         static time_t lastFailTime = 0;
         if (currentTimeSec - lastFailTime > g_faceRegIvSec) {
             if (currentTimeSec - lastFailTime < 10) {
-                if (consecutiveFailCount == 0) {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(200));
-                } else if (consecutiveFailCount == 1) {
+                if (consecutiveFailCount <= 1) {
                     playWav(AuthFailFirst);
                 } else {
                     ostringstream oss;
@@ -566,7 +564,9 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
                 ++consecutiveFailCount;
                 //todo 如果任务时间间隔大于1分钟 则异步调获取任务接口，防止刚刚下发
             } else {
-                consecutiveFailCount = 0;
+                consecutiveErrorCount = 0;
+                consecutiveFailCount = 1;
+                std::this_thread::sleep_for(std::chrono::milliseconds(200));
             }
             lastFailTime = currentTimeSec;
         }
