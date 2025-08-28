@@ -7,7 +7,7 @@
 #include <opencv2/core.hpp>
 
 // const
-constexpr auto APP_VERSION = "4.0.2";
+constexpr auto APP_VERSION = "4.0.3";
 constexpr int HTTP_CODE_OK = 200;
 constexpr auto ENV_DEV = "dev";
 constexpr auto ENV_PROD = "prod";

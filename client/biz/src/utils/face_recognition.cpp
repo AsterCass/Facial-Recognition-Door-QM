@@ -689,6 +689,8 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
         return;
     }
 
+    logPrintln("Start for recognition ... ", airstrip::DEBUG, __FUNCTION__);
+
     static int isCheckFaceReco = 0;
     if (isCheckFaceReco > 1) {
         logPrintln("In Recognition ... ", airstrip::DEBUG, __FUNCTION__);
@@ -699,6 +701,10 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
     cv::Mat frameIrCopy = frameIr.clone();
 
     static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([frameCopy, frameIrCopy] {
+
+            logPrintln("Start for recognition thread ... ",
+                airstrip::DEBUG, __FUNCTION__);
+
             // 确定是否执行人脸识别，还是只是检测
             bool onlyDetect = true;
             static int64_t lastMillisecondCount = 0L;
@@ -729,11 +735,15 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
             }
 
             if (onlyDetect) {
+                logPrintln("For check face ret only detect",
+                           airstrip::DEBUG, __FUNCTION__);
                 --isCheckFaceReco;
                 return;
             }
 
             if (!retDetect && g_enableFaceSpoof) {
+                logPrintln("For check face close face spoof",
+                           airstrip::DEBUG, __FUNCTION__);
                 g_isCheckFace = false;
                 --isCheckFaceReco;
                 return;

@@ -36,6 +36,10 @@ int g_onFaceFrameRga = false;
 
 
 void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
+    logPrintln("Start move data: "
+               + to_string(nullptr == irFrame) + " " + to_string(nullptr == rgaFrame),
+               airstrip::DEBUG, __FUNCTION__);
+
     static cv::Mat s_irFrame;
     static cv::Mat s_rgaFrame;
 
@@ -44,15 +48,26 @@ void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
         s_irFrame = tmp.clone(); // 深拷贝
         delete[] irFrame; // 释放原始 buffer
     }
+
+    logPrintln("Free ir and clone",
+               airstrip::DEBUG, __FUNCTION__);
+
     if (rgaFrame) {
         cv::Mat tmp(g_appHeight, g_appWidth, CV_8UC3, rgaFrame);
         s_rgaFrame = tmp.clone(); // 深拷贝
         delete[] rgaFrame; // 释放原始 buffer
     }
 
+    logPrintln("Free rga and clone",
+               airstrip::DEBUG, __FUNCTION__);
+
     if (s_irFrame.empty() || s_rgaFrame.empty()) {
         return;
     }
+
+    logPrintln("Start faceRecognition",
+               airstrip::DEBUG, __FUNCTION__);
+
 
     try {
         //rectangle(frameRga, rect, cv::Scalar(255, 0, 0), 2);
@@ -71,8 +86,14 @@ void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
                    airstrip::ERROR, __FUNCTION__);
     }
 
+    logPrintln("FaceRecognition finish",
+               airstrip::DEBUG, __FUNCTION__);
+
     s_irFrame.release();
     s_rgaFrame.release();
+
+    logPrintln("FaceRecognition release",
+               airstrip::DEBUG, __FUNCTION__);
 
     g_onFaceFrameRga = false;
     g_onFaceFrameIr = false;
