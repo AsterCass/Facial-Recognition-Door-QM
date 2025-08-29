@@ -36,6 +36,7 @@ int g_onFaceFrameRga = false;
 
 
 void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
+    // 这里加锁防止普通和红外摄像头前后脚进入，导致触发两次 faceRecognition
     static std::mutex mtx;
     std::lock_guard<std::mutex> lock(mtx);
 
