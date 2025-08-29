@@ -697,7 +697,15 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
         return;
     }
     isCheckFaceReco++;
+    if (frame.empty()) {
+        --isCheckFaceReco;
+        return;
+    }
     cv::Mat frameCopy = frame.clone();
+    if (frameIr.empty()) {
+        --isCheckFaceReco;
+        return;
+    }
     cv::Mat frameIrCopy = frameIr.clone();
 
     static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([frameCopy, frameIrCopy] {

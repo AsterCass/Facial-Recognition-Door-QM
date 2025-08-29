@@ -36,6 +36,9 @@ int g_onFaceFrameRga = false;
 
 
 void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
+    static std::mutex mtx;
+    std::lock_guard<std::mutex> lock(mtx);
+
     logPrintln("Start move data: "
                + to_string(nullptr == irFrame) + " " + to_string(nullptr == rgaFrame),
                airstrip::DEBUG, __FUNCTION__);
