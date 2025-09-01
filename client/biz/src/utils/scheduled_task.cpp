@@ -545,11 +545,15 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
         if (currentTimeSec - lastFailTime > g_faceRegIvSec) {
             if (currentTimeSec - lastFailTime < 10) {
                 if (consecutiveFailCount <= 1) {
+                    ostringstream oss;
+                    oss << g_appWorkDir << "log-face/" <<
+                            put_time(localtime(&currentTimeSec), "%Y-%m-%d-%H-%M-%S") << "-Fail1" << ".jpg";
+                    imwrite(oss.str(), generalUtils::matCompress(frame));
                     playWav(AuthFailFirst);
                 } else {
                     ostringstream oss;
                     oss << g_appWorkDir << "log-face/" <<
-                            put_time(localtime(&currentTimeSec), "%Y-%m-%d-%H-%M-%S") << "-Fail" << ".jpg";
+                            put_time(localtime(&currentTimeSec), "%Y-%m-%d-%H-%M-%S") << "-Fail2" << ".jpg";
                     imwrite(oss.str(), generalUtils::matCompress(frame));
                     CameraFrame::getInstance()->negativeMessage();
                     messageLabelSec = 1;
@@ -566,7 +570,11 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
             } else {
                 consecutiveErrorCount = 0;
                 consecutiveFailCount = 1;
-                std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                ostringstream oss;
+                oss << g_appWorkDir << "log-face/" <<
+                        put_time(localtime(&currentTimeSec), "%Y-%m-%d-%H-%M-%S") << "-Fail0" << ".jpg";
+                imwrite(oss.str(), generalUtils::matCompress(frame));
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
             lastFailTime = currentTimeSec;
         }
