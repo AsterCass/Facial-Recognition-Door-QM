@@ -63,3 +63,4 @@
     #!/bin/bash
     ssh -o 'proxycommand socat - PROXY:8.8.8.8:%h:%p,proxyport=9000' root@$1.domin.com
    ```
+3. 线上环境 S99zplay 考虑改输出等级为 info `/data/frd/bin/FacialRecognitionDoor --width 800 --height 1280 --logLevel 2 --appWorkDir /data/frd/ --logPath /data/frd/log >> /data/frd/log.txt 2>&1 &`
