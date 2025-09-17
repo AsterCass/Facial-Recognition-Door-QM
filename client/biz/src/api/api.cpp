@@ -86,8 +86,6 @@ int checkDoorKey() {
         logPrintln("Failed to read data", airstrip::ERROR, __FUNCTION__);
         return -1;
     }
-    logPrintln("Read data = " + std::to_string(doorKeyValues[2]) + " " + std::to_string(doorKeyValues[3]),
-        airstrip::INFO, __FUNCTION__);
     return doorKeyValues[2];
 
 #endif

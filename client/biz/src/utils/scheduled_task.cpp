@@ -409,8 +409,8 @@ void getNfcCode() {
 void getDoorKeyInput() {
     const int ret = checkDoorKey();
     logPrintln("Hand open door " + std::to_string(ret) + " " + std::to_string(doorOpenSec),
-        INFO, __FUNCTION__);
-    if (ret == 0 && doorOpenSec == -1) {
+               INFO, __FUNCTION__);
+    if (ret == 0 && doorOpenSec <= 0) {
         logPrintln("Hand open door", INFO, __FUNCTION__);
         openDoor();
         doorOpenSec = 1;
