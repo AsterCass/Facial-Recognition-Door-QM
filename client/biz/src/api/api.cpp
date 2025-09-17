@@ -86,6 +86,8 @@ int checkDoorKey() {
         logPrintln("Failed to read data", airstrip::ERROR, __FUNCTION__);
         return -1;
     }
+    logPrintln("Read data = " + std::to_string(doorKeyValues[2]) + " " + std::to_string(doorKeyValues[3]),
+        airstrip::INFO, __FUNCTION__);
     return doorKeyValues[2];
 
 #endif
@@ -103,7 +105,7 @@ void openDoor() {
         return;
     }
     auto openRet = ioctl(fdForDoor, TELPO_IOCTL_RELAY, 1);
-    logPrintln("Open door ret " + to_string(openRet), airstrip::INFO, __FUNCTION__);
+    logPrintln("Open door ret " + to_string(openRet), airstrip::DEBUG, __FUNCTION__);
 #endif
     logPrintln("Open door ", airstrip::INFO, __FUNCTION__);
 }
@@ -118,7 +120,7 @@ void closeDoor() {
         return;
     }
     auto openRet = ioctl(fdForDoor, TELPO_IOCTL_RELAY, 0);
-    logPrintln("Close door ret " + to_string(openRet), airstrip::INFO, __FUNCTION__);
+    logPrintln("Close door ret " + to_string(openRet), airstrip::DEBUG, __FUNCTION__);
 #endif
     logPrintln("Close door ", airstrip::INFO, __FUNCTION__);
 }
