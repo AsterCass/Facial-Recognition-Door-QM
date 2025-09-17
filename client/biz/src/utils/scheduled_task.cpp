@@ -405,6 +405,11 @@ void getNfcCode() {
     }
 }
 
+
+void getDoorKeyInput() {
+    checkDoorKey();
+}
+
 // Every (taskIvCnt + executionTime) sec
 void doorAutoClose() {
     if (doorOpenSec <= 0) return;
@@ -459,6 +464,8 @@ void repeatOperation() {
     gotoManagement();
     // Try to get nfc code
     getNfcCode();
+    // Try to get door input
+    getDoorKeyInput();
     // Try to get task list
     checkTaskAndExecute();
     // Auto close door

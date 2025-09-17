@@ -22,6 +22,8 @@ std::string getSn();
 
 std::string getSign();
 
+void checkDoorKey();
+
 void openDoor();
 
 void closeDoor();

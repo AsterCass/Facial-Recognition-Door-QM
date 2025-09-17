@@ -41,6 +41,7 @@ string staticSoundsDir;
 mutex lockPlayWav;
 deque<int> playWavQueue = {};
 int fdForDoor = -1;
+unsigned char doorKeyValues[6];
 
 // local
 string getSn() {
@@ -68,6 +69,29 @@ string getSign() {
                           back_inserter(result));
     transform(result.begin(), result.end(), result.begin(), ::tolower);
     return result;
+}
+
+void checkDoorKey() {
+#ifndef WIN32
+    if (-1 == fdForDoor) {
+        fdForDoor = open("/dev/telpo_gpio", O_RDWR);
+    }
+    if (fdForDoor < 0) {
+        logPrintln("Failed to open device", airstrip::ERROR, __FUNCTION__);
+        return;
+    }
+    memset(doorKeyValues, 0, sizeof(doorKeyValues));
+    int ret = read(fdForDoor, doorKeyValues, sizeof(doorKeyValues));
+    if (ret != sizeof(doorKeyValues)) {
+        logPrintln("Failed to read data", airstrip::ERROR, __FUNCTION__);
+        return;
+    }
+
+    logPrintln("Read data = " + std::to_string(doorKeyValues[2]) + " " + std::to_string(doorKeyValues[3]),
+        airstrip::INFO, __FUNCTION__);
+
+#endif
+    logPrintln("Check door key ", airstrip::DEBUG, __FUNCTION__);
 }
 
 void openDoor() {
