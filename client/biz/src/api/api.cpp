@@ -78,15 +78,15 @@ int checkDoorKey() {
     }
     if (fdForDoor < 0) {
         logPrintln("Failed to open device", airstrip::ERROR, __FUNCTION__);
-        return;
+        return -1;
     }
     memset(doorKeyValues, 0, sizeof(doorKeyValues));
     int ret = read(fdForDoor, doorKeyValues, sizeof(doorKeyValues));
     if (ret != sizeof(doorKeyValues)) {
         logPrintln("Failed to read data", airstrip::ERROR, __FUNCTION__);
-        return;
+        return -1;
     }
-    return doorKeyValues[2]
+    return doorKeyValues[2];
 
 #endif
     logPrintln("Check door key ", airstrip::DEBUG, __FUNCTION__);
