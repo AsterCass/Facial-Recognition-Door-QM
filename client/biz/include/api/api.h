@@ -22,7 +22,7 @@ std::string getSn();
 
 std::string getSign();
 
-void checkDoorKey();
+int checkDoorKey();
 
 void openDoor();
 

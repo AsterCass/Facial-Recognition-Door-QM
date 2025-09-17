@@ -407,7 +407,12 @@ void getNfcCode() {
 
 
 void getDoorKeyInput() {
-    checkDoorKey();
+    const int ret = checkDoorKey();
+    if (ret == 0 && doorOpenSec == -1) {
+        logPrintln("Hand open door", INFO, __FUNCTION__);
+        openDoor();
+        doorOpenSec = 1;
+    }
 }
 
 // Every (taskIvCnt + executionTime) sec
