@@ -10,7 +10,7 @@
 8. 参考 https://github.com/rockchip-linux/rknpu ，这里使用1.7.5的版本，将npu先换成mini驱动，再换成full驱动
    （原因不明，估计是出厂自带的驱动少东西，最好将github下载的压缩包直接传入机器，然后使用cp -r，而不是使用adb）
 9. 传入 https://github.com/HyperInspire/InspireFace 中的 Gundam_RV1109 放置 /data/frd/model/下
-10. 改frpc配置，主要改`vi /data/frp/frpc.toml`，要生效需要正确配置服务端地址
+10. (important!)改frpc配置，主要改`vi /data/frp/frpc.toml`，要生效需要正确配置服务端地址
 11. 修改应用程序权限`chmod 755 /etc/init.d/* && chmod 755 /data/frd/bin/* && chmod 755 /data/frp/frpc`
 12. 删除db内容`rm /data/frd/db/*`
 13. 可以先使用 `/etc/init.d/S99zplay`中的
@@ -51,9 +51,10 @@
     EOF
     chmod 755 /etc/init.d/S97cron
     ```
-    重启后修改定时任务`crontab -e`
+    (important!)重启后修改定时任务`crontab -e`
     最后输入`0 4 * * * sh /data/frd/script/linux/reboot_app.sh`以及`* * * * * sh /data/frd/script/linux/check_app_live.sh`
-18.
+18. (important!)如果有线出现问题，调整脚本 reset_wired.sh 中对于dhcp的引用，改为真dhcp，这里是因为他有时候提供的包有问题，正常默认应该是真dhcp
+19. 
 
 ## 注意事项
 
