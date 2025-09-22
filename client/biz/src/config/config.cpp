@@ -20,6 +20,8 @@ bool g_onFaceRegisterProcess = false;
 
 int g_currentLightLevel = 13;
 
+int g_onlyRgbCamera = 0;
+
 std::string g_prepareUpdateUrl;
 std::string g_prepareUpdateVersion;
 

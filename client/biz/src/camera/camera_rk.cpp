@@ -220,6 +220,22 @@ void processWithMbRga(MEDIA_BUFFER mb) {
 //     return nullptr;
 // }
 
+void resetManualExposureManualGain() {
+    static int onlyRgbCamera = -1;
+    if (onlyRgbCamera != g_onlyRgbCamera) {
+        logPrintln("Camera format switch to " + std::to_string(g_onlyRgbCamera),
+                   airstrip::INFO, __FUNCTION__);
+        if (g_onlyRgbCamera) {
+            SAMPLE_COMM_ISP_SET_ManualExposureAutoGain(1, 0);
+            SAMPLE_COMM_ISP_SET_AutoExposure(1);
+            SAMPLE_COMMON_ISP_SET_AutoWhiteBalance(1);
+        } else {
+            SAMPLE_COMM_ISP_SET_ManualExposureManualGain(1, 0, 0);
+        }
+        onlyRgbCamera = g_onlyRgbCamera;
+    }
+}
+
 void startCameraRk() {
     std::lock_guard<std::mutex> lock(mtx);
     if (started) {
