@@ -27,6 +27,8 @@ wifi_connect_dhcp() {
     local WIFIPWD=$2
     local CONF=/data/cfg/wpa_supplicant.conf
 
+    echo 0 > /sys/class/rfkill/rfkill1/soft
+
     # First ensure WiFi is fully disconnected
     wifi_disconnect
 
@@ -67,6 +69,8 @@ wifi_connect_static() {
     local DNS1=$6
     local DNS2=$7
     local CONF=/data/cfg/wpa_supplicant.conf
+
+    echo 0 > /sys/class/rfkill/rfkill1/soft
 
     # First ensure WiFi is fully disconnected
     wifi_disconnect

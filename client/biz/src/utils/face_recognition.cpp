@@ -709,9 +709,8 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
     cv::Mat frameIrCopy = frameIr.clone();
 
     static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([frameCopy, frameIrCopy] {
-
             logPrintln("Start for recognition thread ... ",
-                airstrip::DEBUG, __FUNCTION__);
+                       airstrip::DEBUG, __FUNCTION__);
 
             // 确定是否执行人脸识别，还是只是检测
             bool onlyDetect = true;
@@ -802,6 +801,14 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
                                                              multipleFaceData.rects->height);
                 } else {
                     CameraFrame::getInstance()->setFaceRects(0, 0, 0, 0);
+                }
+
+                if (onlyDetect) {
+                    logPrintln("For check face ret only detect",
+                               airstrip::DEBUG, __FUNCTION__);
+                    HFReleaseImageStream(stream);
+                    --isCheckFaceReco;
+                    return;
                 }
             }
 
