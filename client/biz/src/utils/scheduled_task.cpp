@@ -324,7 +324,7 @@ void updateUIMainComponentHeader() {
             ostringstream curHourOss;
             curHourOss << put_time(localtime(&time), "%H");
             int curHour = std::stoi(curHourOss.str());
-            if (curHour > 9 && curHour < 18) {
+            if (curHour >= 9 && curHour < 18) {
                 g_onlyRgbCamera = 1;
             } else {
                 g_onlyRgbCamera = 0;
