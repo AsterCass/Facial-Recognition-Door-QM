@@ -1,3 +1,4 @@
+#include <airstrip_command.h>
 #ifndef WIN32x
 
 #include <rkmedia_api.h>
@@ -226,6 +227,13 @@ void resetManualExposureManualGain() {
         logPrintln("Camera format switch to " + std::to_string(g_onlyRgbCamera),
                    airstrip::INFO, __FUNCTION__);
         if (g_onlyRgbCamera) {
+            ostringstream updateExposeGainCmd;
+            updateExposeGainCmd << "sh "
+                    << g_appWorkDir + "script/linux/reset_light.sh 0";
+            logPrintln("Current cmd : " + updateExposeGainCmd.str(),
+                       airstrip::INFO, __FUNCTION__);
+            airstrip::execCommand(updateExposeGainCmd.str());
+
             SAMPLE_COMM_ISP_SET_ManualExposureAutoGain(1, 0);
             SAMPLE_COMM_ISP_SET_AutoExposure(1);
             SAMPLE_COMMON_ISP_SET_AutoWhiteBalance(1);
