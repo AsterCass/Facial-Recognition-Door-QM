@@ -1,6 +1,5 @@
 #ifndef WIN32x
 
-#include <rkmedia_api.h>
 #include <mutex>
 #include "camera/camera_rk.h"
 #include "airstrip_log.h"
@@ -11,6 +10,10 @@
 #include "camera/camera_frame.h"
 #include "config/config.h"
 #include "utils/face_recognition.h"
+#include <rga/RgaApi.h>
+#include "camera/common/aiq_control.h"
+#include "camera/common/camir_control.h"
+#include "camera/common/camrgb_control.h"
 #include "camera/common/display.h"
 
 using namespace std;
@@ -28,10 +31,9 @@ int g_appHeightIr;
 int g_onFaceFrameIr = false;
 int g_onFaceFrameRga = false;
 
-#define CAMERA_WIDTH 1920;
-#define CAMERA_HEIGHT 1080;
-#define CAMERA_WIDTH_VI 1920;
-#define CAMERA_HEIGHT_VI 1080;
+#define CAMERA_WIDTH 1280
+#define CAMERA_HEIGHT 720
+#define SAVE_FRAMES 30
 
 
 void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
@@ -102,70 +104,69 @@ void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
     g_onFaceFrameIr = false;
 }
 
-void processWithMb(bool isIr, MEDIA_BUFFER mb) {
-    const void *data = RK_MPI_MB_GetPtr(mb);
-    const size_t size = RK_MPI_MB_GetSize(mb);
-    auto *buff = new uchar[size];
-    memcpy(buff, data, size);
-
-    uchar *otherBuff = nullptr;
-    auto boundFunction = isIr
-                             ? bind(faceRecognitionPreFun, buff, otherBuff)
-                             : bind(faceRecognitionPreFun, otherBuff, buff);
-
-    boundFunction();
-    RK_MPI_MB_ReleaseBuffer(mb);
-}
-
-void processWithMbIr(MEDIA_BUFFER mb) {
-    if (closeProcess)return;
-    if (g_onFaceFrameIr || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
-        RK_MPI_MB_ReleaseBuffer(mb);
-        return;
-    }
-    g_onFaceFrameIr = true;
-
-    // 限制帧率，人脸检测频率没必要那么高，浪费cpu
-    static int64_t lastMillisecondCount = 0L;
-    const int64_t currentMillisecondCount =
-            std::chrono::duration_cast<chrono::milliseconds>(
-                chrono::system_clock::now().time_since_epoch()).
-            count();
-    if (currentMillisecondCount - lastMillisecondCount < 150) {
-        RK_MPI_MB_ReleaseBuffer(mb);
-        g_onFaceFrameIr = false;
-        return;
-    }
-    lastMillisecondCount = currentMillisecondCount;
-
-    processWithMb(true, mb);
-}
-
-void processWithMbRga(MEDIA_BUFFER mb) {
-    if (closeProcess)return;
-    if (g_onFaceFrameRga || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
-        RK_MPI_MB_ReleaseBuffer(mb);
-        return;
-    }
-    g_onFaceFrameRga = true;
-
-
-    // 限制帧率，人脸检测频率没必要那么高，浪费cpu
-    static int64_t lastMillisecondCount = 0L;
-    const int64_t currentMillisecondCount =
-            std::chrono::duration_cast<chrono::milliseconds>(
-                chrono::system_clock::now().time_since_epoch()).
-            count();
-    if (currentMillisecondCount - lastMillisecondCount < 150) {
-        RK_MPI_MB_ReleaseBuffer(mb);
-        g_onFaceFrameRga = false;
-        return;
-    }
-    lastMillisecondCount = currentMillisecondCount;
-
-    processWithMb(false, mb);
-}
-
+// void processWithMb(bool isIr, MEDIA_BUFFER mb) {
+//     const void *data = RK_MPI_MB_GetPtr(mb);
+//     const size_t size = RK_MPI_MB_GetSize(mb);
+//     auto *buff = new uchar[size];
+//     memcpy(buff, data, size);
+//
+//     uchar *otherBuff = nullptr;
+//     auto boundFunction = isIr
+//                              ? bind(faceRecognitionPreFun, buff, otherBuff)
+//                              : bind(faceRecognitionPreFun, otherBuff, buff);
+//
+//     boundFunction();
+//     RK_MPI_MB_ReleaseBuffer(mb);
+// }
+//
+// void processWithMbIr(MEDIA_BUFFER mb) {
+//     if (closeProcess)return;
+//     if (g_onFaceFrameIr || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
+//         RK_MPI_MB_ReleaseBuffer(mb);
+//         return;
+//     }
+//     g_onFaceFrameIr = true;
+//
+//     // 限制帧率，人脸检测频率没必要那么高，浪费cpu
+//     static int64_t lastMillisecondCount = 0L;
+//     const int64_t currentMillisecondCount =
+//             std::chrono::duration_cast<chrono::milliseconds>(
+//                 chrono::system_clock::now().time_since_epoch()).
+//             count();
+//     if (currentMillisecondCount - lastMillisecondCount < 150) {
+//         RK_MPI_MB_ReleaseBuffer(mb);
+//         g_onFaceFrameIr = false;
+//         return;
+//     }
+//     lastMillisecondCount = currentMillisecondCount;
+//
+//     processWithMb(true, mb);
+// }
+//
+// void processWithMbRga(MEDIA_BUFFER mb) {
+//     if (closeProcess)return;
+//     if (g_onFaceFrameRga || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
+//         RK_MPI_MB_ReleaseBuffer(mb);
+//         return;
+//     }
+//     g_onFaceFrameRga = true;
+//
+//
+//     // 限制帧率，人脸检测频率没必要那么高，浪费cpu
+//     static int64_t lastMillisecondCount = 0L;
+//     const int64_t currentMillisecondCount =
+//             std::chrono::duration_cast<chrono::milliseconds>(
+//                 chrono::system_clock::now().time_since_epoch()).
+//             count();
+//     if (currentMillisecondCount - lastMillisecondCount < 150) {
+//         RK_MPI_MB_ReleaseBuffer(mb);
+//         g_onFaceFrameRga = false;
+//         return;
+//     }
+//     lastMillisecondCount = currentMillisecondCount;
+//
+//     processWithMb(false, mb);
+// }
 
 
 void startCameraRk() {
@@ -180,18 +181,53 @@ void startCameraRk() {
     airstrip::getProgramOptions(PRO_OPT_APP_HEIGHT, &appHeight);
     g_appWidth = appWidth;
     g_appHeight = appHeight;
-    g_appWidthIr = static_cast<int>(appWidth * IR_SCALE);
-    g_appHeightIr = static_cast<int>(appHeight * IR_SCALE);
-
-
-    display_init(0, 0);
-    display_exit();
-
-    closeProcess = false;
-    int ret = 0;
 
     // Init
-    // todo init camera
+    set_rgb_param(CAMERA_WIDTH
+                  ,
+                  CAMERA_HEIGHT
+                  ,
+                  NULL, true
+    );
+    set_ir_param(CAMERA_WIDTH
+                 ,
+                 CAMERA_HEIGHT
+                 ,
+                 NULL
+    );
+    set_rgb_rotation(90);
+
+    display_switch(DISPLAY_VIDEO_RGB);
+    if (display_init(g_appWidth, g_appHeight)) {
+        logPrintln("Display init failed", airstrip::ERROR, __FUNCTION__);
+        return;
+    }
+
+    logPrintln("Init display finish", airstrip::INFO, __FUNCTION__);
+
+    if (c_RkRgaInit()) {
+        logPrintln("Rga init failed", airstrip::ERROR, __FUNCTION__);
+        return;
+    }
+
+    aiq_control_alloc();
+    for (int i = 0; i < 10; i++) {
+        if (aiq_control_get_status(AIQ_CONTROL_RGB)) {
+            logPrintln("RGB aiq status ok.", airstrip::INFO, __FUNCTION__);
+            camrgb_control_init();
+            break;
+        }
+        sleep(1);
+    }
+
+    for (int i = 0; i < 10; i++) {
+        if (aiq_control_get_status(AIQ_CONTROL_IR)) {
+            logPrintln("IR aiq status ok.", airstrip::INFO, __FUNCTION__);
+            camir_control_init();
+            break;
+        }
+        sleep(1);
+    }
 
 
     logPrintln("Camera RK initial finish", airstrip::INFO, __FUNCTION__);
