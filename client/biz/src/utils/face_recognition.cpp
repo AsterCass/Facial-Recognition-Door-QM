@@ -709,8 +709,9 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
     cv::Mat frameIrCopy = frameIr.clone();
 
     static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([frameCopy, frameIrCopy] {
+
             logPrintln("Start for recognition thread ... ",
-                       airstrip::DEBUG, __FUNCTION__);
+                airstrip::DEBUG, __FUNCTION__);
 
             // 确定是否执行人脸识别，还是只是检测
             bool onlyDetect = true;
@@ -727,37 +728,34 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
 
             logPrintln("For check face in ... ", airstrip::DEBUG, __FUNCTION__);
 
-            cv::Rect rectIr;
             // 红外人脸检测
-            if (!g_onlyRgbCamera) {
-                const bool retDetect = faceDetectInspire(frameCopy, frameIrCopy, rectIr, !onlyDetect);
+            cv::Rect rectIr;
+            const bool retDetect = faceDetectInspire(frameCopy, frameIrCopy, rectIr, !onlyDetect);
 
-                logPrintln("For check face ret = " + to_string(retDetect) +
-                           " " + to_string(onlyDetect) + " " + to_string(g_isCheckFace),
-                           airstrip::DEBUG, __FUNCTION__);
+            logPrintln("For check face ret = " + to_string(retDetect) +
+                       " " + to_string(onlyDetect) + " " + to_string(g_isCheckFace),
+                       airstrip::DEBUG, __FUNCTION__);
 
-                if (retDetect) {
-                    CameraFrame::getInstance()->setFaceRects(rectIr.x, rectIr.y, rectIr.width, rectIr.height);
-                } else {
-                    CameraFrame::getInstance()->setFaceRects(0, 0, 0, 0);
-                }
-
-                if (onlyDetect) {
-                    logPrintln("For check face ret only detect",
-                               airstrip::DEBUG, __FUNCTION__);
-                    --isCheckFaceReco;
-                    return;
-                }
-
-                if (!retDetect && g_enableFaceSpoof) {
-                    logPrintln("For check face close face spoof",
-                               airstrip::DEBUG, __FUNCTION__);
-                    g_isCheckFace = false;
-                    --isCheckFaceReco;
-                    return;
-                }
+            if (retDetect) {
+                CameraFrame::getInstance()->setFaceRects(rectIr.x, rectIr.y, rectIr.width, rectIr.height);
+            } else {
+                CameraFrame::getInstance()->setFaceRects(0, 0, 0, 0);
             }
 
+            if (onlyDetect) {
+                logPrintln("For check face ret only detect",
+                           airstrip::DEBUG, __FUNCTION__);
+                --isCheckFaceReco;
+                return;
+            }
+
+            if (!retDetect && g_enableFaceSpoof) {
+                logPrintln("For check face close face spoof",
+                           airstrip::DEBUG, __FUNCTION__);
+                g_isCheckFace = false;
+                --isCheckFaceReco;
+                return;
+            }
 
             logPrintln("Start RGA face detect ...", airstrip::DEBUG, __FUNCTION__);
 
@@ -793,25 +791,6 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
 
             logPrintln("RGA track loaded ...", airstrip::DEBUG, __FUNCTION__);
 
-
-            if (g_onlyRgbCamera) {
-                if (multipleFaceData.detectedNum > 0) {
-                    CameraFrame::getInstance()->setFaceRects(multipleFaceData.rects->x, multipleFaceData.rects->y,
-                                                             multipleFaceData.rects->width,
-                                                             multipleFaceData.rects->height);
-                } else {
-                    CameraFrame::getInstance()->setFaceRects(0, 0, 0, 0);
-                }
-
-                if (onlyDetect) {
-                    logPrintln("For check face ret only detect",
-                               airstrip::DEBUG, __FUNCTION__);
-                    HFReleaseImageStream(stream);
-                    --isCheckFaceReco;
-                    return;
-                }
-            }
-
             if (multipleFaceData.detectedNum <= 0) {
                 logPrintln("Face recognition lay detect num" + ret,
                            airstrip::DEBUG, __FUNCTION__);
@@ -823,22 +802,19 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
 
 
             // 确认当前IR和RGB图片基本重合
-            if (!g_onlyRgbCamera) {
-                if (g_enableFaceSpoof) {
-                    const cv::Rect rectRgb(multipleFaceData.rects->x, multipleFaceData.rects->y,
-                                           multipleFaceData.rects->width, multipleFaceData.rects->height);
-                    const cv::Point rectRgbCenter(rectRgb.x + rectRgb.width / 2, rectRgb.y + rectRgb.height / 2);
-                    const cv::Point rectIrCenter(rectIr.x + rectIr.width / 2, rectIr.y + rectIr.height / 2);
-                    if (!rectRgb.contains(rectIrCenter) || !rectIr.contains(rectRgbCenter)) {
-                        logPrintln("Face fake face !!!!!", airstrip::WARN, __FUNCTION__);
-                        HFReleaseImageStream(stream);
-                        g_isCheckFace = false;
-                        --isCheckFaceReco;
-                        return;
-                    }
+            if (g_enableFaceSpoof) {
+                const cv::Rect rectRgb(multipleFaceData.rects->x, multipleFaceData.rects->y,
+                                       multipleFaceData.rects->width, multipleFaceData.rects->height);
+                const cv::Point rectRgbCenter(rectRgb.x + rectRgb.width / 2, rectRgb.y + rectRgb.height / 2);
+                const cv::Point rectIrCenter(rectIr.x + rectIr.width / 2, rectIr.y + rectIr.height / 2);
+                if (!rectRgb.contains(rectIrCenter) || !rectIr.contains(rectRgbCenter)) {
+                    logPrintln("Face fake face !!!!!", airstrip::WARN, __FUNCTION__);
+                    HFReleaseImageStream(stream);
+                    g_isCheckFace = false;
+                    --isCheckFaceReco;
+                    return;
                 }
             }
-
 
             logPrintln("RGA face detected ...", airstrip::DEBUG, __FUNCTION__);
 

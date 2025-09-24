@@ -317,26 +317,6 @@ void updateUIMainComponentHeader() {
         }
     }
 
-
-    //todo  临时逻辑
-    {
-        try {
-            ostringstream curHourOss;
-            curHourOss << put_time(localtime(&time), "%H");
-            int curHour = std::stoi(curHourOss.str());
-            if (curHour >= 9 && curHour < 18) {
-                g_onlyRgbCamera = 1;
-            } else {
-                g_onlyRgbCamera = 0;
-            }
-            resetManualExposureManualGain();
-        } catch (const std::exception &e) {
-            std::ostringstream errMsg;
-            errMsg << "Parse hour error: " << e.what();
-            logPrintln(errMsg.str(), ERROR, __FUNCTION__);
-        }
-    }
-
     logPrintln("Start bar label update finish", DEBUG, __FUNCTION__);
 }
 

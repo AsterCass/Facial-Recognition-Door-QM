@@ -33,10 +33,9 @@
 #ifndef __DISPLAY_H__
 #define __DISPLAY_H__
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
-
-#include "draw_rect.h"
 
 enum display_video_type {
     DISPLAY_VIDEO_RGB,
@@ -45,18 +44,10 @@ enum display_video_type {
 };
 
 int display_init(int width, int height);
-
 void display_exit(void);
-
 void display_commit(void *ptr, int fd, int fmt, int w, int h, int rotation);
-
 void display_switch(enum display_video_type type);
-
 void display_get_resolution(int *width, int *height);
-
-void display_paint_box(int left, int top, int right, int bottom);
-
-void display_set_color(YUV_Color color);
 
 #ifdef __cplusplus
 }

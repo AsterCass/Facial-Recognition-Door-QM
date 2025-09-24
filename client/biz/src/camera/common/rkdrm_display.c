@@ -29,9 +29,10 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef WIN32
 #include <libdrm/drm_mode.h>
+#include <stdbool.h>
 #include <stdint.h>
+#include <stddef.h>
 #include <xf86drmMode.h>
 #include <sys/mman.h>
 #include <unistd.h>
@@ -41,7 +42,7 @@
 #define INT_MAX 0xff
 #define COLOR_KEY 0xFFFFFFFF
 
-static int drm_plane_set_property (int fd, drmModePlane * plane,
+static bool drm_plane_set_property (int fd, drmModePlane * plane,
         const char *prop_name, uint64_t prop_value)
 {
     drmModeObjectPropertiesPtr props;
@@ -51,7 +52,7 @@ static int drm_plane_set_property (int fd, drmModePlane * plane,
     props = drmModeObjectGetProperties (fd, plane->plane_id,
             DRM_MODE_OBJECT_PLANE);
     if (!props)
-        return 0;
+        return false;
 
     for (i = 0; i < props->count_props; i++) {
         prop = drmModeGetProperty (fd, props->props[i]);
@@ -63,7 +64,7 @@ static int drm_plane_set_property (int fd, drmModePlane * plane,
     }
 
     drmModeFreeObjectProperties (props);
-    return ret < 0 ? 0 : 1;
+    return ret < 0 ? false : true;
 }
 
 /**
@@ -664,4 +665,3 @@ int drmCommit(struct drm_buf *buffer, int width, int height,
 
     return ret;
 }
-#endif

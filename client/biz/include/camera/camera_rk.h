@@ -6,7 +6,5 @@ void startCameraRk();
 
 void stopCameraRk();
 
-void resetManualExposureManualGain();
-
 
 #endif //CAMERA_RK_H

@@ -110,10 +110,10 @@ set(PROJECT_SOURCES
         src/db/card_db.cpp
         src/db/face_db.cpp
         src/db/open_record_db.cpp
-        src/camera/common/sample_common_isp.c
-        src/camera/common/sample_fake_isp.c
+        src/camera/common/aiq_control.cpp
+        src/camera/common/camir_control.cpp
+        src/camera/common/camrgb_control.cpp
         src/camera/common/display.c
-        src/camera/common/draw_rect.c
         src/camera/common/rkdrm_display.c
         src/camera/camera_rk.cpp
         src/camera/camera_frame.cpp
