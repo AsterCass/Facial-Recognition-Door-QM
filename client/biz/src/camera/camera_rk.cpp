@@ -84,7 +84,9 @@ void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height)
         //     faceRecognition(frameRga, rect);
         // }
         //CameraFrame::getInstance()->setFaceRects(rect.x, rect.y, rect.width, rect.height);
-        faceRecognition(s_rgaFrame, s_irFrame);
+        // faceRecognition(s_rgaFrame, s_irFrame);
+        cv::imwrite("/data/frd/rga.jpg", s_rgaFrame);
+        cv::imwrite("/data/frd/ir.jpg", s_irFrame);
     } catch (const exception &e) {
         logPrintln("Face Recognition fail : " + string(e.what()),
                    airstrip::ERROR, __FUNCTION__);
@@ -103,7 +105,7 @@ void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height)
     g_onFaceFrameIr = false;
 }
 
-void processWithMbIr(void *buf, int width, int height) {
+void processWithMbIr(void *buf, int, int, int width, int height, int) {
     if (g_onFaceFrameIr || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
         return;
     }
@@ -124,7 +126,7 @@ void processWithMbIr(void *buf, int width, int height) {
     faceRecognitionPreFun(buf, nullptr, width, height);
 }
 
-void processWithMbRga(void *buf, int width, int height) {
+void processWithMbRga(void *buf, int, int, int width, int height, int) {
     if (g_onFaceFrameRga || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
         return;
     }

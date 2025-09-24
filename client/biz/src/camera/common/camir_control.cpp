@@ -43,14 +43,13 @@ void set_ir_param(int width, int height, display_callback cb) {
 }
 
 static void *process(void *arg) {
-    static int cnt = 0;
     do {
-        ++cnt;
         buf = rkisp_get_frame(ctx, 0);
 
         pthread_mutex_lock(&g_display_lock);
         if (g_display_cb)
-            g_display_cb(buf->buf, ctx->width, ctx->height);
+            g_display_cb(buf->buf, buf->fd, RK_FORMAT_YCbCr_420_SP,
+                         ctx->width, ctx->height, g_rotation);
         pthread_mutex_unlock(&g_display_lock);
 
         rkisp_put_frame(ctx, buf);
