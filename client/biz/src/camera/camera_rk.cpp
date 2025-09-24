@@ -20,7 +20,6 @@ using namespace std;
 
 mutex mtx;
 bool started = false;
-int closeProcess = false;
 
 int g_appWidth;
 int g_appHeight;
@@ -36,7 +35,7 @@ int g_onFaceFrameRga = false;
 #define SAVE_FRAMES 30
 
 
-void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
+void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height) {
     // 这里加锁防止普通和红外摄像头前后脚进入，导致触发两次 faceRecognition
     static std::mutex mtx;
     std::lock_guard<std::mutex> lock(mtx);
@@ -49,18 +48,18 @@ void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
     static cv::Mat s_rgaFrame;
 
     if (irFrame) {
-        cv::Mat tmp(g_appHeightIr, g_appWidthIr, CV_8UC3, irFrame);
-        s_irFrame = tmp.clone(); // 深拷贝
-        delete[] irFrame; // 释放原始 buffer
+        auto *yuv_data = static_cast<uint8_t *>(irFrame);
+        const cv::Mat yuv(height * 3 / 2, width, CV_8UC1, yuv_data);
+        cv::rotate(yuv, s_irFrame, cv::ROTATE_90_COUNTERCLOCKWISE);
     }
 
     logPrintln("Free ir and clone",
                airstrip::DEBUG, __FUNCTION__);
 
     if (rgaFrame) {
-        cv::Mat tmp(g_appHeight, g_appWidth, CV_8UC3, rgaFrame);
-        s_rgaFrame = tmp.clone(); // 深拷贝
-        delete[] rgaFrame; // 释放原始 buffer
+        auto *yuv_data = static_cast<uint8_t *>(rgaFrame);
+        const cv::Mat yuv(height * 3 / 2, width, CV_8UC1, yuv_data);
+        cv::rotate(yuv, s_rgaFrame, cv::ROTATE_90_CLOCKWISE);
     }
 
     logPrintln("Free rga and clone",
@@ -104,69 +103,48 @@ void faceRecognitionPreFun(uchar *irFrame, uchar *rgaFrame) {
     g_onFaceFrameIr = false;
 }
 
-// void processWithMb(bool isIr, MEDIA_BUFFER mb) {
-//     const void *data = RK_MPI_MB_GetPtr(mb);
-//     const size_t size = RK_MPI_MB_GetSize(mb);
-//     auto *buff = new uchar[size];
-//     memcpy(buff, data, size);
-//
-//     uchar *otherBuff = nullptr;
-//     auto boundFunction = isIr
-//                              ? bind(faceRecognitionPreFun, buff, otherBuff)
-//                              : bind(faceRecognitionPreFun, otherBuff, buff);
-//
-//     boundFunction();
-//     RK_MPI_MB_ReleaseBuffer(mb);
-// }
-//
-// void processWithMbIr(MEDIA_BUFFER mb) {
-//     if (closeProcess)return;
-//     if (g_onFaceFrameIr || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
-//         RK_MPI_MB_ReleaseBuffer(mb);
-//         return;
-//     }
-//     g_onFaceFrameIr = true;
-//
-//     // 限制帧率，人脸检测频率没必要那么高，浪费cpu
-//     static int64_t lastMillisecondCount = 0L;
-//     const int64_t currentMillisecondCount =
-//             std::chrono::duration_cast<chrono::milliseconds>(
-//                 chrono::system_clock::now().time_since_epoch()).
-//             count();
-//     if (currentMillisecondCount - lastMillisecondCount < 150) {
-//         RK_MPI_MB_ReleaseBuffer(mb);
-//         g_onFaceFrameIr = false;
-//         return;
-//     }
-//     lastMillisecondCount = currentMillisecondCount;
-//
-//     processWithMb(true, mb);
-// }
-//
-// void processWithMbRga(MEDIA_BUFFER mb) {
-//     if (closeProcess)return;
-//     if (g_onFaceFrameRga || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
-//         RK_MPI_MB_ReleaseBuffer(mb);
-//         return;
-//     }
-//     g_onFaceFrameRga = true;
-//
-//
-//     // 限制帧率，人脸检测频率没必要那么高，浪费cpu
-//     static int64_t lastMillisecondCount = 0L;
-//     const int64_t currentMillisecondCount =
-//             std::chrono::duration_cast<chrono::milliseconds>(
-//                 chrono::system_clock::now().time_since_epoch()).
-//             count();
-//     if (currentMillisecondCount - lastMillisecondCount < 150) {
-//         RK_MPI_MB_ReleaseBuffer(mb);
-//         g_onFaceFrameRga = false;
-//         return;
-//     }
-//     lastMillisecondCount = currentMillisecondCount;
-//
-//     processWithMb(false, mb);
-// }
+void processWithMbIr(void *buf, int width, int height) {
+    if (g_onFaceFrameIr || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
+        return;
+    }
+    g_onFaceFrameIr = true;
+
+    // 限制帧率，人脸检测频率没必要那么高，浪费cpu
+    static int64_t lastMillisecondCount = 0L;
+    const int64_t currentMillisecondCount =
+            std::chrono::duration_cast<chrono::milliseconds>(
+                chrono::system_clock::now().time_since_epoch()).
+            count();
+    if (currentMillisecondCount - lastMillisecondCount < 150) {
+        g_onFaceFrameIr = false;
+        return;
+    }
+    lastMillisecondCount = currentMillisecondCount;
+
+    faceRecognitionPreFun(buf, nullptr, width, height);
+}
+
+void processWithMbRga(void *buf, int width, int height) {
+    if (g_onFaceFrameRga || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
+        return;
+    }
+    g_onFaceFrameRga = true;
+
+
+    // 限制帧率，人脸检测频率没必要那么高，浪费cpu
+    static int64_t lastMillisecondCount = 0L;
+    const int64_t currentMillisecondCount =
+            std::chrono::duration_cast<chrono::milliseconds>(
+                chrono::system_clock::now().time_since_epoch()).
+            count();
+    if (currentMillisecondCount - lastMillisecondCount < 150) {
+        g_onFaceFrameRga = false;
+        return;
+    }
+    lastMillisecondCount = currentMillisecondCount;
+
+    faceRecognitionPreFun(nullptr, buf, width, height);
+}
 
 
 void startCameraRk() {
@@ -183,18 +161,8 @@ void startCameraRk() {
     g_appHeight = appHeight;
 
     // Init
-    set_rgb_param(CAMERA_WIDTH
-                  ,
-                  CAMERA_HEIGHT
-                  ,
-                  NULL, true
-    );
-    set_ir_param(CAMERA_WIDTH
-                 ,
-                 CAMERA_HEIGHT
-                 ,
-                 NULL
-    );
+    set_rgb_param(CAMERA_WIDTH,CAMERA_HEIGHT, processWithMbIr, true);
+    set_ir_param(CAMERA_WIDTH,CAMERA_HEIGHT, processWithMbRga);
     set_rgb_rotation(90);
 
     display_switch(DISPLAY_VIDEO_RGB);
@@ -240,8 +208,6 @@ void stopCameraRk() {
         logPrintln("Camera RK has stoped", airstrip::WARN, __FUNCTION__);
         return;
     }
-
-    closeProcess = true;
 
     //todo close aiq
 
