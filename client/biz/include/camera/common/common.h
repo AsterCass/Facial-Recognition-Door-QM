@@ -8,6 +8,8 @@
 #define HAL_TRANSFORM_ROT_270    0x07
 
 
+typedef void (*display_callback_iv)(void *ptr, int w, int h);
+
 typedef void (*display_callback)(void *ptr, int fd, int fmt, int w, int h, int rotation);
 
 enum aiq_control_type {

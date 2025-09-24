@@ -19,6 +19,7 @@ static bool g_ir_en;
 static int g_ir_width;
 static int g_ir_height;
 static display_callback g_display_cb = nullptr;
+static display_callback_iv g_display_iv_cb = nullptr;
 static pthread_mutex_t g_display_lock = PTHREAD_MUTEX_INITIALIZER;
 static int g_rotation = HAL_TRANSFORM_ROT_270;
 
@@ -32,6 +33,12 @@ void set_ir_rotation(int angle) {
 void set_ir_display(display_callback cb) {
     pthread_mutex_lock(&g_display_lock);
     g_display_cb = cb;
+    pthread_mutex_unlock(&g_display_lock);
+}
+
+void set_ir_display_vi(display_callback_iv cb) {
+    pthread_mutex_lock(&g_display_lock);
+    g_display_iv_cb = cb;
     pthread_mutex_unlock(&g_display_lock);
 }
 
@@ -50,6 +57,8 @@ static void *process(void *arg) {
         if (g_display_cb)
             g_display_cb(buf->buf, buf->fd, RK_FORMAT_YCbCr_420_SP,
                          ctx->width, ctx->height, g_rotation);
+        if (g_display_iv_cb)
+            g_display_iv_cb(buf->buf, ctx->width, ctx->height);
         pthread_mutex_unlock(&g_display_lock);
 
         rkisp_put_frame(ctx, buf);

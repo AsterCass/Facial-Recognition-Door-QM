@@ -42,6 +42,8 @@ void set_ir_rotation(int angle);
 
 void set_ir_display(display_callback cb);
 
+void set_ir_display_iv(display_callback_iv cb);
+
 void set_ir_param(int width, int height, display_callback cb);
 
 int camir_control_init(void);

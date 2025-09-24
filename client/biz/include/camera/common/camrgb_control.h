@@ -40,13 +40,15 @@ extern "C" {
 #include <stdbool.h>
 #include "common.h"
 
-    void set_rgb_rotation(int angle);
+void set_rgb_rotation(int angle);
 
-    void set_rgb_display(display_callback cb);
+void set_rgb_display(display_callback cb);
 
-    void set_rgb_param(int width, int height, display_callback cb, bool expo);
+void set_rgb_display_iv(display_callback_iv cb);
 
-    int camrgb_control_init();
+void set_rgb_param(int width, int height, display_callback cb, bool expo);
+
+int camrgb_control_init();
 
 #ifdef __cplusplus
 }

@@ -105,7 +105,7 @@ void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height)
     g_onFaceFrameIr = false;
 }
 
-void processWithMbIr(void *buf, int, int, int width, int height, int) {
+void processWithMbIr(void *buf, int width, int height) {
     if (g_onFaceFrameIr || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
         return;
     }
@@ -126,7 +126,7 @@ void processWithMbIr(void *buf, int, int, int width, int height, int) {
     faceRecognitionPreFun(buf, nullptr, width, height);
 }
 
-void processWithMbRga(void *buf, int, int, int width, int height, int) {
+void processWithMbRga(void *buf, int width, int height) {
     if (g_onFaceFrameRga || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
         return;
     }
@@ -163,9 +163,13 @@ void startCameraRk() {
     g_appHeight = appHeight;
 
     // Init
-    set_rgb_param(CAMERA_WIDTH,CAMERA_HEIGHT, processWithMbIr, true);
-    set_ir_param(CAMERA_WIDTH,CAMERA_HEIGHT, processWithMbRga);
+    // 这里回调会在 display_switch 被输出屏幕的方法占用，所以不在这里设置
+    set_rgb_param(CAMERA_WIDTH,CAMERA_HEIGHT, nullptr, true);
+    set_ir_param(CAMERA_WIDTH,CAMERA_HEIGHT, nullptr);
     set_rgb_rotation(90);
+
+    set_ir_display_iv(processWithMbIr);
+    set_rgb_display_iv(processWithMbRga);
 
     display_switch(DISPLAY_VIDEO_RGB);
     if (display_init(g_appWidth, g_appHeight)) {
