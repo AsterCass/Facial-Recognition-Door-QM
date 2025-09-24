@@ -36,7 +36,7 @@ void set_ir_display(display_callback cb) {
     pthread_mutex_unlock(&g_display_lock);
 }
 
-void set_ir_display_vi(display_callback_iv cb) {
+void set_ir_display_iv(display_callback_iv cb) {
     pthread_mutex_lock(&g_display_lock);
     g_display_iv_cb = cb;
     pthread_mutex_unlock(&g_display_lock);
