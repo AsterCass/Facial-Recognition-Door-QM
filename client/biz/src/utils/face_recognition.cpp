@@ -694,7 +694,7 @@ void faceRecognition() {
     // const auto curTime = chrono::system_clock::to_time_t(chrono::system_clock::now());
     // static time_t lastRecognitionTime = 0;
 
-    if (g_curRgbData.size() <= 0) {
+    if (g_curRgbData.size <= 0) {
         return;
     }
 
