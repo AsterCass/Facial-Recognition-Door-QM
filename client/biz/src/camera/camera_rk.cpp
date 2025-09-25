@@ -3,7 +3,6 @@
 #include <mutex>
 #include "camera/camera_rk.h"
 #include "airstrip_log.h"
-#include <opencv2/opencv.hpp>
 
 #include "airstrip_program_options.h"
 #include "airstrip_thread_pool.h"
@@ -24,9 +23,6 @@ bool started = false;
 int g_appWidth;
 int g_appHeight;
 
-int g_appWidthIr;
-int g_appHeightIr;
-
 int g_onFaceFrameIr = false;
 int g_onFaceFrameRga = false;
 
@@ -44,32 +40,34 @@ void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height)
                + to_string(nullptr == irFrame) + " " + to_string(nullptr == rgaFrame),
                airstrip::DEBUG, __FUNCTION__);
 
-    static cv::Mat s_irFrame;
-    static cv::Mat s_rgaFrame;
+    const int calSize = width * height * 3 / 2;
 
-    if (irFrame) {
-        auto *yuv_data = static_cast<uint8_t *>(irFrame);
-        s_irFrame = cv::Mat(height * 3 / 2, width, CV_8UC1, yuv_data).clone();
+    if (irFrame && MAX_OUTPUT_FRAME_SIZE >= calSize) {
+        g_curIrData.size = calSize;
+        g_curIrData.height = height;
+        g_curIrData.width = width;
+        memcpy(g_curIrData.data, irFrame, calSize);
     }
 
     logPrintln("Free ir and clone",
                airstrip::DEBUG, __FUNCTION__);
 
-    if (rgaFrame) {
-        auto *yuv_data = static_cast<uint8_t *>(rgaFrame);
-        s_rgaFrame = cv::Mat(height * 3 / 2, width, CV_8UC1, yuv_data).clone();
+    if (rgaFrame && MAX_OUTPUT_FRAME_SIZE >= calSize) {
+        g_curRgbData.size = calSize;
+        g_curRgbData.height = height;
+        g_curRgbData.width = width;
+        memcpy(g_curRgbData.data, rgaFrame, calSize);
     }
 
     logPrintln("Free rga and clone",
                airstrip::DEBUG, __FUNCTION__);
 
-    if (s_irFrame.empty() || s_rgaFrame.empty()) {
+    if (0 == g_curIrData.size || 0 == g_curRgbData.size) {
         return;
     }
 
     logPrintln("Start faceRecognition",
                airstrip::DEBUG, __FUNCTION__);
-
 
     try {
         //rectangle(frameRga, rect, cv::Scalar(255, 0, 0), 2);
@@ -82,7 +80,7 @@ void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height)
         //     faceRecognition(frameRga, rect);
         // }
         //CameraFrame::getInstance()->setFaceRects(rect.x, rect.y, rect.width, rect.height);
-        faceRecognition(s_rgaFrame, s_irFrame);
+        faceRecognition();
     } catch (const exception &e) {
         logPrintln("Face Recognition fail : " + string(e.what()),
                    airstrip::ERROR, __FUNCTION__);
@@ -91,8 +89,8 @@ void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height)
     logPrintln("FaceRecognition finish",
                airstrip::DEBUG, __FUNCTION__);
 
-    s_irFrame.release();
-    s_rgaFrame.release();
+    memset(&g_curRgbData, 0, sizeof(g_curRgbData));
+    memset(&g_curIrData, 0, sizeof(g_curIrData));
 
     logPrintln("FaceRecognition release",
                airstrip::DEBUG, __FUNCTION__);
@@ -101,23 +99,19 @@ void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height)
     g_onFaceFrameIr = false;
 }
 
-void processWithMbIr(void *buf, int size, int width, int height) {
+void processWithMbIr(void *buf, int size, int width, int height, int64_t cnt) {
     if (g_onFaceFrameIr || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
         return;
     }
     g_onFaceFrameIr = true;
 
-    // 限制帧率，人脸检测频率没必要那么高，浪费cpu
-    static int64_t lastMillisecondCount = 0L;
-    const int64_t currentMillisecondCount =
-            std::chrono::duration_cast<chrono::milliseconds>(
-                chrono::system_clock::now().time_since_epoch()).
-            count();
-    if (currentMillisecondCount - lastMillisecondCount < 150) {
+    // 30帧数据，每5帧调用一次
+    static int64_t lastCnt = 0;
+    if (cnt - lastCnt < 5) {
         g_onFaceFrameIr = false;
         return;
     }
-    lastMillisecondCount = currentMillisecondCount;
+    lastCnt = cnt;
 
     logPrintln("The ir data : " + to_string(size) + " " + to_string(width) + " " + to_string(height),
                airstrip::DEBUG, __FUNCTION__);
@@ -135,24 +129,20 @@ void processWithMbIr(void *buf, int size, int width, int height) {
     faceRecognitionPreFun(buf, nullptr, width, height);
 }
 
-void processWithMbRga(void *buf, int size, int width, int height) {
+void processWithMbRga(void *buf, int size, int width, int height, int64_t cnt) {
     if (g_onFaceFrameRga || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
         return;
     }
     g_onFaceFrameRga = true;
 
 
-    // 限制帧率，人脸检测频率没必要那么高，浪费cpu
-    static int64_t lastMillisecondCount = 0L;
-    const int64_t currentMillisecondCount =
-            std::chrono::duration_cast<chrono::milliseconds>(
-                chrono::system_clock::now().time_since_epoch()).
-            count();
-    if (currentMillisecondCount - lastMillisecondCount < 150) {
+    // 30帧数据，每5帧调用一次
+    static int64_t lastCnt = 0;
+    if (cnt - lastCnt < 5) {
         g_onFaceFrameRga = false;
         return;
     }
-    lastMillisecondCount = currentMillisecondCount;
+    lastCnt = cnt;
 
     logPrintln("The rga data : " + to_string(size) + " " + to_string(width) + " " + to_string(height),
                airstrip::DEBUG, __FUNCTION__);

@@ -667,213 +667,265 @@ bool faceDetectInspire(const cv::Mat &frame, const cv::Mat &frameIr, cv::Rect &r
     return ret;
 }
 
-void faceRecognition(const std::string &address, const std::string &addressIr) {
-    if (!initializedFaceRec) {
-        return;
-    }
-    const auto image = cv::imread(address);
-    if (image.empty()) {
-        logPrintln("Read pic error " + address, airstrip::WARN, __FUNCTION__);
-        return;
-    }
-    const auto imageIr = cv::imread(addressIr);
-    if (imageIr.empty()) {
-        logPrintln("Read pic ir error " + address, airstrip::WARN, __FUNCTION__);
-        return;
-    }
-    return faceRecognition(image, imageIr);
-}
+// void faceRecognition(const std::string &address, const std::string &addressIr) {
+//     if (!initializedFaceRec) {
+//         return;
+//     }
+//     const auto image = cv::imread(address);
+//     if (image.empty()) {
+//         logPrintln("Read pic error " + address, airstrip::WARN, __FUNCTION__);
+//         return;
+//     }
+//     const auto imageIr = cv::imread(addressIr);
+//     if (imageIr.empty()) {
+//         logPrintln("Read pic ir error " + address, airstrip::WARN, __FUNCTION__);
+//         return;
+//     }
+//     return faceRecognition(image, imageIr);
+// }
 
-void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
+void faceRecognition() {
     if (!initializedFaceRec) {
         return;
     }
 
     logPrintln("Start for recognition ... ", airstrip::DEBUG, __FUNCTION__);
 
-    static int isCheckFaceReco = 0;
-    if (isCheckFaceReco > 1) {
-        logPrintln("In Recognition ... ", airstrip::DEBUG, __FUNCTION__);
+    // const auto curTime = chrono::system_clock::to_time_t(chrono::system_clock::now());
+    // static time_t lastRecognitionTime = 0;
+
+    if (g_curRgbData.size() <= 0) {
         return;
     }
-    isCheckFaceReco++;
-    if (frame.empty()) {
-        --isCheckFaceReco;
+
+    // 执行人脸检测
+    HFImageStream stream = nullptr;
+    HFImageData imageData = {};
+    imageData.data = g_curRgbData.data;
+    imageData.format = HF_STREAM_YUV_NV12;
+    imageData.height = g_curRgbData.height;
+    imageData.width = g_curRgbData.width;
+    imageData.rotation = HF_CAMERA_ROTATION_270;
+    HResult ret = HFCreateImageStream(&imageData, &stream);
+    if (ret != HSUCCEED) {
+        logPrintln("Face recognition build image fail " + ret,
+                   airstrip::WARN, __FUNCTION__);
         return;
     }
-    cv::Mat frameCopyOri = frame.clone();
-    if (frameIr.empty()) {
-        --isCheckFaceReco;
+
+
+    logPrintln("RGA track to format ...", airstrip::INFO, __FUNCTION__);
+
+    HFMultipleFaceData multipleFaceData = {};
+    ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
+    if (ret != HSUCCEED) {
+        logPrintln("Face recognition track image fail " + ret,
+                   airstrip::WARN, __FUNCTION__);
+        HFReleaseImageStream(stream);
         return;
     }
-    cv::Mat frameIrCopyOri = frameIr.clone();
 
-    static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([frameCopyOri, frameIrCopyOri] {
-            logPrintln("Start for recognition thread ... ",
-                       airstrip::DEBUG, __FUNCTION__);
+    logPrintln("RGA track loaded ...", airstrip::INFO, __FUNCTION__);
 
-            // 确定是否执行人脸识别，还是只是检测
-            bool onlyDetect = true;
-            static int64_t lastMillisecondCount = 0L;
-            const int64_t currentMillisecondCount =
-                    std::chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).
-                    count();
-            // 超过间隔时间且没有在进行人脸检测则发起新的人脸检测
-            if (currentMillisecondCount - lastMillisecondCount > g_faceRegCoreIvMillSec && !g_isCheckFace) {
-                onlyDetect = false;
-                g_isCheckFace = true;
-                lastMillisecondCount = currentMillisecondCount;
-            }
-
-            logPrintln("For check face in ... ", airstrip::DEBUG, __FUNCTION__);
-
-            // 数据矫正
-            cv::Mat frameCopy;
-            cv::cvtColor(frameCopyOri, frameCopy, cv::COLOR_YUV2BGR_NV12);
-            cv::rotate(frameCopy, frameCopy, cv::ROTATE_90_CLOCKWISE);
-            cv::Mat frameIrCopy;
-            cv::cvtColor(frameIrCopyOri, frameIrCopy, cv::COLOR_YUV2BGR_NV12);
-            cv::rotate(frameIrCopy, frameIrCopy, cv::ROTATE_90_COUNTERCLOCKWISE);
+    if (multipleFaceData.detectedNum <= 0) {
+        logPrintln("Face recognition lay detect num" + ret,
+                   airstrip::INFO, __FUNCTION__);
+        HFReleaseImageStream(stream);
+        return;
+    }
 
 
-            // 红外人脸检测
-            cv::Rect rectIr;
-            const bool retDetect = faceDetectInspire(frameCopy, frameIrCopy, rectIr, !onlyDetect);
-
-            logPrintln("For check face ret = " + to_string(retDetect) +
-                       " " + to_string(onlyDetect) + " " + to_string(g_isCheckFace),
-                       airstrip::DEBUG, __FUNCTION__);
-
-            if (retDetect) {
-                CameraFrame::getInstance()->setFaceRects(rectIr.x, rectIr.y, rectIr.width, rectIr.height);
-            } else {
-                CameraFrame::getInstance()->setFaceRects(0, 0, 0, 0);
-            }
-
-            if (onlyDetect) {
-                logPrintln("For check face ret only detect",
-                           airstrip::DEBUG, __FUNCTION__);
-                --isCheckFaceReco;
-                return;
-            }
-
-            if (!retDetect && g_enableFaceSpoof) {
-                logPrintln("For check face close face spoof",
-                           airstrip::DEBUG, __FUNCTION__);
-                g_isCheckFace = false;
-                --isCheckFaceReco;
-                return;
-            }
-
-            logPrintln("Start RGA face detect ...", airstrip::DEBUG, __FUNCTION__);
-
-            // 执行人脸检测
-            HFImageStream stream = nullptr;
-            HFImageData imageData = {};
-            imageData.data = frameCopy.data;
-            imageData.format = HF_STREAM_BGR;
-            imageData.height = frameCopy.rows;
-            imageData.width = frameCopy.cols;
-            imageData.rotation = HF_CAMERA_ROTATION_0;
-            HResult ret = HFCreateImageStream(&imageData, &stream);
-            if (ret != HSUCCEED) {
-                logPrintln("Face recognition build image fail " + ret,
-                           airstrip::WARN, __FUNCTION__);
-                g_isCheckFace = false;
-                --isCheckFaceReco;
-                return;
-            }
-
-            logPrintln("RGA track to format ...", airstrip::DEBUG, __FUNCTION__);
-
-            HFMultipleFaceData multipleFaceData = {};
-            ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
-            if (ret != HSUCCEED) {
-                logPrintln("Face recognition track image fail " + ret,
-                           airstrip::WARN, __FUNCTION__);
-                HFReleaseImageStream(stream);
-                g_isCheckFace = false;
-                --isCheckFaceReco;
-                return;
-            }
-
-            logPrintln("RGA track loaded ...", airstrip::DEBUG, __FUNCTION__);
-
-            if (multipleFaceData.detectedNum <= 0) {
-                logPrintln("Face recognition lay detect num" + ret,
-                           airstrip::DEBUG, __FUNCTION__);
-                HFReleaseImageStream(stream);
-                g_isCheckFace = false;
-                --isCheckFaceReco;
-                return;
-            }
+    logPrintln("Detect :" + to_string(multipleFaceData.rects->x) + " "
+               + to_string(multipleFaceData.rects->y) + " "
+               + to_string(multipleFaceData.rects->width) + " "
+               + to_string(multipleFaceData.rects->height) + " ",
+               airstrip::INFO, __FUNCTION__);
 
 
-            // 确认当前IR和RGB图片基本重合
-            if (g_enableFaceSpoof) {
-                const cv::Rect rectRgb(multipleFaceData.rects->x, multipleFaceData.rects->y,
-                                       multipleFaceData.rects->width, multipleFaceData.rects->height);
-                const cv::Point rectRgbCenter(rectRgb.x + rectRgb.width / 2, rectRgb.y + rectRgb.height / 2);
-                const cv::Point rectIrCenter(rectIr.x + rectIr.width / 2, rectIr.y + rectIr.height / 2);
-                if (!rectRgb.contains(rectIrCenter) || !rectIr.contains(rectRgbCenter)) {
-                    logPrintln("Face fake face !!!!!", airstrip::WARN, __FUNCTION__);
-                    HFReleaseImageStream(stream);
-                    g_isCheckFace = false;
-                    --isCheckFaceReco;
-                    return;
-                }
-            }
-
-            logPrintln("RGA face detected ...", airstrip::DEBUG, __FUNCTION__);
-
-            HFFaceFeature feature = {};
-            ret = HFFaceFeatureExtract(faceRecognitionSession, stream, multipleFaceData.tokens[0], &feature);
-            if (ret != HSUCCEED) {
-                logPrintln("Face recognition feature extract fail " + ret,
-                           airstrip::WARN, __FUNCTION__);
-                HFReleaseImageStream(stream);
-                g_isCheckFace = false;
-                --isCheckFaceReco;
-                return;
-            }
-
-            HFloat confidence;
-            HFFaceFeatureIdentity searchResult = {};
-            ret = HFFeatureHubFaceSearch(feature, &confidence, &searchResult);
-            if (ret != HSUCCEED) {
-                logPrintln("Face recognition feature search fail " + ret,
-                           airstrip::WARN, __FUNCTION__);
-                HFReleaseImageStream(stream);
-                g_isCheckFace = false;
-                --isCheckFaceReco;
-                return;
-            }
-
-            if (searchResult.id <= 0 || faceUserInfoMap.find(searchResult.id) == faceUserInfoMap.end()) {
-                ScheduledTask::sendFaceRegRes({}, frameCopy, 0.0);
-                HFReleaseImageStream(stream);
-                g_isCheckFace = false;
-                --isCheckFaceReco;
-                return;
-            }
-
-            const auto userData = faceUserInfoMap[searchResult.id];
-            logPrintln("Face recognition ret id = " + to_string(searchResult.id)
-                       + " userId = " + userData.userId + " " + to_string(confidence),
-                       airstrip::INFO, __FUNCTION__);
-            if ((!currentIsNight() && confidence < g_faceThreshold) || (
-                    currentIsNight() && confidence < g_faceThresholdNight)) {
-                ScheduledTask::sendFaceRegRes({}, frameCopy, 0.0);
-            } else {
-                ScheduledTask::sendFaceRegRes(userData, frameCopy, confidence);
-            }
-
-            HFReleaseImageStream(stream);
-            g_isCheckFace = false;
-            --isCheckFaceReco;
-        }
-
-    );
+    //
+    // static int isCheckFaceReco = 0;
+    // if (isCheckFaceReco > 1) {
+    //     logPrintln("In Recognition ... ", airstrip::DEBUG, __FUNCTION__);
+    //     return;
+    // }
+    // isCheckFaceReco++;
+    // if (frame.empty()) {
+    //     --isCheckFaceReco;
+    //     return;
+    // }
+    // cv::Mat frameCopyOri = frame.clone();
+    // if (frameIr.empty()) {
+    //     --isCheckFaceReco;
+    //     return;
+    // }
+    // cv::Mat frameIrCopyOri = frameIr.clone();
+    //
+    // static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([frameCopyOri, frameIrCopyOri] {
+    //         logPrintln("Start for recognition thread ... ",
+    //                    airstrip::DEBUG, __FUNCTION__);
+    //
+    //         // 确定是否执行人脸识别，还是只是检测
+    //         bool onlyDetect = true;
+    //         static int64_t lastMillisecondCount = 0L;
+    //         const int64_t currentMillisecondCount =
+    //                 std::chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now().time_since_epoch()).
+    //                 count();
+    //         // 超过间隔时间且没有在进行人脸检测则发起新的人脸检测
+    //         if (currentMillisecondCount - lastMillisecondCount > g_faceRegCoreIvMillSec && !g_isCheckFace) {
+    //             onlyDetect = false;
+    //             g_isCheckFace = true;
+    //             lastMillisecondCount = currentMillisecondCount;
+    //         }
+    //
+    //         logPrintln("For check face in ... ", airstrip::DEBUG, __FUNCTION__);
+    //
+    //         // 数据矫正
+    //         cv::Mat frameCopy;
+    //         cv::cvtColor(frameCopyOri, frameCopy, cv::COLOR_YUV2BGR_NV12);
+    //         cv::rotate(frameCopy, frameCopy, cv::ROTATE_90_CLOCKWISE);
+    //         cv::Mat frameIrCopy;
+    //         cv::cvtColor(frameIrCopyOri, frameIrCopy, cv::COLOR_YUV2BGR_NV12);
+    //         cv::rotate(frameIrCopy, frameIrCopy, cv::ROTATE_90_COUNTERCLOCKWISE);
+    //
+    //
+    //         // 红外人脸检测
+    //         cv::Rect rectIr;
+    //         const bool retDetect = faceDetectInspire(frameCopy, frameIrCopy, rectIr, !onlyDetect);
+    //
+    //         logPrintln("For check face ret = " + to_string(retDetect) +
+    //                    " " + to_string(onlyDetect) + " " + to_string(g_isCheckFace),
+    //                    airstrip::DEBUG, __FUNCTION__);
+    //
+    //         if (retDetect) {
+    //             CameraFrame::getInstance()->setFaceRects(rectIr.x, rectIr.y, rectIr.width, rectIr.height);
+    //         } else {
+    //             CameraFrame::getInstance()->setFaceRects(0, 0, 0, 0);
+    //         }
+    //
+    //         if (onlyDetect) {
+    //             logPrintln("For check face ret only detect",
+    //                        airstrip::DEBUG, __FUNCTION__);
+    //             --isCheckFaceReco;
+    //             return;
+    //         }
+    //
+    //         if (!retDetect && g_enableFaceSpoof) {
+    //             logPrintln("For check face close face spoof",
+    //                        airstrip::DEBUG, __FUNCTION__);
+    //             g_isCheckFace = false;
+    //             --isCheckFaceReco;
+    //             return;
+    //         }
+    //
+    //         logPrintln("Start RGA face detect ...", airstrip::DEBUG, __FUNCTION__);
+    //
+    //         // 执行人脸检测
+    //         HFImageStream stream = nullptr;
+    //         HFImageData imageData = {};
+    //         imageData.data = frameCopy.data;
+    //         imageData.format = HF_STREAM_BGR;
+    //         imageData.height = frameCopy.rows;
+    //         imageData.width = frameCopy.cols;
+    //         imageData.rotation = HF_CAMERA_ROTATION_0;
+    //         HResult ret = HFCreateImageStream(&imageData, &stream);
+    //         if (ret != HSUCCEED) {
+    //             logPrintln("Face recognition build image fail " + ret,
+    //                        airstrip::WARN, __FUNCTION__);
+    //             g_isCheckFace = false;
+    //             --isCheckFaceReco;
+    //             return;
+    //         }
+    //
+    //         logPrintln("RGA track to format ...", airstrip::DEBUG, __FUNCTION__);
+    //
+    //         HFMultipleFaceData multipleFaceData = {};
+    //         ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
+    //         if (ret != HSUCCEED) {
+    //             logPrintln("Face recognition track image fail " + ret,
+    //                        airstrip::WARN, __FUNCTION__);
+    //             HFReleaseImageStream(stream);
+    //             g_isCheckFace = false;
+    //             --isCheckFaceReco;
+    //             return;
+    //         }
+    //
+    //         logPrintln("RGA track loaded ...", airstrip::DEBUG, __FUNCTION__);
+    //
+    //         if (multipleFaceData.detectedNum <= 0) {
+    //             logPrintln("Face recognition lay detect num" + ret,
+    //                        airstrip::DEBUG, __FUNCTION__);
+    //             HFReleaseImageStream(stream);
+    //             g_isCheckFace = false;
+    //             --isCheckFaceReco;
+    //             return;
+    //         }
+    //
+    //
+    //         // 确认当前IR和RGB图片基本重合
+    //         if (g_enableFaceSpoof) {
+    //             const cv::Rect rectRgb(multipleFaceData.rects->x, multipleFaceData.rects->y,
+    //                                    multipleFaceData.rects->width, multipleFaceData.rects->height);
+    //             const cv::Point rectRgbCenter(rectRgb.x + rectRgb.width / 2, rectRgb.y + rectRgb.height / 2);
+    //             const cv::Point rectIrCenter(rectIr.x + rectIr.width / 2, rectIr.y + rectIr.height / 2);
+    //             if (!rectRgb.contains(rectIrCenter) || !rectIr.contains(rectRgbCenter)) {
+    //                 logPrintln("Face fake face !!!!!", airstrip::WARN, __FUNCTION__);
+    //                 HFReleaseImageStream(stream);
+    //                 g_isCheckFace = false;
+    //                 --isCheckFaceReco;
+    //                 return;
+    //             }
+    //         }
+    //
+    //         logPrintln("RGA face detected ...", airstrip::DEBUG, __FUNCTION__);
+    //
+    //         HFFaceFeature feature = {};
+    //         ret = HFFaceFeatureExtract(faceRecognitionSession, stream, multipleFaceData.tokens[0], &feature);
+    //         if (ret != HSUCCEED) {
+    //             logPrintln("Face recognition feature extract fail " + ret,
+    //                        airstrip::WARN, __FUNCTION__);
+    //             HFReleaseImageStream(stream);
+    //             g_isCheckFace = false;
+    //             --isCheckFaceReco;
+    //             return;
+    //         }
+    //
+    //         HFloat confidence;
+    //         HFFaceFeatureIdentity searchResult = {};
+    //         ret = HFFeatureHubFaceSearch(feature, &confidence, &searchResult);
+    //         if (ret != HSUCCEED) {
+    //             logPrintln("Face recognition feature search fail " + ret,
+    //                        airstrip::WARN, __FUNCTION__);
+    //             HFReleaseImageStream(stream);
+    //             g_isCheckFace = false;
+    //             --isCheckFaceReco;
+    //             return;
+    //         }
+    //
+    //         if (searchResult.id <= 0 || faceUserInfoMap.find(searchResult.id) == faceUserInfoMap.end()) {
+    //             ScheduledTask::sendFaceRegRes({}, frameCopy, 0.0);
+    //             HFReleaseImageStream(stream);
+    //             g_isCheckFace = false;
+    //             --isCheckFaceReco;
+    //             return;
+    //         }
+    //
+    //         const auto userData = faceUserInfoMap[searchResult.id];
+    //         logPrintln("Face recognition ret id = " + to_string(searchResult.id)
+    //                    + " userId = " + userData.userId + " " + to_string(confidence),
+    //                    airstrip::INFO, __FUNCTION__);
+    //         if ((!currentIsNight() && confidence < g_faceThreshold) || (
+    //                 currentIsNight() && confidence < g_faceThresholdNight)) {
+    //             ScheduledTask::sendFaceRegRes({}, frameCopy, 0.0);
+    //         } else {
+    //             ScheduledTask::sendFaceRegRes(userData, frameCopy, confidence);
+    //         }
+    //
+    //         HFReleaseImageStream(stream);
+    //         g_isCheckFace = false;
+    //         --isCheckFaceReco;
+    //     }
+    //
+    // );
 }
 
 #else
