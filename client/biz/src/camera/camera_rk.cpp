@@ -105,7 +105,7 @@ void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height)
     g_onFaceFrameIr = false;
 }
 
-void processWithMbIr(void *buf, int width, int height) {
+void processWithMbIr(void *buf, int size, int width, int height) {
     if (g_onFaceFrameIr || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
         return;
     }
@@ -123,10 +123,23 @@ void processWithMbIr(void *buf, int width, int height) {
     }
     lastMillisecondCount = currentMillisecondCount;
 
-    faceRecognitionPreFun(buf, nullptr, width, height);
+    logPrintln("The ir data : " + to_string(size) + " " + to_string(width) + " " + to_string(height),
+               airstrip::INFO, __FUNCTION__);
+
+    int calSize = width * height * 3 / 2;
+
+    auto *newBuf = new uchar[calSize];
+    memcpy(newBuf, buf, calSize);
+
+    // new thread do somthing
+    {
+        delete[] newBuf;
+    }
+
+    // faceRecognitionPreFun(buf, nullptr, width, height);
 }
 
-void processWithMbRga(void *buf, int width, int height) {
+void processWithMbRga(void *buf, int size, int width, int height) {
     if (g_onFaceFrameRga || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
         return;
     }
@@ -145,7 +158,21 @@ void processWithMbRga(void *buf, int width, int height) {
     }
     lastMillisecondCount = currentMillisecondCount;
 
-    faceRecognitionPreFun(nullptr, buf, width, height);
+    logPrintln("The rga data : " + to_string(size) + " " + to_string(width) + " " + to_string(height),
+               airstrip::INFO, __FUNCTION__);
+
+
+    int calSize = width * height * 3 / 2;
+
+    auto *newBuf = new uchar[calSize];
+    memcpy(newBuf, buf, calSize);
+
+    // new thread do somthing
+    {
+        delete[] newBuf;
+    }
+
+    // faceRecognitionPreFun(nullptr, buf, width, height);
 }
 
 

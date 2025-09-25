@@ -86,12 +86,13 @@ static void *process(void *arg) {
     do {
         buf = rkisp_get_frame(ctx, 0);
 
+        if (g_display_iv_cb)
+            g_display_iv_cb(buf->buf, buf->size, ctx->width, ctx->height);
+
         pthread_mutex_lock(&g_display_lock);
         if (g_display_cb)
             g_display_cb(buf->buf, buf->fd, RK_FORMAT_YCbCr_420_SP,
                          ctx->width, ctx->height, g_rotation);
-        if (g_display_iv_cb)
-            g_display_iv_cb(buf->buf, ctx->width, ctx->height);
         pthread_mutex_unlock(&g_display_lock);
 
         rkisp_put_frame(ctx, buf);
