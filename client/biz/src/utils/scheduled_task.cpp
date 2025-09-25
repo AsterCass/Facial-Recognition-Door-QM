@@ -442,7 +442,7 @@ void onceTaskBefore() {
     CameraFrame::getInstance()->start();
 
     // Init Face
-    // initFaceRecognition();
+    initFaceRecognition();
 
     // Login
     login();

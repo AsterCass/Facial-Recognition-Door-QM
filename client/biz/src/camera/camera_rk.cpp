@@ -49,8 +49,7 @@ void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height)
 
     if (irFrame) {
         auto *yuv_data = static_cast<uint8_t *>(irFrame);
-        const cv::Mat yuv(height * 3 / 2, width, CV_8UC1, yuv_data);
-        cv::rotate(yuv, s_irFrame, cv::ROTATE_90_COUNTERCLOCKWISE);
+        s_irFrame = cv::Mat(height * 3 / 2, width, CV_8UC1, yuv_data).clone();
     }
 
     logPrintln("Free ir and clone",
@@ -58,8 +57,7 @@ void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height)
 
     if (rgaFrame) {
         auto *yuv_data = static_cast<uint8_t *>(rgaFrame);
-        const cv::Mat yuv(height * 3 / 2, width, CV_8UC1, yuv_data);
-        cv::rotate(yuv, s_rgaFrame, cv::ROTATE_90_CLOCKWISE);
+        s_rgaFrame = cv::Mat(height * 3 / 2, width, CV_8UC1, yuv_data).clone();
     }
 
     logPrintln("Free rga and clone",
@@ -84,9 +82,7 @@ void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height)
         //     faceRecognition(frameRga, rect);
         // }
         //CameraFrame::getInstance()->setFaceRects(rect.x, rect.y, rect.width, rect.height);
-        // faceRecognition(s_rgaFrame, s_irFrame);
-        cv::imwrite("/data/frd/rga.jpg", s_rgaFrame);
-        cv::imwrite("/data/frd/ir.jpg", s_irFrame);
+        faceRecognition(s_rgaFrame, s_irFrame);
     } catch (const exception &e) {
         logPrintln("Face Recognition fail : " + string(e.what()),
                    airstrip::ERROR, __FUNCTION__);
@@ -124,19 +120,19 @@ void processWithMbIr(void *buf, int size, int width, int height) {
     lastMillisecondCount = currentMillisecondCount;
 
     logPrintln("The ir data : " + to_string(size) + " " + to_string(width) + " " + to_string(height),
-               airstrip::INFO, __FUNCTION__);
+               airstrip::DEBUG, __FUNCTION__);
 
-    int calSize = width * height * 3 / 2;
+    // int calSize = width * height * 3 / 2;
+    //
+    // auto *newBuf = new uchar[calSize];
+    // memcpy(newBuf, buf, calSize);
+    //
+    // // new thread do somthing
+    // {
+    //     delete[] newBuf;
+    // }
 
-    auto *newBuf = new uchar[calSize];
-    memcpy(newBuf, buf, calSize);
-
-    // new thread do somthing
-    {
-        delete[] newBuf;
-    }
-
-    // faceRecognitionPreFun(buf, nullptr, width, height);
+    faceRecognitionPreFun(buf, nullptr, width, height);
 }
 
 void processWithMbRga(void *buf, int size, int width, int height) {
@@ -159,20 +155,20 @@ void processWithMbRga(void *buf, int size, int width, int height) {
     lastMillisecondCount = currentMillisecondCount;
 
     logPrintln("The rga data : " + to_string(size) + " " + to_string(width) + " " + to_string(height),
-               airstrip::INFO, __FUNCTION__);
+               airstrip::DEBUG, __FUNCTION__);
 
 
-    int calSize = width * height * 3 / 2;
+    // int calSize = width * height * 3 / 2;
+    //
+    // auto *newBuf = new uchar[calSize];
+    // memcpy(newBuf, buf, calSize);
+    //
+    // // new thread do somthing
+    // {
+    //     delete[] newBuf;
+    // }
 
-    auto *newBuf = new uchar[calSize];
-    memcpy(newBuf, buf, calSize);
-
-    // new thread do somthing
-    {
-        delete[] newBuf;
-    }
-
-    // faceRecognitionPreFun(nullptr, buf, width, height);
+    faceRecognitionPreFun(nullptr, buf, width, height);
 }
 
 

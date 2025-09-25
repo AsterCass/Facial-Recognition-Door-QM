@@ -568,10 +568,10 @@ bool faceDetectInspire(const cv::Mat &frame, const cv::Mat &frameIr, cv::Rect &r
     HFImageStream stream = nullptr;
     HFImageData imageData = {};
     imageData.data = frameIr.data;
-    imageData.format = HF_STREAM_BGR;
+    imageData.format = HF_STREAM_YUV_NV12;
     imageData.height = frameIr.rows;
     imageData.width = frameIr.cols;
-    imageData.rotation = HF_CAMERA_ROTATION_0;
+    imageData.rotation = HF_CAMERA_ROTATION_270;
     HResult retI = HFCreateImageStream(&imageData, &stream);
     if (retI != HSUCCEED) {
         logPrintln("Face recognition build image fail " + retI,
@@ -685,7 +685,7 @@ void faceRecognition(const std::string &address, const std::string &addressIr) {
 }
 
 void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
-    if (!initializedFaceRec || frame.empty() || frameIr.empty()) {
+    if (!initializedFaceRec) {
         return;
     }
 
@@ -709,9 +709,8 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
     cv::Mat frameIrCopy = frameIr.clone();
 
     static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([frameCopy, frameIrCopy] {
-
             logPrintln("Start for recognition thread ... ",
-                airstrip::DEBUG, __FUNCTION__);
+                       airstrip::DEBUG, __FUNCTION__);
 
             // 确定是否执行人脸识别，还是只是检测
             bool onlyDetect = true;
@@ -763,10 +762,10 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
             HFImageStream stream = nullptr;
             HFImageData imageData = {};
             imageData.data = frameCopy.data;
-            imageData.format = HF_STREAM_BGR;
+            imageData.format = HF_STREAM_YUV_NV12;
             imageData.height = frameCopy.rows;
             imageData.width = frameCopy.cols;
-            imageData.rotation = HF_CAMERA_ROTATION_0;
+            imageData.rotation = HF_CAMERA_ROTATION_90;
             HResult ret = HFCreateImageStream(&imageData, &stream);
             if (ret != HSUCCEED) {
                 logPrintln("Face recognition build image fail " + ret,
