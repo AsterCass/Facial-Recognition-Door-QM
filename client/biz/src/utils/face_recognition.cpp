@@ -693,9 +693,6 @@ void faceRecognition() {
 
     logPrintln("Start for recognition ... ", airstrip::DEBUG, __FUNCTION__);
 
-    // const auto curTime = chrono::system_clock::to_time_t(chrono::system_clock::now());
-    // static time_t lastRecognitionTime = 0;
-
     if (g_curRgbData.size <= 0) {
         return;
     }
@@ -715,8 +712,7 @@ void faceRecognition() {
         return;
     }
 
-
-    logPrintln("RGA track to format ...", airstrip::INFO, __FUNCTION__);
+    logPrintln("RGA track to format ...", airstrip::DEBUG, __FUNCTION__);
 
     HFMultipleFaceData multipleFaceData = {};
     ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
@@ -727,29 +723,75 @@ void faceRecognition() {
         return;
     }
 
-    logPrintln("RGA track loaded ...", airstrip::INFO, __FUNCTION__);
+    logPrintln("RGA track loaded ...", airstrip::DEBUG, __FUNCTION__);
 
     if (multipleFaceData.detectedNum <= 0) {
         logPrintln("Face recognition lay detect num" + ret,
-                   airstrip::INFO, __FUNCTION__);
+                   airstrip::DEBUG, __FUNCTION__);
+        display_paint_box(0, 0, 0, 0);
         HFReleaseImageStream(stream);
         return;
     }
-
 
     logPrintln("Detect :" + to_string(multipleFaceData.rects->x) + " "
                + to_string(multipleFaceData.rects->y) + " "
                + to_string(multipleFaceData.rects->width) + " "
                + to_string(multipleFaceData.rects->height) + " ",
-               airstrip::INFO, __FUNCTION__);
+               airstrip::DEBUG, __FUNCTION__);
 
-    int trueX = g_curRgbData.width - multipleFaceData.rects->y - multipleFaceData.rects->height;
-    int trueY = multipleFaceData.rects->x;
-    int trueWidth = multipleFaceData.rects->height;
-    int trueHeight = multipleFaceData.rects->width;
+    const int rotationX = g_curRgbData.height - multipleFaceData.rects->y - multipleFaceData.rects->height;
+    const int rotationY = multipleFaceData.rects->x;
+    const int rotationWidth = multipleFaceData.rects->height;
+    const int rotationHeight = multipleFaceData.rects->width;
 
-    display_paint_box(trueX, trueY, trueWidth, trueHeight);
+    // 校正
+    const int maxWidth = g_curRgbData.height;
+    const int maxHeight = g_curRgbData.width;
+    const int faceX = std::max(0, rotationX);
+    const int faceY = std::max(0, rotationY);
+    int faceW = std::max(0, rotationWidth);
+    int faceH = std::max(0, rotationHeight);
+    faceW = faceX + faceW > maxWidth ? maxWidth - faceX : faceW;
+    faceH = faceY + faceH > maxHeight ? maxHeight - faceY : faceH;
 
+    display_paint_box(faceX, faceY, faceW, faceH);
+
+    HFReleaseImageStream(stream);
+
+    const auto curTime = duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    static time_t lastRecognitionTime = 0;
+    // 距离上次时间不足 g_faceRegCoreIvMillSec 或者还在核验中
+    if (curTime - lastRecognitionTime < g_faceRegCoreIvMillSec || g_isCheckFace) {
+        return;
+    }
+    g_isCheckFace = true;
+    lastRecognitionTime = curTime;
+
+    // 数据拷贝
+    g_curRgbDataMat = cv::Mat(g_curRgbData.height * 3 / 2,
+                              g_curRgbData.width, CV_8UC1, g_curRgbData.data).clone();
+    g_curIrDataMat = cv::Mat(g_curIrData.height * 3 / 2,
+                             g_curIrData.width, CV_8UC1, g_curIrData.data).clone();
+
+
+    static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([] {
+
+        // 数据矫正
+        cv::Mat frameCopy;
+        cv::cvtColor(g_curRgbDataMat, frameCopy, cv::COLOR_YUV2BGR_NV12);
+        cv::rotate(frameCopy, frameCopy, cv::ROTATE_90_CLOCKWISE);
+
+        cv::Mat frameIrCopy;
+        cv::cvtColor(g_curIrDataMat, frameIrCopy, cv::COLOR_YUV2BGR_NV12);
+        cv::rotate(frameIrCopy, frameIrCopy, cv::ROTATE_90_COUNTERCLOCKWISE);
+
+
+        cv::imwrite("/data/frd/1.jpg", frameCopy);
+        cv::imwrite("/data/frd/2.jpg", frameIrCopy);
+
+        g_isCheckFace = false;
+    });
 
     //
     // static int isCheckFaceReco = 0;

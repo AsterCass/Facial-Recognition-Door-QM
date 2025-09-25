@@ -7,3 +7,6 @@ CameraOutputFrameInfo g_curIrData = {};
 // 人脸识别
 CameraOutputFrameInfo g_curRgbDataAuth = {};
 CameraOutputFrameInfo g_curIrDataAuth = {};
+// 人脸识别
+cv::Mat g_curRgbDataMat;
+cv::Mat g_curIrDataMat;
