@@ -74,10 +74,3 @@ std::string g_netWirelessPasswd;
 int g_netFourEnable;
 int g_showFaceRect;
 int g_longDistanceDetect;
-
-// 人脸检测
-CameraOutputFrameInfo g_curRgbData = {};
-CameraOutputFrameInfo g_curIrData = {};
-// 人脸识别
-CameraOutputFrameInfo g_curRgbDataAuth = {};
-CameraOutputFrameInfo g_curIrDataAuth = {};

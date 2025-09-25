@@ -37,6 +37,9 @@
 
 #include <rga/RgaApi.h>
 #include "camera/common/display.h"
+
+#include <camera/common/draw_rect.h>
+
 #include "camera/common/rkdrm_display.h"
 #include "camera/common/camir_control.h"
 #include "camera/common/camrgb_control.h"
@@ -53,6 +56,11 @@ struct display {
     struct drm_buf buf[BUF_COUNT];
     int buf_cnt;
     int rga_fmt;
+
+    int x;
+    int y;
+    int w;
+    int h;
 };
 
 static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
@@ -132,6 +140,13 @@ void drm_commit(struct display *disp, int num, void *ptr, int fd, int fmt, int w
         return;
     }
 
+    pthread_mutex_lock(&g_lock);
+    YUV_Rect rect = {g_disp.x, g_disp.y, g_disp.w, g_disp.h};
+    YUV_Color color = {149, 43, 21};
+    pthread_mutex_unlock(&g_lock);
+    if (rect.x || rect.y || rect.width || rect.height)
+        yuv420_draw_rectangle(map, dst_w, dst_h, rect, color);
+
     ret = drmCommit(&disp->buf[num], disp->width, disp->height, 0, 0, &disp->dev, disp->plane_type);
     if (ret) {
         fprintf(stderr, "display commit error, ret = %d\n", ret);
@@ -157,4 +172,13 @@ void display_switch(enum display_video_type type) {
 void display_get_resolution(int *width, int *height) {
     *width = g_disp.width;
     *height = g_disp.height;
+}
+
+void display_paint_box(int x, int y, int w, int h) {
+    pthread_mutex_lock(&g_lock);
+    g_disp.x = x;
+    g_disp.y = y;
+    g_disp.w = w;
+    g_disp.h = h;
+    pthread_mutex_unlock(&g_lock);
 }

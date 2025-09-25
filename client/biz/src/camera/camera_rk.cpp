@@ -1,5 +1,6 @@
 #ifndef WIN32x
 
+#include <config/config_camera.h>
 #include <mutex>
 #include "camera/camera_rk.h"
 #include "airstrip_log.h"

@@ -107,6 +107,7 @@ set(PROJECT_SOURCES
         src/nfc/nfc_tool.cpp
         src/api/api.cpp
         src/config/config.cpp
+        src/config/config_camera.cpp
         src/db/card_db.cpp
         src/db/face_db.cpp
         src/db/open_record_db.cpp
@@ -117,6 +118,7 @@ set(PROJECT_SOURCES
         src/camera/common/rkdrm_display.c
         src/camera/camera_rk.cpp
         src/camera/camera_frame.cpp
+        src/camera/common/draw_rect.c
         src/ui/main_router.cpp
         src/ui/components/main_component_header.cpp
         src/ui/components/virtual_keyboard.cpp

@@ -190,23 +190,6 @@ extern int g_netFourEnable;
 extern int g_showFaceRect;
 extern int g_longDistanceDetect;
 
-
-struct CameraOutputFrameInfo {
-    // 这里值计算为 1280 * 720 * 3 /2
-    uchar data[MAX_OUTPUT_FRAME_SIZE];
-    int width;
-    int height;
-    int size;
-};
-
-// 人脸检测
-extern CameraOutputFrameInfo g_curRgbData;
-extern CameraOutputFrameInfo g_curIrData;
-// 人脸识别
-extern CameraOutputFrameInfo g_curRgbDataAuth;
-extern CameraOutputFrameInfo g_curIrDataAuth;
-
-
 // function
 
 inline bool currentIsNight() {

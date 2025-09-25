@@ -1,6 +1,8 @@
 /*
- * Copyright (C) 2020 Rockchip Electronics Co., Ltd.
- * author: Zhihua Wang, hogan.wang@rock-chips.com
+ * Rockchip App
+ *
+ * Copyright (C) 2017 Rockchip Electronics Co., Ltd.
+ * author: hogan.wang@rock-chips.com
  *
  * This software is available to you under a choice of one of two
  * licenses.  You may choose to be licensed under the terms of the GNU
@@ -30,32 +32,53 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-#ifndef __DISPLAY_H__
-#define __DISPLAY_H__
-#ifdef __cplusplus
-extern "C"
-{
-#endif
 
-enum display_video_type {
-    DISPLAY_VIDEO_RGB,
-    DISPLAY_VIDEO_IR,
-    DISPLAY_VIDEO_USB,
-};
+#ifndef __DRAW_RECT_H__
+#define __DRAW_RECT_H__
 
-int display_init(int width, int height);
+#include <time.h>
+#include <stdio.h>
 
-void display_exit(void);
+typedef enum {
+    COLOR_Y,
+    COLOR_R,
+    COLOR_G,
+    COLOR_B,
+    COLOR_BK,
+    COLOR_W,
+} COLOR_Type;
 
-void display_commit(void *ptr, int fd, int fmt, int w, int h, int rotation);
+typedef struct {
+    int x;
+    int y;
+    int width;
+    int height;
+} YUV_Rect;
 
-void display_switch(enum display_video_type type);
+typedef struct {
+    int x;
+    int y;
+} YUV_Point;
 
-void display_get_resolution(int *width, int *height);
+typedef struct {
+    int Y;
+    int U;
+    int V;
+} YUV_Color;
 
-void display_paint_box(int x, int y, int w, int h);
+YUV_Color set_yuv_color(COLOR_Type color_type);
 
-#ifdef __cplusplus
-}
-#endif
+void yuv420_draw_line(void* imgdata,
+    int width,
+    int height,
+    YUV_Point startPoint,
+    YUV_Point endPoint,
+    YUV_Color color);
+
+void yuv420_draw_rectangle(void* imgdata,
+    int width,
+    int height,
+    YUV_Rect rect_rio,
+    YUV_Color color);
+
 #endif

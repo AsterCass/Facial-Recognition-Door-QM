@@ -2,6 +2,8 @@
 
 #include <airstrip_thread_pool.h>
 #include <camera/camera_frame.h>
+#include <camera/common/display.h>
+#include <config/config_camera.h>
 #include <utils/general_utils.h>
 #include "db/face_db.h"
 #include "airstrip_log.h"
@@ -740,6 +742,9 @@ void faceRecognition() {
                + to_string(multipleFaceData.rects->width) + " "
                + to_string(multipleFaceData.rects->height) + " ",
                airstrip::INFO, __FUNCTION__);
+
+    display_paint_box(multipleFaceData.rects->x, multipleFaceData.rects->y,
+                      multipleFaceData.rects->width, multipleFaceData.rects->height);
 
 
     //
