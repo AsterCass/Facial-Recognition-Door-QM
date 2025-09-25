@@ -3,8 +3,6 @@
 
 #include <opencv2/core.hpp>
 
-#define MAX_OUTPUT_FRAME_SIZE 1382400
-
 struct FaceUserInfo {
     int64_t faceId;
     std::string faceAddress;
@@ -15,20 +13,6 @@ struct FaceUserInfo {
     int isEnable;
     std::string voiceTemplate;
 };
-
-struct CameraOutputFrameInfo {
-    // 这里值计算为 1280 * 720 * 3 /2
-    uchar data[MAX_OUTPUT_FRAME_SIZE];
-    int width;
-    int height;
-    int size;
-};
-// 人脸检测
-CameraOutputFrameInfo g_curRgbData = {};
-CameraOutputFrameInfo g_curIrData = {};
-// 人脸识别
-CameraOutputFrameInfo g_curRgbDataAuth = {};
-CameraOutputFrameInfo g_curIrDataAuth = {};
 
 void updateLight(int expose, int gain, int light);
 
