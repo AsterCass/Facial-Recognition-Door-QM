@@ -779,172 +779,174 @@ void faceRecognition() {
 
     static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([] {
         // 数据矫正
-        cv::Mat frameCopy;
-        cv::cvtColor(g_curRgbDataMat, frameCopy, cv::COLOR_YUV2BGR_NV12);
-        cv::rotate(frameCopy, frameCopy, cv::ROTATE_90_CLOCKWISE);
-
         cv::Mat frameIrCopy;
         cv::cvtColor(g_curIrDataMat, frameIrCopy, cv::COLOR_YUV2BGR_NV12);
         cv::rotate(frameIrCopy, frameIrCopy, cv::ROTATE_90_COUNTERCLOCKWISE);
 
+        cv::Mat frameCopy;
+        cv::cvtColor(g_curRgbDataMat, frameCopy, cv::COLOR_YUV2BGR_NV12);
+        cv::rotate(frameCopy, frameCopy, cv::ROTATE_90_CLOCKWISE);
 
-        HResult ret;
 
-        // 红外部分
-        cv::Rect rectIr; {
-            HFImageStream stream = nullptr;
-            HFImageData imageData = {};
-            imageData.data = frameIrCopy.data;
-            imageData.format = HF_STREAM_BGR;
-            imageData.height = frameIrCopy.rows;
-            imageData.width = frameIrCopy.cols;
-            imageData.rotation = HF_CAMERA_ROTATION_0;
-            ret = HFCreateImageStream(&imageData, &stream);
-            if (ret != HSUCCEED) {
-                logPrintln("Face recognition build image fail " + ret,
-                           airstrip::WARN, __FUNCTION__);
-                g_isCheckFace = false;
-                return;
-            }
+        g_isCheckFace = false;
 
-            HFMultipleFaceData multipleFaceData = {};
-            ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
-            if (ret != HSUCCEED) {
-                logPrintln("Face recognition track image fail " + ret,
-                           airstrip::WARN, __FUNCTION__);
-                HFReleaseImageStream(stream);
-                g_isCheckFace = false;
-                return;
-            }
-
-            if (multipleFaceData.detectedNum <= 0) {
-                logPrintln("Ir Face not found" + ret,
-                           airstrip::INFO, __FUNCTION__);
-                HFReleaseImageStream(stream);
-                g_isCheckFace = false;
-                return;
-            }
-
-            const cv::Rect rect(multipleFaceData.rects->x, multipleFaceData.rects->y,
-                                multipleFaceData.rects->width, multipleFaceData.rects->height);
-
-            // 校正
-            const int maxWidth = frameIrCopy.cols;
-            const int maxHeight = frameIrCopy.rows;
-            const int faceX = std::max(0, rect.x);
-            const int faceY = std::max(0, rect.y);
-            int faceW = std::max(0, rect.width);
-            int faceH = std::max(0, rect.height);
-            faceW = faceX + faceW > maxWidth ? maxWidth - faceX : faceW;
-            faceH = faceY + faceH > maxHeight ? maxHeight - faceY : faceH;
-            rectIr = cv::Rect(faceX, faceY, faceW, faceH);
-
-            HFReleaseImageStream(stream);
-        }
-
-        // 普通摄像头部分
-        {
-            HFImageStream stream = nullptr;
-            HFImageData imageData = {};
-            imageData.data = frameCopy.data;
-            imageData.format = HF_STREAM_BGR;
-            imageData.height = frameCopy.rows;
-            imageData.width = frameCopy.cols;
-            imageData.rotation = HF_CAMERA_ROTATION_0;
-            ret = HFCreateImageStream(&imageData, &stream);
-            if (ret != HSUCCEED) {
-                logPrintln("Face recognition build image fail " + ret,
-                           airstrip::WARN, __FUNCTION__);
-                g_isCheckFace = false;
-                return;
-            }
-
-            HFMultipleFaceData multipleFaceData = {};
-            ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
-            if (ret != HSUCCEED) {
-                logPrintln("Face recognition track image fail " + ret,
-                           airstrip::WARN, __FUNCTION__);
-                HFReleaseImageStream(stream);
-                g_isCheckFace = false;
-                return;
-            }
-
-            if (multipleFaceData.detectedNum <= 0) {
-                logPrintln("RGB Face not found" + ret,
-                           airstrip::INFO, __FUNCTION__);
-                HFReleaseImageStream(stream);
-                g_isCheckFace = false;
-                return;
-            }
-
-            const cv::Rect rect(multipleFaceData.rects->x, multipleFaceData.rects->y,
-                                multipleFaceData.rects->width, multipleFaceData.rects->height);
-
-            // 校正
-            const int maxWidth = frameCopy.cols;
-            const int maxHeight = frameCopy.rows;
-            const int faceX = std::max(0, rect.x);
-            const int faceY = std::max(0, rect.y);
-            int faceW = std::max(0, rect.width);
-            int faceH = std::max(0, rect.height);
-            faceW = faceX + faceW > maxWidth ? maxWidth - faceX : faceW;
-            faceH = faceY + faceH > maxHeight ? maxHeight - faceY : faceH;
-            cv::Rect rectRgb = cv::Rect(faceX, faceY, faceW, faceH);
-
-            // 重合检测
-            const cv::Point rectRgbCenter(rectRgb.x + rectRgb.width / 2, rectRgb.y + rectRgb.height / 2);
-            const cv::Point rectIrCenter(rectIr.x + rectIr.width / 2, rectIr.y + rectIr.height / 2);
-            if (!rectRgb.contains(rectIrCenter) || !rectIr.contains(rectRgbCenter)) {
-                logPrintln("Face fake face !!!!!", airstrip::WARN, __FUNCTION__);
-                HFReleaseImageStream(stream);
-                g_isCheckFace = false;
-                return;
-            }
-
-            logPrintln("RGA face detected ...", airstrip::DEBUG, __FUNCTION__);
-
-            HFFaceFeature feature = {};
-            ret = HFFaceFeatureExtract(faceRecognitionSession, stream, multipleFaceData.tokens[0], &feature);
-            if (ret != HSUCCEED) {
-                logPrintln("Face recognition feature extract fail " + ret,
-                           airstrip::WARN, __FUNCTION__);
-                HFReleaseImageStream(stream);
-                g_isCheckFace = false;
-                return;
-            }
-
-            HFloat confidence;
-            HFFaceFeatureIdentity searchResult = {};
-            ret = HFFeatureHubFaceSearch(feature, &confidence, &searchResult);
-            if (ret != HSUCCEED) {
-                logPrintln("Face recognition feature search fail " + ret,
-                           airstrip::WARN, __FUNCTION__);
-                HFReleaseImageStream(stream);
-                g_isCheckFace = false;
-                return;
-            }
-
-            if (searchResult.id <= 0 || faceUserInfoMap.find(searchResult.id) == faceUserInfoMap.end()) {
-                ScheduledTask::sendFaceRegRes({}, frameCopy, 0.0);
-                HFReleaseImageStream(stream);
-                g_isCheckFace = false;
-                return;
-            }
-
-            const auto userData = faceUserInfoMap[searchResult.id];
-            logPrintln("Face recognition ret id = " + to_string(searchResult.id)
-                       + " userId = " + userData.userId + " " + to_string(confidence),
-                       airstrip::INFO, __FUNCTION__);
-            if ((!currentIsNight() && confidence < g_faceThreshold) || (
-                    currentIsNight() && confidence < g_faceThresholdNight)) {
-                ScheduledTask::sendFaceRegRes({}, frameCopy, 0.0);
-            } else {
-                ScheduledTask::sendFaceRegRes(userData, frameCopy, confidence);
-            }
-
-            HFReleaseImageStream(stream);
-            g_isCheckFace = false;
-        }
+        // HResult ret;
+        //
+        // // 红外部分
+        // cv::Rect rectIr; {
+        //     HFImageStream stream = nullptr;
+        //     HFImageData imageData = {};
+        //     imageData.data = frameIrCopy.data;
+        //     imageData.format = HF_STREAM_BGR;
+        //     imageData.height = frameIrCopy.rows;
+        //     imageData.width = frameIrCopy.cols;
+        //     imageData.rotation = HF_CAMERA_ROTATION_0;
+        //     ret = HFCreateImageStream(&imageData, &stream);
+        //     if (ret != HSUCCEED) {
+        //         logPrintln("Face recognition build image fail " + ret,
+        //                    airstrip::WARN, __FUNCTION__);
+        //         g_isCheckFace = false;
+        //         return;
+        //     }
+        //
+        //     HFMultipleFaceData multipleFaceData = {};
+        //     ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
+        //     if (ret != HSUCCEED) {
+        //         logPrintln("Face recognition track image fail " + ret,
+        //                    airstrip::WARN, __FUNCTION__);
+        //         HFReleaseImageStream(stream);
+        //         g_isCheckFace = false;
+        //         return;
+        //     }
+        //
+        //     if (multipleFaceData.detectedNum <= 0) {
+        //         logPrintln("Ir Face not found" + ret,
+        //                    airstrip::INFO, __FUNCTION__);
+        //         HFReleaseImageStream(stream);
+        //         g_isCheckFace = false;
+        //         return;
+        //     }
+        //
+        //     const cv::Rect rect(multipleFaceData.rects->x, multipleFaceData.rects->y,
+        //                         multipleFaceData.rects->width, multipleFaceData.rects->height);
+        //
+        //     // 校正
+        //     const int maxWidth = frameIrCopy.cols;
+        //     const int maxHeight = frameIrCopy.rows;
+        //     const int faceX = std::max(0, rect.x);
+        //     const int faceY = std::max(0, rect.y);
+        //     int faceW = std::max(0, rect.width);
+        //     int faceH = std::max(0, rect.height);
+        //     faceW = faceX + faceW > maxWidth ? maxWidth - faceX : faceW;
+        //     faceH = faceY + faceH > maxHeight ? maxHeight - faceY : faceH;
+        //     rectIr = cv::Rect(faceX, faceY, faceW, faceH);
+        //
+        //     HFReleaseImageStream(stream);
+        // }
+        //
+        // // 普通摄像头部分
+        // {
+        //     HFImageStream stream = nullptr;
+        //     HFImageData imageData = {};
+        //     imageData.data = frameCopy.data;
+        //     imageData.format = HF_STREAM_BGR;
+        //     imageData.height = frameCopy.rows;
+        //     imageData.width = frameCopy.cols;
+        //     imageData.rotation = HF_CAMERA_ROTATION_0;
+        //     ret = HFCreateImageStream(&imageData, &stream);
+        //     if (ret != HSUCCEED) {
+        //         logPrintln("Face recognition build image fail " + ret,
+        //                    airstrip::WARN, __FUNCTION__);
+        //         g_isCheckFace = false;
+        //         return;
+        //     }
+        //
+        //     HFMultipleFaceData multipleFaceData = {};
+        //     ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
+        //     if (ret != HSUCCEED) {
+        //         logPrintln("Face recognition track image fail " + ret,
+        //                    airstrip::WARN, __FUNCTION__);
+        //         HFReleaseImageStream(stream);
+        //         g_isCheckFace = false;
+        //         return;
+        //     }
+        //
+        //     if (multipleFaceData.detectedNum <= 0) {
+        //         logPrintln("RGB Face not found" + ret,
+        //                    airstrip::INFO, __FUNCTION__);
+        //         HFReleaseImageStream(stream);
+        //         g_isCheckFace = false;
+        //         return;
+        //     }
+        //
+        //     const cv::Rect rect(multipleFaceData.rects->x, multipleFaceData.rects->y,
+        //                         multipleFaceData.rects->width, multipleFaceData.rects->height);
+        //
+        //     // 校正
+        //     const int maxWidth = frameCopy.cols;
+        //     const int maxHeight = frameCopy.rows;
+        //     const int faceX = std::max(0, rect.x);
+        //     const int faceY = std::max(0, rect.y);
+        //     int faceW = std::max(0, rect.width);
+        //     int faceH = std::max(0, rect.height);
+        //     faceW = faceX + faceW > maxWidth ? maxWidth - faceX : faceW;
+        //     faceH = faceY + faceH > maxHeight ? maxHeight - faceY : faceH;
+        //     cv::Rect rectRgb = cv::Rect(faceX, faceY, faceW, faceH);
+        //
+        //     // 重合检测
+        //     const cv::Point rectRgbCenter(rectRgb.x + rectRgb.width / 2, rectRgb.y + rectRgb.height / 2);
+        //     const cv::Point rectIrCenter(rectIr.x + rectIr.width / 2, rectIr.y + rectIr.height / 2);
+        //     if (!rectRgb.contains(rectIrCenter) || !rectIr.contains(rectRgbCenter)) {
+        //         logPrintln("Face fake face !!!!!", airstrip::WARN, __FUNCTION__);
+        //         HFReleaseImageStream(stream);
+        //         g_isCheckFace = false;
+        //         return;
+        //     }
+        //
+        //     logPrintln("RGA face detected ...", airstrip::DEBUG, __FUNCTION__);
+        //
+        //     HFFaceFeature feature = {};
+        //     ret = HFFaceFeatureExtract(faceRecognitionSession, stream, multipleFaceData.tokens[0], &feature);
+        //     if (ret != HSUCCEED) {
+        //         logPrintln("Face recognition feature extract fail " + ret,
+        //                    airstrip::WARN, __FUNCTION__);
+        //         HFReleaseImageStream(stream);
+        //         g_isCheckFace = false;
+        //         return;
+        //     }
+        //
+        //     HFloat confidence;
+        //     HFFaceFeatureIdentity searchResult = {};
+        //     ret = HFFeatureHubFaceSearch(feature, &confidence, &searchResult);
+        //     if (ret != HSUCCEED) {
+        //         logPrintln("Face recognition feature search fail " + ret,
+        //                    airstrip::WARN, __FUNCTION__);
+        //         HFReleaseImageStream(stream);
+        //         g_isCheckFace = false;
+        //         return;
+        //     }
+        //
+        //     if (searchResult.id <= 0 || faceUserInfoMap.find(searchResult.id) == faceUserInfoMap.end()) {
+        //         ScheduledTask::sendFaceRegRes({}, frameCopy, 0.0);
+        //         HFReleaseImageStream(stream);
+        //         g_isCheckFace = false;
+        //         return;
+        //     }
+        //
+        //     const auto userData = faceUserInfoMap[searchResult.id];
+        //     logPrintln("Face recognition ret id = " + to_string(searchResult.id)
+        //                + " userId = " + userData.userId + " " + to_string(confidence),
+        //                airstrip::INFO, __FUNCTION__);
+        //     if ((!currentIsNight() && confidence < g_faceThreshold) || (
+        //             currentIsNight() && confidence < g_faceThresholdNight)) {
+        //         ScheduledTask::sendFaceRegRes({}, frameCopy, 0.0);
+        //     } else {
+        //         ScheduledTask::sendFaceRegRes(userData, frameCopy, confidence);
+        //     }
+        //
+        //     HFReleaseImageStream(stream);
+        //     g_isCheckFace = false;
+        // }
     });
 
     //
