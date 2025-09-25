@@ -743,8 +743,12 @@ void faceRecognition() {
                + to_string(multipleFaceData.rects->height) + " ",
                airstrip::INFO, __FUNCTION__);
 
-    display_paint_box(multipleFaceData.rects->x, multipleFaceData.rects->y,
-                      multipleFaceData.rects->width, multipleFaceData.rects->height);
+    int trueX = multipleFaceData.rects->y - multipleFaceData.rects->height;
+    int trueY = multipleFaceData.rects->x;
+    int trueWidth = multipleFaceData.rects->height;
+    int trueHeight = multipleFaceData.rects->width;
+
+    display_paint_box(trueX, trueY, trueWidth, trueHeight);
 
 
     //
