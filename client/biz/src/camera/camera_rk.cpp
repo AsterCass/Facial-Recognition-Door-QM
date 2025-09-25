@@ -99,7 +99,7 @@ void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height)
     g_onFaceFrameIr = false;
 }
 
-void processWithMbIr(void *buf, int size, int width, int height, int64_t cnt) {
+void processWithMbIr(void *buf, int size, int width, int height, uint64_t cnt) {
     if (g_onFaceFrameIr || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
         return;
     }
@@ -129,7 +129,7 @@ void processWithMbIr(void *buf, int size, int width, int height, int64_t cnt) {
     faceRecognitionPreFun(buf, nullptr, width, height);
 }
 
-void processWithMbRga(void *buf, int size, int width, int height, int64_t cnt) {
+void processWithMbRga(void *buf, int size, int width, int height, uint64_t cnt) {
     if (g_onFaceFrameRga || g_closeFaceRecognition || g_closeFaceRecognitionRegister || !g_allowFaceOpen) {
         return;
     }

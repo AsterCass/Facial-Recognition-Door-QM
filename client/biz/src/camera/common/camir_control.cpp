@@ -50,7 +50,7 @@ void set_ir_param(int width, int height, display_callback cb) {
 }
 
 static void *process(void *arg) {
-    static int64_t cnt = 0;
+    static uint64_t cnt = 0;
     do {
         ++cnt;
         buf = rkisp_get_frame(ctx, 0);
