@@ -788,62 +788,62 @@ void faceRecognition() {
         cv::rotate(frameCopy, frameCopy, cv::ROTATE_90_CLOCKWISE);
 
 
+        HResult ret;
+
+        // 红外部分
+        cv::Rect rectIr; {
+            HFImageStream stream = nullptr;
+            HFImageData imageData = {};
+            imageData.data = frameIrCopy.data;
+            imageData.format = HF_STREAM_BGR;
+            imageData.height = frameIrCopy.rows;
+            imageData.width = frameIrCopy.cols;
+            imageData.rotation = HF_CAMERA_ROTATION_0;
+            ret = HFCreateImageStream(&imageData, &stream);
+            if (ret != HSUCCEED) {
+                logPrintln("Face recognition build image fail " + ret,
+                           airstrip::WARN, __FUNCTION__);
+                g_isCheckFace = false;
+                return;
+            }
+
+            HFMultipleFaceData multipleFaceData = {};
+            ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
+            if (ret != HSUCCEED) {
+                logPrintln("Face recognition track image fail " + ret,
+                           airstrip::WARN, __FUNCTION__);
+                HFReleaseImageStream(stream);
+                g_isCheckFace = false;
+                return;
+            }
+
+            if (multipleFaceData.detectedNum <= 0) {
+                logPrintln("Ir Face not found" + ret,
+                           airstrip::INFO, __FUNCTION__);
+                HFReleaseImageStream(stream);
+                g_isCheckFace = false;
+                return;
+            }
+
+            const cv::Rect rect(multipleFaceData.rects->x, multipleFaceData.rects->y,
+                                multipleFaceData.rects->width, multipleFaceData.rects->height);
+
+            // 校正
+            const int maxWidth = frameIrCopy.cols;
+            const int maxHeight = frameIrCopy.rows;
+            const int faceX = std::max(0, rect.x);
+            const int faceY = std::max(0, rect.y);
+            int faceW = std::max(0, rect.width);
+            int faceH = std::max(0, rect.height);
+            faceW = faceX + faceW > maxWidth ? maxWidth - faceX : faceW;
+            faceH = faceY + faceH > maxHeight ? maxHeight - faceY : faceH;
+            rectIr = cv::Rect(faceX, faceY, faceW, faceH);
+
+            HFReleaseImageStream(stream);
+        }
+
         g_isCheckFace = false;
 
-        // HResult ret;
-        //
-        // // 红外部分
-        // cv::Rect rectIr; {
-        //     HFImageStream stream = nullptr;
-        //     HFImageData imageData = {};
-        //     imageData.data = frameIrCopy.data;
-        //     imageData.format = HF_STREAM_BGR;
-        //     imageData.height = frameIrCopy.rows;
-        //     imageData.width = frameIrCopy.cols;
-        //     imageData.rotation = HF_CAMERA_ROTATION_0;
-        //     ret = HFCreateImageStream(&imageData, &stream);
-        //     if (ret != HSUCCEED) {
-        //         logPrintln("Face recognition build image fail " + ret,
-        //                    airstrip::WARN, __FUNCTION__);
-        //         g_isCheckFace = false;
-        //         return;
-        //     }
-        //
-        //     HFMultipleFaceData multipleFaceData = {};
-        //     ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
-        //     if (ret != HSUCCEED) {
-        //         logPrintln("Face recognition track image fail " + ret,
-        //                    airstrip::WARN, __FUNCTION__);
-        //         HFReleaseImageStream(stream);
-        //         g_isCheckFace = false;
-        //         return;
-        //     }
-        //
-        //     if (multipleFaceData.detectedNum <= 0) {
-        //         logPrintln("Ir Face not found" + ret,
-        //                    airstrip::INFO, __FUNCTION__);
-        //         HFReleaseImageStream(stream);
-        //         g_isCheckFace = false;
-        //         return;
-        //     }
-        //
-        //     const cv::Rect rect(multipleFaceData.rects->x, multipleFaceData.rects->y,
-        //                         multipleFaceData.rects->width, multipleFaceData.rects->height);
-        //
-        //     // 校正
-        //     const int maxWidth = frameIrCopy.cols;
-        //     const int maxHeight = frameIrCopy.rows;
-        //     const int faceX = std::max(0, rect.x);
-        //     const int faceY = std::max(0, rect.y);
-        //     int faceW = std::max(0, rect.width);
-        //     int faceH = std::max(0, rect.height);
-        //     faceW = faceX + faceW > maxWidth ? maxWidth - faceX : faceW;
-        //     faceH = faceY + faceH > maxHeight ? maxHeight - faceY : faceH;
-        //     rectIr = cv::Rect(faceX, faceY, faceW, faceH);
-        //
-        //     HFReleaseImageStream(stream);
-        // }
-        //
         // // 普通摄像头部分
         // {
         //     HFImageStream stream = nullptr;
