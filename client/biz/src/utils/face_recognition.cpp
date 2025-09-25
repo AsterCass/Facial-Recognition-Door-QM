@@ -734,16 +734,17 @@ void faceRecognition() {
             return;
         }
 
-        const int rotationX = g_curRgbData.height - multipleFaceData.rects->y - multipleFaceData.rects->height;
-        const int rotationY = multipleFaceData.rects->x;
-        const int rotationWidth = multipleFaceData.rects->height;
-        const int rotationHeight = multipleFaceData.rects->width;
+        const int rotationX = (g_curRgbData.height - multipleFaceData.rects->y - multipleFaceData.rects->height) *
+                              g_appWidth / CAMERA_HEIGHT;
+        const int rotationY = (multipleFaceData.rects->x) * g_appHeight / CAMERA_WIDTH;
+        const int rotationWidth = multipleFaceData.rects->height * g_appWidth / CAMERA_HEIGHT;
+        const int rotationHeight = multipleFaceData.rects->width * g_appHeight / CAMERA_WIDTH;
 
         // 校正
-        const int maxWidth = g_curRgbData.height;
-        const int maxHeight = g_curRgbData.width;
-        const int faceX = std::max(0, rotationX);
-        const int faceY = std::max(0, rotationY);
+        const int maxWidth = g_appWidth;
+        const int maxHeight = g_appHeight;
+        const int faceX = std::min(std::max(0, rotationX), maxWidth);
+        const int faceY = std::min(std::max(0, rotationY), maxHeight);
         int faceW = std::max(0, rotationWidth);
         int faceH = std::max(0, rotationHeight);
         faceW = faceX + faceW > maxWidth ? maxWidth - faceX : faceW;
@@ -755,7 +756,7 @@ void faceRecognition() {
                    + to_string(faceH) + " " + to_string(multipleFaceData.trackIds[0]),
                    airstrip::INFO, __FUNCTION__);
 
-        display_paint_box(faceX, faceY, maxWidth - faceX - faceW, maxHeight - faceY - faceH);
+        display_paint_box(faceX, faceY, faceX + faceW, faceY + faceH);
 
         HFReleaseImageStream(stream);
     }
@@ -838,6 +839,12 @@ void faceRecognition() {
             faceW = faceX + faceW > maxWidth ? maxWidth - faceX : faceW;
             faceH = faceY + faceH > maxHeight ? maxHeight - faceY : faceH;
             rectIr = cv::Rect(faceX, faceY, faceW, faceH);
+
+            logPrintln("Ir Detect :" + to_string(faceX) + " "
+                       + to_string(faceY) + " "
+                       + to_string(faceW) + " "
+                       + to_string(faceH) + " " + to_string(multipleFaceData.trackIds[0]),
+                       airstrip::INFO, __FUNCTION__);
 
             HFReleaseImageStream(stream);
         }

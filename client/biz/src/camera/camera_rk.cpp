@@ -21,15 +21,8 @@ using namespace std;
 mutex mtx;
 bool started = false;
 
-int g_appWidth;
-int g_appHeight;
-
 int g_onFaceFrameIr = false;
 int g_onFaceFrameRga = false;
-
-#define CAMERA_WIDTH 1280
-#define CAMERA_HEIGHT 720
-#define SAVE_FRAMES 30
 
 
 void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height) {

@@ -10,3 +10,6 @@ CameraOutputFrameInfo g_curIrDataAuth = {};
 // 人脸识别
 cv::Mat g_curRgbDataMat;
 cv::Mat g_curIrDataMat;
+
+int g_appWidth;
+int g_appHeight;
