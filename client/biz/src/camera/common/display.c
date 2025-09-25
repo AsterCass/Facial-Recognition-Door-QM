@@ -174,11 +174,11 @@ void display_get_resolution(int *width, int *height) {
     *height = g_disp.height;
 }
 
-void display_paint_box(int x, int y, int w, int h) {
+void display_paint_box(int left, int top, int right, int bottom) {
     pthread_mutex_lock(&g_lock);
-    g_disp.x = x;
-    g_disp.y = y;
-    g_disp.w = w;
-    g_disp.h = h;
+    g_disp.x = left;
+    g_disp.y = top;
+    g_disp.w = right - left;
+    g_disp.h = bottom - top;
     pthread_mutex_unlock(&g_lock);
 }

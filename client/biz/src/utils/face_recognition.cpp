@@ -755,7 +755,7 @@ void faceRecognition() {
                    + to_string(faceH) + " " + to_string(multipleFaceData.trackIds[0]),
                    airstrip::INFO, __FUNCTION__);
 
-        display_paint_box(faceX, faceY, faceW, faceH);
+        display_paint_box(faceX, faceY, maxWidth - faceX - faceW, maxHeight - faceY - faceH);
 
         HFReleaseImageStream(stream);
     }

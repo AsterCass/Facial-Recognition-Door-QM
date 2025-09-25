@@ -53,7 +53,7 @@ void display_switch(enum display_video_type type);
 
 void display_get_resolution(int *width, int *height);
 
-void display_paint_box(int x, int y, int w, int h);
+void display_paint_box(int left, int top, int right, int bottom);
 
 #ifdef __cplusplus
 }
