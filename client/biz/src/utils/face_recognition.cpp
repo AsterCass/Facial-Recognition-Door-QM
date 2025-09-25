@@ -752,7 +752,7 @@ void faceRecognition() {
         logPrintln("Detect :" + to_string(faceX) + " "
                    + to_string(faceY) + " "
                    + to_string(faceW) + " "
-                   + to_string(faceH) + " ",
+                   + to_string(faceH) + " " + to_string(multipleFaceData.trackIds[0]),
                    airstrip::INFO, __FUNCTION__);
 
         display_paint_box(faceX, faceY, faceW, faceH);
@@ -818,6 +818,8 @@ void faceRecognition() {
             }
 
             if (multipleFaceData.detectedNum <= 0) {
+                logPrintln("Ir Face not found" + ret,
+                           airstrip::INFO, __FUNCTION__);
                 HFReleaseImageStream(stream);
                 g_isCheckFace = false;
                 return;
@@ -868,6 +870,8 @@ void faceRecognition() {
             }
 
             if (multipleFaceData.detectedNum <= 0) {
+                logPrintln("RGB Face not found" + ret,
+                           airstrip::INFO, __FUNCTION__);
                 HFReleaseImageStream(stream);
                 g_isCheckFace = false;
                 return;
