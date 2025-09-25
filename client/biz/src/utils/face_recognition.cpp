@@ -571,7 +571,7 @@ bool faceDetectInspire(const cv::Mat &frame, const cv::Mat &frameIr, cv::Rect &r
     imageData.format = HF_STREAM_BGR;
     imageData.height = frameIr.rows;
     imageData.width = frameIr.cols;
-    imageData.rotation = HF_CAMERA_ROTATION_90;
+    imageData.rotation = HF_CAMERA_ROTATION_0;
     HResult retI = HFCreateImageStream(&imageData, &stream);
     if (retI != HSUCCEED) {
         logPrintln("Face recognition build image fail " + retI,
@@ -730,8 +730,11 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
             // 数据矫正
             cv::Mat frameCopy;
             cv::cvtColor(frameCopyOri, frameCopy, cv::COLOR_YUV2BGR_NV12);
+            cv::rotate(frameCopy, frameCopy, cv::ROTATE_90_CLOCKWISE);
             cv::Mat frameIrCopy;
             cv::cvtColor(frameIrCopyOri, frameIrCopy, cv::COLOR_YUV2BGR_NV12);
+            cv::rotate(frameIrCopy, frameIrCopy, cv::ROTATE_90_COUNTERCLOCKWISE);
+
 
             // 红外人脸检测
             cv::Rect rectIr;
@@ -771,7 +774,7 @@ void faceRecognition(const cv::Mat &frame, const cv::Mat &frameIr) {
             imageData.format = HF_STREAM_BGR;
             imageData.height = frameCopy.rows;
             imageData.width = frameCopy.cols;
-            imageData.rotation = HF_CAMERA_ROTATION_270;
+            imageData.rotation = HF_CAMERA_ROTATION_0;
             HResult ret = HFCreateImageStream(&imageData, &stream);
             if (ret != HSUCCEED) {
                 logPrintln("Face recognition build image fail " + ret,
