@@ -732,7 +732,8 @@ void faceRecognition() {
 
         static uint32_t consecutiveFailCnt = 0;
         if (multipleFaceData.detectedNum <= 0) {
-            logPrintln("Face recognition lay detect num" + ret,
+            logPrintln("Face recognition lay detect num " + to_string(ret)
+                       + " " + to_string(consecutiveFailCnt),
                        airstrip::INFO, __FUNCTION__);
             // < 10 是为了略微减少cpu压力，因为他这里会加锁  >=1 是为了防止由于人像抖动造成的框消失
             if (consecutiveFailCnt >= 1 && consecutiveFailCnt < 10) {
