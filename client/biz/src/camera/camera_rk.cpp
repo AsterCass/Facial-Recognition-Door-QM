@@ -173,7 +173,8 @@ void startCameraRk() {
     // 这里回调会在 display_switch 被输出屏幕的方法占用，所以不在这里设置
     set_rgb_param(CAMERA_WIDTH,CAMERA_HEIGHT, nullptr, true);
     set_ir_param(CAMERA_WIDTH,CAMERA_HEIGHT, nullptr);
-    set_rgb_rotation(90);
+    set_rgb_rotation(0);
+    set_ir_rotation(0);
 
     set_ir_display_iv(processWithMbIr);
     set_rgb_display_iv(processWithMbRga);

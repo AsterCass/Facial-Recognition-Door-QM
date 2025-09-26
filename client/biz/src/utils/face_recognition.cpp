@@ -32,6 +32,7 @@ std::map<int64_t, FaceUserInfo> faceUserInfoMap = {};
 
 HFSession faceRecognitionSession = nullptr;
 
+// 目前模型加载时间过长，之后可以利用 rktoolkit 将模型变成mini模型再改驱动，适配，目前使用full模型，加载两个Session会导致启动时间过长
 HFSession faceRecognitionSessionDetect = nullptr;
 
 void updateLight(int expose, int gain, int light) {
@@ -153,61 +154,40 @@ void initFaceRecognition() {
         exit(-1);
     }
 
-    logPrintln("Load model finish", airstrip::INFO, __FUNCTION__); {
-        constexpr HOption option = HF_ENABLE_FACE_RECOGNITION;
-        constexpr HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
-        constexpr HInt32 maxDetectNum = 1;
-        constexpr HInt32 detectPixelLevel = 160;
-        ret = HFCreateInspireFaceSessionOptional(
-            option, detMode, maxDetectNum, detectPixelLevel, -1, &faceRecognitionSession);
-        if (ret != HSUCCEED) {
-            logPrintln("Create face context error: " + ret, airstrip::CRITICAL, __FUNCTION__);
-            exit(-1);
-        }
+    logPrintln("Load model finish", airstrip::INFO, __FUNCTION__);
 
-        logPrintln("Load optional finish", airstrip::INFO, __FUNCTION__);
-
-        HFSessionSetTrackPreviewSize(faceRecognitionSession, detectPixelLevel);
-        HFSessionSetFilterMinimumFacePixelSize(faceRecognitionSession, 30);
-
-        logPrintln("Load more optional finish", airstrip::INFO, __FUNCTION__);
-
-        HFFeatureHubConfiguration configuration;
-        configuration.primaryKeyMode = HF_PK_MANUAL_INPUT;
-        configuration.enablePersistence = 0;
-        configuration.persistenceDbPath = nullptr;
-        if (g_fullFaceCompare) {
-            configuration.searchMode = HF_SEARCH_MODE_EXHAUSTIVE;
-        } else {
-            configuration.searchMode = HF_SEARCH_MODE_EAGER;
-        }
-        configuration.searchThreshold = static_cast<float>(std::min(g_faceThreshold, g_faceThresholdNight));
-        ret = HFFeatureHubDataEnable(configuration);
-        if (ret != HSUCCEED) {
-            logPrintln("Create face db error: " + ret, airstrip::CRITICAL, __FUNCTION__);
-            exit(-1);
-        }
+    constexpr HOption option = HF_ENABLE_FACE_RECOGNITION;
+    constexpr HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
+    constexpr HInt32 maxDetectNum = 1;
+    constexpr HInt32 detectPixelLevel = 160;
+    ret = HFCreateInspireFaceSessionOptional(
+        option, detMode, maxDetectNum, detectPixelLevel, -1, &faceRecognitionSession);
+    if (ret != HSUCCEED) {
+        logPrintln("Create face context error: " + ret, airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
     }
 
-    // only for detect
-    {
-        constexpr HOption option = HF_ENABLE_FACE_RECOGNITION;
-        constexpr HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
-        constexpr HInt32 maxDetectNum = 1;
-        constexpr HInt32 detectPixelLevel = 160;
-        ret = HFCreateInspireFaceSessionOptional(
-            option, detMode, maxDetectNum, detectPixelLevel, -1, &faceRecognitionSessionDetect);
-        if (ret != HSUCCEED) {
-            logPrintln("Create face context error: " + ret, airstrip::CRITICAL, __FUNCTION__);
-            exit(-1);
-        }
+    logPrintln("Load optional finish", airstrip::INFO, __FUNCTION__);
 
-        logPrintln("Load optional finish", airstrip::INFO, __FUNCTION__);
+    HFSessionSetTrackPreviewSize(faceRecognitionSession, detectPixelLevel);
+    HFSessionSetFilterMinimumFacePixelSize(faceRecognitionSession, 30);
 
-        HFSessionSetTrackPreviewSize(faceRecognitionSessionDetect, detectPixelLevel);
-        HFSessionSetFilterMinimumFacePixelSize(faceRecognitionSessionDetect, 30);
+    logPrintln("Load more optional finish", airstrip::INFO, __FUNCTION__);
 
-        logPrintln("Load more optional finish", airstrip::INFO, __FUNCTION__);
+    HFFeatureHubConfiguration configuration;
+    configuration.primaryKeyMode = HF_PK_MANUAL_INPUT;
+    configuration.enablePersistence = 0;
+    configuration.persistenceDbPath = nullptr;
+    if (g_fullFaceCompare) {
+        configuration.searchMode = HF_SEARCH_MODE_EXHAUSTIVE;
+    } else {
+        configuration.searchMode = HF_SEARCH_MODE_EAGER;
+    }
+    configuration.searchThreshold = static_cast<float>(std::min(g_faceThreshold, g_faceThresholdNight));
+    ret = HFFeatureHubDataEnable(configuration);
+    if (ret != HSUCCEED) {
+        logPrintln("Create face db error: " + ret, airstrip::CRITICAL, __FUNCTION__);
+        exit(-1);
     }
 
     logPrintln("Face model init finish", airstrip::INFO, __FUNCTION__);
@@ -745,7 +725,7 @@ void faceRecognition() {
         logPrintln("RGA track to format ...", airstrip::DEBUG, __FUNCTION__);
 
         HFMultipleFaceData multipleFaceData = {};
-        ret = HFExecuteFaceTrack(faceRecognitionSessionDetect, stream, &multipleFaceData);
+        ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
         if (ret != HSUCCEED) {
             logPrintln("Face recognition track image fail " + ret,
                        airstrip::WARN, __FUNCTION__);
@@ -771,7 +751,6 @@ void faceRecognition() {
         consecutiveFailCnt = 0;
 
         // 校正
-
         const int rotationX = (g_curRgbData.height - multipleFaceData.rects->y - multipleFaceData.rects->height) *
                               g_appWidth / CAMERA_HEIGHT;
         const int rotationY = (multipleFaceData.rects->x) * g_appHeight / CAMERA_WIDTH;
@@ -810,82 +789,74 @@ void faceRecognition() {
     lastRecognitionTime = curTime;
 
     // 数据拷贝
-    g_curRgbDataMat = cv::Mat(g_curRgbData.height * 3 / 2,
-                              g_curRgbData.width, CV_8UC1, g_curRgbData.data).clone();
-    g_curIrDataMat = cv::Mat(g_curIrData.height * 3 / 2,
-                             g_curIrData.width, CV_8UC1, g_curIrData.data).clone();
-
+    memcpy(&g_curRgbDataAuth, &g_curRgbData, sizeof(CameraOutputFrameInfo));
+    memcpy(&g_curIrDataAuth, &g_curIrData, sizeof(CameraOutputFrameInfo));
 
     static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([] {
-        // 数据矫正
-        cv::Mat frameIrCopy;
-        cv::cvtColor(g_curIrDataMat, frameIrCopy, cv::COLOR_YUV2BGR_NV12);
-        cv::rotate(frameIrCopy, frameIrCopy, cv::ROTATE_90_COUNTERCLOCKWISE);
-
-        cv::Mat frameCopy;
-        cv::cvtColor(g_curRgbDataMat, frameCopy, cv::COLOR_YUV2BGR_NV12);
-        cv::rotate(frameCopy, frameCopy, cv::ROTATE_90_CLOCKWISE);
-
-
         HResult ret;
 
         // 红外部分
-        cv::Rect rectIr; {
-            HFImageStream stream = nullptr;
-            HFImageData imageData = {};
-            imageData.data = frameIrCopy.data;
-            imageData.format = HF_STREAM_BGR;
-            imageData.height = frameIrCopy.rows;
-            imageData.width = frameIrCopy.cols;
-            imageData.rotation = HF_CAMERA_ROTATION_0;
-            ret = HFCreateImageStream(&imageData, &stream);
-            if (ret != HSUCCEED) {
-                logPrintln("Face recognition build image fail " + ret,
-                           airstrip::WARN, __FUNCTION__);
-                g_isCheckFace = false;
-                return;
-            }
-
-            HFMultipleFaceData multipleFaceData = {};
-            ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
-            if (ret != HSUCCEED) {
-                logPrintln("Face recognition track image fail " + ret,
-                           airstrip::WARN, __FUNCTION__);
-                HFReleaseImageStream(stream);
-                g_isCheckFace = false;
-                return;
-            }
-
-            if (multipleFaceData.detectedNum <= 0) {
-                logPrintln("Ir Face not found" + ret,
-                           airstrip::INFO, __FUNCTION__);
-                HFReleaseImageStream(stream);
-                g_isCheckFace = false;
-                return;
-            }
-
-            const cv::Rect rect(multipleFaceData.rects->x, multipleFaceData.rects->y,
-                                multipleFaceData.rects->width, multipleFaceData.rects->height);
-
-            // 校正
-            const int maxWidth = frameIrCopy.cols;
-            const int maxHeight = frameIrCopy.rows;
-            const int faceX = std::max(0, rect.x);
-            const int faceY = std::max(0, rect.y);
-            int faceW = std::max(0, rect.width);
-            int faceH = std::max(0, rect.height);
-            faceW = faceX + faceW > maxWidth ? maxWidth - faceX : faceW;
-            faceH = faceY + faceH > maxHeight ? maxHeight - faceY : faceH;
-            rectIr = cv::Rect(faceX, faceY, faceW, faceH);
-
-            logPrintln("Ir Detect :" + to_string(faceX) + " "
-                       + to_string(faceY) + " "
-                       + to_string(faceW) + " "
-                       + to_string(faceH) + " " + to_string(multipleFaceData.trackIds[0]),
-                       airstrip::INFO, __FUNCTION__);
-
-            HFReleaseImageStream(stream);
-        }
+        // cv::Rect rectIr;
+        // if (g_enableFaceSpoof) {
+        //     HFImageStream stream = nullptr;
+        //     HFImageData imageData = {};
+        //     imageData.data = g_curIrDataAuth.data;
+        //     imageData.format = HF_STREAM_YUV_NV12;
+        //     imageData.height = g_curIrDataAuth.height;
+        //     imageData.width = g_curIrDataAuth.width;
+        //     imageData.rotation = HF_CAMERA_ROTATION_90;
+        //     ret = HFCreateImageStream(&imageData, &stream);
+        //     if (ret != HSUCCEED) {
+        //         logPrintln("Face recognition build image fail " + ret,
+        //                    airstrip::WARN, __FUNCTION__);
+        //         g_isCheckFace = false;
+        //         return;
+        //     }
+        //
+        //     HFMultipleFaceData multipleFaceData = {};
+        //     ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
+        //     if (ret != HSUCCEED) {
+        //         logPrintln("Face recognition track image fail " + ret,
+        //                    airstrip::WARN, __FUNCTION__);
+        //         HFReleaseImageStream(stream);
+        //         g_isCheckFace = false;
+        //         return;
+        //     }
+        //
+        //     if (multipleFaceData.detectedNum <= 0) {
+        //         logPrintln("Ir Face not found" + ret,
+        //                    airstrip::INFO, __FUNCTION__);
+        //         HFReleaseImageStream(stream);
+        //         g_isCheckFace = false;
+        //         return;
+        //     }
+        //
+        //     // 校正
+        //     const int rotationX = (g_curIrDataAuth.height - multipleFaceData.rects->y - multipleFaceData.rects->height)
+        //                           *
+        //                           g_appWidth / CAMERA_HEIGHT;
+        //     const int rotationY = (multipleFaceData.rects->x) * g_appHeight / CAMERA_WIDTH;
+        //     const int rotationWidth = multipleFaceData.rects->height * g_appWidth / CAMERA_HEIGHT;
+        //     const int rotationHeight = multipleFaceData.rects->width * g_appHeight / CAMERA_WIDTH;
+        //
+        //     // 校正
+        //     const int maxWidth = g_appWidth;
+        //     const int maxHeight = g_appHeight;
+        //     const int faceX = std::min(std::max(0, rotationX), maxWidth);
+        //     const int faceY = std::min(std::max(0, rotationY), maxHeight);
+        //     int faceW = std::max(0, rotationWidth);
+        //     int faceH = std::max(0, rotationHeight);
+        //     faceW = faceX + faceW > maxWidth ? maxWidth - faceX : faceW;
+        //     faceH = faceY + faceH > maxHeight ? maxHeight - faceY : faceH;
+        //
+        //     logPrintln("Ir Detect :" + to_string(faceX) + " "
+        //                + to_string(faceY) + " "
+        //                + to_string(faceW) + " "
+        //                + to_string(faceH) + " " + to_string(multipleFaceData.trackIds[0]),
+        //                airstrip::INFO, __FUNCTION__);
+        //
+        //     HFReleaseImageStream(stream);
+        // }
 
 
         // // 普通摄像头部分

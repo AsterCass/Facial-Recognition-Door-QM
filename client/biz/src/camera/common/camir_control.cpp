@@ -24,10 +24,7 @@ static pthread_mutex_t g_display_lock = PTHREAD_MUTEX_INITIALIZER;
 static int g_rotation = HAL_TRANSFORM_ROT_270;
 
 void set_ir_rotation(int angle) {
-    if (angle == 90)
-        g_rotation = HAL_TRANSFORM_ROT_90;
-    else if (angle == 270)
-        g_rotation = HAL_TRANSFORM_ROT_270;
+    g_rotation = angle;
 }
 
 void set_ir_display(display_callback cb) {
