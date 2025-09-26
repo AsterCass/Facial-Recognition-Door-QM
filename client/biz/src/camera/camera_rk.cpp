@@ -25,7 +25,6 @@ int g_onFaceFrameIr = false;
 int g_onFaceFrameRga = false;
 
 
-
 void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height) {
     // 这里加锁防止普通和红外摄像头前后脚进入，导致触发两次 faceRecognition
     static std::mutex mtx;
@@ -38,26 +37,26 @@ void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height)
     const int calSize = width * height * 3 / 2;
 
     if (irFrame && MAX_OUTPUT_FRAME_SIZE >= calSize) {
-        auto *yuv_data = static_cast<uint8_t *>(irFrame);
-        const cv::Mat yuv(height * 3 / 2, width, CV_8UC1, yuv_data);
-        cv::cvtColor(yuv, g_curIrDataMat, cv::COLOR_YUV2BGR_NV12);
-        cv::rotate(g_curIrDataMat, g_curIrDataMat, cv::ROTATE_90_COUNTERCLOCKWISE);
+        g_curIrData.size = calSize;
+        g_curIrData.height = height;
+        g_curIrData.width = width;
+        memcpy(g_curIrData.data, irFrame, calSize);
     }
 
     logPrintln("Free ir and clone",
                airstrip::DEBUG, __FUNCTION__);
 
     if (rgaFrame && MAX_OUTPUT_FRAME_SIZE >= calSize) {
-        auto *yuv_data = static_cast<uint8_t *>(rgaFrame);
-        const cv::Mat yuv(height * 3 / 2, width, CV_8UC1, yuv_data);
-        cv::cvtColor(yuv, g_curRgbDataMat, cv::COLOR_YUV2BGR_NV12);
-        cv::rotate(g_curRgbDataMat, g_curRgbDataMat, cv::ROTATE_90_CLOCKWISE);
+        g_curRgbData.size = calSize;
+        g_curRgbData.height = height;
+        g_curRgbData.width = width;
+        memcpy(g_curRgbData.data, rgaFrame, calSize);
     }
 
     logPrintln("Free rga and clone",
                airstrip::DEBUG, __FUNCTION__);
 
-    if (g_curRgbDataMat.empty() || g_curIrDataMat.empty()) {
+    if (0 == g_curIrData.size || 0 == g_curRgbData.size) {
         return;
     }
 
@@ -84,8 +83,8 @@ void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height)
     logPrintln("FaceRecognition finish",
                airstrip::DEBUG, __FUNCTION__);
 
-    g_curRgbDataMat.release();
-    g_curIrDataMat.release();
+    memset(&g_curRgbData, 0, sizeof(g_curRgbData));
+    memset(&g_curIrData, 0, sizeof(g_curIrData));
 
     logPrintln("FaceRecognition release",
                airstrip::DEBUG, __FUNCTION__);

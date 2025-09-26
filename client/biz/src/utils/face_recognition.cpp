@@ -702,7 +702,7 @@ void faceRecognition() {
 
     logPrintln("Start for recognition ... ", airstrip::DEBUG, __FUNCTION__);
 
-    if (g_curRgbDataMat.empty() || g_curIrDataMat.empty()) {
+    if (g_curRgbData.size <= 0 || g_curIrData.size <= 0) {
         return;
     }
 
@@ -710,11 +710,11 @@ void faceRecognition() {
     {
         HFImageStream stream = nullptr;
         HFImageData imageData = {};
-        imageData.data = g_curRgbDataMat.data;
-        imageData.format = HF_STREAM_BGR;
-        imageData.height = g_curRgbDataMat.rows;
-        imageData.width = g_curRgbDataMat.cols;
-        imageData.rotation = HF_CAMERA_ROTATION_0;
+        imageData.data = g_curRgbData.data;
+        imageData.format = HF_STREAM_YUV_NV12;
+        imageData.height = g_curRgbData.height;
+        imageData.width = g_curRgbData.width;
+        imageData.rotation = HF_CAMERA_ROTATION_270;
         HResult ret = HFCreateImageStream(&imageData, &stream);
         if (ret != HSUCCEED) {
             logPrintln("Face recognition build image fail " + ret,
@@ -751,10 +751,11 @@ void faceRecognition() {
         consecutiveFailCnt = 0;
 
         // 校正
-        const int rotationX = multipleFaceData.rects->x * g_appWidth / CAMERA_HEIGHT;
-        const int rotationY = multipleFaceData.rects->y * g_appHeight / CAMERA_WIDTH;
-        const int rotationWidth = multipleFaceData.rects->width * g_appWidth / CAMERA_HEIGHT;
-        const int rotationHeight = multipleFaceData.rects->height * g_appHeight / CAMERA_WIDTH;
+        const int rotationX = (CAMERA_HEIGHT - multipleFaceData.rects->y - multipleFaceData.rects->height) *
+                              g_appWidth / CAMERA_HEIGHT;
+        const int rotationY = (multipleFaceData.rects->x) * g_appHeight / CAMERA_WIDTH;
+        const int rotationWidth = multipleFaceData.rects->height * g_appWidth / CAMERA_HEIGHT;
+        const int rotationHeight = multipleFaceData.rects->width * g_appHeight / CAMERA_WIDTH;
 
         // 校正
         const int maxWidth = g_appWidth;
@@ -788,14 +789,31 @@ void faceRecognition() {
     lastRecognitionTime = curTime;
 
     // 数据拷贝
-    g_curRgbDataMatAuth = g_curRgbDataMat.clone();
-    g_curIrDataMatAuth = g_curIrDataMat.clone();
+    memcpy(&g_curRgbDataAuth, &g_curRgbData, sizeof(CameraOutputFrameInfo));
+    memcpy(&g_curIrDataAuth, &g_curIrData, sizeof(CameraOutputFrameInfo));
 
     static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([] {
         HResult ret;
 
-        cv::imwrite("/data/frd/1.jpg", g_curRgbDataMatAuth);
-        cv::imwrite("/data/frd/2.jpg", g_curIrDataMatAuth);
+        //test
+        {
+            const cv::Mat yuv(g_curRgbDataAuth.height * 3 / 2, g_curRgbDataAuth.width,
+                              CV_8UC1, g_curRgbDataAuth.data);
+            cv::cvtColor(yuv, g_curRgbDataMatAuth, cv::COLOR_YUV2BGR_NV12);
+            cv::rotate(g_curRgbDataMatAuth, g_curRgbDataMatAuth, cv::ROTATE_90_CLOCKWISE);
+            cv::imwrite("/data/frd/1.jpg", g_curRgbDataMatAuth);
+        }
+        //test
+        {
+            const cv::Mat yuv(g_curIrDataAuth.height * 3 / 2, g_curIrDataAuth.width,
+                              CV_8UC1, g_curIrDataAuth.data);
+            cv::cvtColor(yuv, g_curIrDataMatAuth, cv::COLOR_YUV2BGR_NV12);
+            cv::rotate(g_curIrDataMatAuth, g_curIrDataMatAuth, cv::ROTATE_90_COUNTERCLOCKWISE);
+            cv::imwrite("/data/frd/2.jpg", g_curIrDataMatAuth);
+        }
+
+
+        // cv::imwrite("/data/frd/2.jpg", g_curIrDataMatAuth);
 
         // 红外部分
         // cv::Rect rectIr;

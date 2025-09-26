@@ -16,10 +16,16 @@ struct CameraOutputFrameInfo {
     int size;
 };
 
+// 人脸检测
+extern CameraOutputFrameInfo g_curRgbData;
+extern CameraOutputFrameInfo g_curIrData;
+// 人脸识别
+extern CameraOutputFrameInfo g_curRgbDataAuth;
+extern CameraOutputFrameInfo g_curIrDataAuth;
 // 人脸识别
 extern cv::Mat g_curRgbDataMat;
 extern cv::Mat g_curIrDataMat;
-
+// 人脸识别
 extern cv::Mat g_curRgbDataMatAuth;
 extern cv::Mat g_curIrDataMatAuth;
 
