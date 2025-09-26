@@ -726,13 +726,21 @@ void faceRecognition() {
 
         logPrintln("RGA track loaded ...", airstrip::DEBUG, __FUNCTION__);
 
+        static uint32_t consecutiveFailCnt = 0;
         if (multipleFaceData.detectedNum <= 0) {
             logPrintln("Face recognition lay detect num" + ret,
-                       airstrip::DEBUG, __FUNCTION__);
-            display_paint_box(0, 0, 0, 0);
+                       airstrip::INFO, __FUNCTION__);
+            // < 10 是为了略微减少cpu压力，因为他这里会加锁  >=1 是为了防止由于人像抖动造成的框消失
+            if (consecutiveFailCnt >= 1 && consecutiveFailCnt < 10) {
+                display_paint_box(0, 0, 0, 0);
+            }
+            ++consecutiveFailCnt;
             HFReleaseImageStream(stream);
             return;
         }
+        consecutiveFailCnt = 0;
+
+        // 校正
 
         const int rotationX = (g_curRgbData.height - multipleFaceData.rects->y - multipleFaceData.rects->height) *
                               g_appWidth / CAMERA_HEIGHT;
