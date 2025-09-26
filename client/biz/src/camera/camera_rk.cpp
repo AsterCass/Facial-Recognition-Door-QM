@@ -25,6 +25,33 @@ int g_onFaceFrameIr = false;
 int g_onFaceFrameRga = false;
 
 
+void rotate90_nv12(const unsigned char *src, unsigned char *dst, int width, int height) {
+    int wh = width * height;
+    const unsigned char *srcY = src;
+    const unsigned char *srcUV = src + wh;
+
+    unsigned char *dstY = dst;
+    unsigned char *dstUV = dst + wh;
+
+    // Y 平面旋转 90°
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            dstY[x * height + (height - y - 1)] = srcY[y * width + x];
+        }
+    }
+
+    // UV 平面旋转 90°，步长是2
+    for (int y = 0; y < height / 2; y++) {
+        for (int x = 0; x < width; x += 2) {
+            int src_index = y * width + x;
+            int dst_index = x / 2 * height * 2 + (height / 2 - y - 1) * 2;
+            dstUV[dst_index] = srcUV[src_index]; // U
+            dstUV[dst_index + 1] = srcUV[src_index + 1]; // V
+        }
+    }
+}
+
+
 void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height) {
     // 这里加锁防止普通和红外摄像头前后脚进入，导致触发两次 faceRecognition
     static std::mutex mtx;
@@ -38,9 +65,9 @@ void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height)
 
     if (irFrame && MAX_OUTPUT_FRAME_SIZE >= calSize) {
         g_curIrData.size = calSize;
-        g_curIrData.height = height;
-        g_curIrData.width = width;
-        memcpy(g_curIrData.data, irFrame, calSize);
+        rotate90_nv12(static_cast<unsigned char *>(irFrame), g_curIrData.data, width, height);
+        g_curIrData.height = width;
+        g_curIrData.width = height;
     }
 
     logPrintln("Free ir and clone",
@@ -173,8 +200,6 @@ void startCameraRk() {
     // 这里回调会在 display_switch 被输出屏幕的方法占用，所以不在这里设置
     set_rgb_param(CAMERA_WIDTH,CAMERA_HEIGHT, nullptr, true);
     set_ir_param(CAMERA_WIDTH,CAMERA_HEIGHT, nullptr);
-    set_rgb_rotation(0);
-    set_ir_rotation(0);
 
     set_ir_display_iv(processWithMbIr);
     set_rgb_display_iv(processWithMbRga);

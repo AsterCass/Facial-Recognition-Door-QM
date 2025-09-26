@@ -710,13 +710,13 @@ void faceRecognition() {
     {
         auto *yuv_data = static_cast<uint8_t *>(g_curRgbData.data);
         g_curRgbDataMat = cv::Mat(g_curRgbData.height * 3 / 2, g_curRgbData.width, CV_8UC1, yuv_data).clone();
-        cv::imshow("/data/frd/1.jpg", g_curRgbDataMat);
+        cv::imwrite("/data/frd/1.jpg", g_curRgbDataMat);
     }
 
     {
         auto *yuv_data = static_cast<uint8_t *>(g_curIrData.data);
         g_curIrDataMat = cv::Mat(g_curIrData.height * 3 / 2, g_curIrData.width, CV_8UC1, yuv_data).clone();
-        cv::imshow("/data/frd/2.jpg", g_curIrDataMat);
+        cv::imwrite("/data/frd/2.jpg", g_curIrDataMat);
     }
 
 
