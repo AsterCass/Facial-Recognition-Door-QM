@@ -153,36 +153,61 @@ void initFaceRecognition() {
         exit(-1);
     }
 
-    logPrintln("Load model finish", airstrip::INFO, __FUNCTION__);
+    logPrintln("Load model finish", airstrip::INFO, __FUNCTION__); {
+        constexpr HOption option = HF_ENABLE_FACE_RECOGNITION;
+        constexpr HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
+        constexpr HInt32 maxDetectNum = 1;
+        constexpr HInt32 detectPixelLevel = 160;
+        ret = HFCreateInspireFaceSessionOptional(
+            option, detMode, maxDetectNum, detectPixelLevel, -1, &faceRecognitionSession);
+        if (ret != HSUCCEED) {
+            logPrintln("Create face context error: " + ret, airstrip::CRITICAL, __FUNCTION__);
+            exit(-1);
+        }
 
-    constexpr HOption option = HF_ENABLE_FACE_RECOGNITION;
-    constexpr HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
-    constexpr HInt32 maxDetectNum = 1;
-    constexpr HInt32 detectPixelLevel = 160;
-    ret = HFCreateInspireFaceSessionOptional(
-        option, detMode, maxDetectNum, detectPixelLevel, -1, &faceRecognitionSession);
-    if (ret != HSUCCEED) {
-        logPrintln("Create face context error: " + ret, airstrip::CRITICAL, __FUNCTION__);
-        exit(-1);
+        logPrintln("Load optional finish", airstrip::INFO, __FUNCTION__);
+
+        HFSessionSetTrackPreviewSize(faceRecognitionSession, detectPixelLevel);
+        HFSessionSetFilterMinimumFacePixelSize(faceRecognitionSession, 30);
+
+        logPrintln("Load more optional finish", airstrip::INFO, __FUNCTION__);
+
+        HFFeatureHubConfiguration configuration;
+        configuration.primaryKeyMode = HF_PK_MANUAL_INPUT;
+        configuration.enablePersistence = 0;
+        configuration.persistenceDbPath = nullptr;
+        if (g_fullFaceCompare) {
+            configuration.searchMode = HF_SEARCH_MODE_EXHAUSTIVE;
+        } else {
+            configuration.searchMode = HF_SEARCH_MODE_EAGER;
+        }
+        configuration.searchThreshold = static_cast<float>(std::min(g_faceThreshold, g_faceThresholdNight));
+        ret = HFFeatureHubDataEnable(configuration);
+        if (ret != HSUCCEED) {
+            logPrintln("Create face db error: " + ret, airstrip::CRITICAL, __FUNCTION__);
+            exit(-1);
+        }
     }
 
-    HFSessionSetTrackPreviewSize(faceRecognitionSession, detectPixelLevel);
-    HFSessionSetFilterMinimumFacePixelSize(faceRecognitionSession, 30);
+    // only for detect
+    {
+        constexpr HOption option = HF_ENABLE_FACE_RECOGNITION;
+        constexpr HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
+        constexpr HInt32 maxDetectNum = 1;
+        constexpr HInt32 detectPixelLevel = 160;
+        ret = HFCreateInspireFaceSessionOptional(
+            option, detMode, maxDetectNum, detectPixelLevel, -1, &faceRecognitionSessionDetect);
+        if (ret != HSUCCEED) {
+            logPrintln("Create face context error: " + ret, airstrip::CRITICAL, __FUNCTION__);
+            exit(-1);
+        }
 
-    HFFeatureHubConfiguration configuration;
-    configuration.primaryKeyMode = HF_PK_MANUAL_INPUT;
-    configuration.enablePersistence = 0;
-    configuration.persistenceDbPath = nullptr;
-    if (g_fullFaceCompare) {
-        configuration.searchMode = HF_SEARCH_MODE_EXHAUSTIVE;
-    } else {
-        configuration.searchMode = HF_SEARCH_MODE_EAGER;
-    }
-    configuration.searchThreshold = static_cast<float>(std::min(g_faceThreshold, g_faceThresholdNight));
-    ret = HFFeatureHubDataEnable(configuration);
-    if (ret != HSUCCEED) {
-        logPrintln("Create face db error: " + ret, airstrip::CRITICAL, __FUNCTION__);
-        exit(-1);
+        logPrintln("Load optional finish", airstrip::INFO, __FUNCTION__);
+
+        HFSessionSetTrackPreviewSize(faceRecognitionSessionDetect, detectPixelLevel);
+        HFSessionSetFilterMinimumFacePixelSize(faceRecognitionSessionDetect, 30);
+
+        logPrintln("Load more optional finish", airstrip::INFO, __FUNCTION__);
     }
 
     logPrintln("Face model init finish", airstrip::INFO, __FUNCTION__);
@@ -720,7 +745,7 @@ void faceRecognition() {
         logPrintln("RGA track to format ...", airstrip::DEBUG, __FUNCTION__);
 
         HFMultipleFaceData multipleFaceData = {};
-        ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
+        ret = HFExecuteFaceTrack(faceRecognitionSessionDetect, stream, &multipleFaceData);
         if (ret != HSUCCEED) {
             logPrintln("Face recognition track image fail " + ret,
                        airstrip::WARN, __FUNCTION__);
