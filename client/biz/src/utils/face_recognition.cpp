@@ -35,6 +35,49 @@ HFSession faceRecognitionSession = nullptr;
 // 目前模型加载时间过长，之后可以利用 rktoolkit 将模型变成mini模型再改驱动，适配，目前使用full模型，加载两个Session会导致启动时间过长
 HFSession faceRecognitionSessionDetect = nullptr;
 
+
+void rotate_nv12_180_inplace(CameraOutputFrameInfo* frame) {
+    if (!frame || frame->width <= 0 || frame->height <= 0) {
+        return;
+    }
+
+    int width = frame->width;
+    int height = frame->height;
+    int y_size = width * height;
+
+    // 原地旋转Y分量
+    unsigned char* y_data = frame->data;
+    for (int i = 0; i < y_size / 2; i++) {
+        // 计算对称位置
+        int mirror_pos = y_size - 1 - i;
+
+        // 交换像素
+        unsigned char temp = y_data[i];
+        y_data[i] = y_data[mirror_pos];
+        y_data[mirror_pos] = temp;
+    }
+
+    // 原地旋转UV分量
+    unsigned char* uv_data = frame->data + y_size;
+    int uv_size = y_size / 2;
+
+    for (int i = 0; i < uv_size / 2; i += 2) {
+        // UV是成对存储的，需要成对交换
+        int mirror_pos = uv_size - 2 - i;
+
+        // 交换U分量
+        unsigned char temp_u = uv_data[i];
+        uv_data[i] = uv_data[mirror_pos];
+        uv_data[mirror_pos] = temp_u;
+
+        // 交换V分量
+        unsigned char temp_v = uv_data[i + 1];
+        uv_data[i + 1] = uv_data[mirror_pos + 1];
+        uv_data[mirror_pos + 1] = temp_v;
+    }
+}
+
+
 void updateLight(int expose, int gain, int light) {
     ostringstream updateExposeGainCmd;
     updateExposeGainCmd << "sh " << g_appWorkDir + "script/linux/reset_expose.sh "
@@ -796,19 +839,21 @@ void faceRecognition() {
         HResult ret;
 
 
-        // 格式转换 rgb
-        {
-            const cv::Mat yuv(g_curRgbDataAuth.height * 3 / 2, g_curRgbDataAuth.width,
-                              CV_8UC1, g_curRgbDataAuth.data);
-            cv::cvtColor(yuv, g_curRgbDataMatAuth, cv::COLOR_YUV2BGR_NV12);
-        }
-        // 格式转换 ir
-        {
-            const cv::Mat yuv(g_curIrDataAuth.height * 3 / 2, g_curIrDataAuth.width,
-                              CV_8UC1, g_curIrDataAuth.data);
-            cv::cvtColor(yuv, g_curIrDataMatAuth, cv::COLOR_YUV2BGR_NV12);
-            cv::rotate(g_curIrDataMatAuth, g_curIrDataMatAuth, cv::ROTATE_180);
-        }
+        // // 格式转换 rgb
+        // {
+        //     const cv::Mat yuv(g_curRgbDataAuth.height * 3 / 2, g_curRgbDataAuth.width,
+        //                       CV_8UC1, g_curRgbDataAuth.data);
+        //     cv::cvtColor(yuv, g_curRgbDataMatAuth, cv::COLOR_YUV2BGR_NV12);
+        // }
+        // // 格式转换 ir
+        // {
+        //     const cv::Mat yuv(g_curIrDataAuth.height * 3 / 2, g_curIrDataAuth.width,
+        //                       CV_8UC1, g_curIrDataAuth.data);
+        //     cv::cvtColor(yuv, g_curIrDataMatAuth, cv::COLOR_YUV2BGR_NV12);
+        //     cv::rotate(g_curIrDataMatAuth, g_curIrDataMatAuth, cv::ROTATE_180);
+        // }
+
+        rotate_nv12_180_inplace(&g_curIrDataAuth);
 
 
         // 红外部分
@@ -816,10 +861,10 @@ void faceRecognition() {
         if (g_enableFaceSpoof) {
             HFImageStream stream = nullptr;
             HFImageData imageData = {};
-            imageData.data = g_curIrDataMatAuth.data;
-            imageData.format = HF_STREAM_BGR;
-            imageData.height = g_curIrDataMatAuth.rows;
-            imageData.width = g_curIrDataMatAuth.cols;
+            imageData.data = g_curIrDataAuth.data;
+            imageData.format = HF_STREAM_YUV_NV12;
+            imageData.height = g_curIrDataAuth.height;
+            imageData.width = g_curIrDataAuth.width;
             imageData.rotation = HF_CAMERA_ROTATION_270;
             ret = HFCreateImageStream(&imageData, &stream);
             if (ret != HSUCCEED) {
