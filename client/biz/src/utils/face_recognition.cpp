@@ -702,139 +702,100 @@ void faceRecognition() {
 
     logPrintln("Start for recognition ... ", airstrip::DEBUG, __FUNCTION__);
 
-    if (g_curRgbData.size <= 0) {
+    if (g_curRgbDataMat.empty() || g_curIrDataMat.empty()) {
         return;
     }
 
-
+    // 执行人脸检测
     {
-        auto *yuv_data = static_cast<uint8_t *>(g_curRgbData.data);
-        g_curRgbDataMat = cv::Mat(g_curRgbData.height * 3 / 2, g_curRgbData.width, CV_8UC1, yuv_data).clone();
-        cv::imwrite("/data/frd/1.jpg", g_curRgbDataMat);
+        HFImageStream stream = nullptr;
+        HFImageData imageData = {};
+        imageData.data = g_curRgbDataMat.data;
+        imageData.format = HF_STREAM_BGR;
+        imageData.height = g_curRgbDataMat.rows;
+        imageData.width = g_curRgbDataMat.cols;
+        imageData.rotation = HF_CAMERA_ROTATION_0;
+        HResult ret = HFCreateImageStream(&imageData, &stream);
+        if (ret != HSUCCEED) {
+            logPrintln("Face recognition build image fail " + ret,
+                       airstrip::WARN, __FUNCTION__);
+            return;
+        }
+
+        logPrintln("RGA track to format ...", airstrip::DEBUG, __FUNCTION__);
+
+        HFMultipleFaceData multipleFaceData = {};
+        ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
+        if (ret != HSUCCEED) {
+            logPrintln("Face recognition track image fail " + ret,
+                       airstrip::WARN, __FUNCTION__);
+            HFReleaseImageStream(stream);
+            return;
+        }
+
+        logPrintln("RGA track loaded ...", airstrip::DEBUG, __FUNCTION__);
+
+        static uint32_t consecutiveFailCnt = 0;
+        if (multipleFaceData.detectedNum <= 0) {
+            logPrintln("Face recognition lay detect num " + to_string(ret)
+                       + " " + to_string(consecutiveFailCnt),
+                       airstrip::INFO, __FUNCTION__);
+            // < 10 是为了略微减少cpu压力，因为他这里会加锁  >=1 是为了防止由于人像抖动造成的框消失
+            if (consecutiveFailCnt >= 1 && consecutiveFailCnt < 10) {
+                display_paint_box(0, 0, 0, 0);
+            }
+            ++consecutiveFailCnt;
+            HFReleaseImageStream(stream);
+            return;
+        }
+        consecutiveFailCnt = 0;
+
+        // 校正
+        const int rotationX = multipleFaceData.rects->x * g_appWidth / CAMERA_HEIGHT;
+        const int rotationY = multipleFaceData.rects->y * g_appHeight / CAMERA_WIDTH;
+        const int rotationWidth = multipleFaceData.rects->width * g_appWidth / CAMERA_HEIGHT;
+        const int rotationHeight = multipleFaceData.rects->height * g_appHeight / CAMERA_WIDTH;
+
+        // 校正
+        const int maxWidth = g_appWidth;
+        const int maxHeight = g_appHeight;
+        const int faceX = std::min(std::max(0, rotationX), maxWidth);
+        const int faceY = std::min(std::max(0, rotationY), maxHeight);
+        int faceW = std::max(0, rotationWidth);
+        int faceH = std::max(0, rotationHeight);
+        faceW = faceX + faceW > maxWidth ? maxWidth - faceX : faceW;
+        faceH = faceY + faceH > maxHeight ? maxHeight - faceY : faceH;
+
+        logPrintln("Detect :" + to_string(faceX) + " "
+                   + to_string(faceY) + " "
+                   + to_string(faceW) + " "
+                   + to_string(faceH) + " " + to_string(multipleFaceData.trackIds[0]),
+                   airstrip::INFO, __FUNCTION__);
+
+        display_paint_box(faceX, faceY, faceX + faceW, faceY + faceH);
+
+        HFReleaseImageStream(stream);
     }
 
-    {
-        auto *yuv_data = static_cast<uint8_t *>(g_curIrData.data);
-        g_curIrDataMat = cv::Mat(g_curIrData.height * 3 / 2, g_curIrData.width, CV_8UC1, yuv_data).clone();
-        cv::imwrite("/data/frd/2.jpg", g_curIrDataMat);
+    const auto curTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now().time_since_epoch()).count();
+    static time_t lastRecognitionTime = 0;
+    // 距离上次时间不足 g_faceRegCoreIvMillSec 或者还在核验中
+    if (curTime - lastRecognitionTime < g_faceRegCoreIvMillSec || g_isCheckFace) {
+        return;
     }
+    g_isCheckFace = true;
+    lastRecognitionTime = curTime;
 
-
-    // // 执行人脸检测
-    // {
-    //     HFImageStream stream = nullptr;
-    //     HFImageData imageData = {};
-    //     imageData.data = g_curRgbData.data;
-    //     imageData.format = HF_STREAM_YUV_NV12;
-    //     imageData.height = g_curRgbData.height;
-    //     imageData.width = g_curRgbData.width;
-    //     imageData.rotation = HF_CAMERA_ROTATION_270;
-    //     HResult ret = HFCreateImageStream(&imageData, &stream);
-    //     if (ret != HSUCCEED) {
-    //         logPrintln("Face recognition build image fail " + ret,
-    //                    airstrip::WARN, __FUNCTION__);
-    //         return;
-    //     }
-    //
-    //     logPrintln("RGA track to format ...", airstrip::DEBUG, __FUNCTION__);
-    //
-    //     HFMultipleFaceData multipleFaceData = {};
-    //     ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
-    //     if (ret != HSUCCEED) {
-    //         logPrintln("Face recognition track image fail " + ret,
-    //                    airstrip::WARN, __FUNCTION__);
-    //         HFReleaseImageStream(stream);
-    //         return;
-    //     }
-
-    // // 执行人脸检测
-    // {
-    //     HFImageStream stream = nullptr;
-    //     HFImageData imageData = {};
-    //     imageData.data = g_curRgbData.data;
-    //     imageData.format = HF_STREAM_YUV_NV12;
-    //     imageData.height = g_curRgbData.height;
-    //     imageData.width = g_curRgbData.width;
-    //     imageData.rotation = HF_CAMERA_ROTATION_270;
-    //     HResult ret = HFCreateImageStream(&imageData, &stream);
-    //     if (ret != HSUCCEED) {
-    //         logPrintln("Face recognition build image fail " + ret,
-    //                    airstrip::WARN, __FUNCTION__);
-    //         return;
-    //     }
-    //
-    //     logPrintln("RGA track to format ...", airstrip::DEBUG, __FUNCTION__);
-    //
-    //     HFMultipleFaceData multipleFaceData = {};
-    //     ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
-    //     if (ret != HSUCCEED) {
-    //         logPrintln("Face recognition track image fail " + ret,
-    //                    airstrip::WARN, __FUNCTION__);
-    //         HFReleaseImageStream(stream);
-    //         return;
-    //     }
-    //
-    //     logPrintln("RGA track loaded ...", airstrip::DEBUG, __FUNCTION__);
-    //
-    //     static uint32_t consecutiveFailCnt = 0;
-    //     if (multipleFaceData.detectedNum <= 0) {
-    //         logPrintln("Face recognition lay detect num " + to_string(ret)
-    //                    + " " + to_string(consecutiveFailCnt),
-    //                    airstrip::INFO, __FUNCTION__);
-    //         // < 10 是为了略微减少cpu压力，因为他这里会加锁  >=1 是为了防止由于人像抖动造成的框消失
-    //         if (consecutiveFailCnt >= 1 && consecutiveFailCnt < 10) {
-    //             display_paint_box(0, 0, 0, 0);
-    //         }
-    //         ++consecutiveFailCnt;
-    //         HFReleaseImageStream(stream);
-    //         return;
-    //     }
-    //     consecutiveFailCnt = 0;
-    //
-    //     // 校正
-    //     const int rotationX = (g_curRgbData.height - multipleFaceData.rects->y - multipleFaceData.rects->height) *
-    //                           g_appWidth / CAMERA_HEIGHT;
-    //     const int rotationY = (multipleFaceData.rects->x) * g_appHeight / CAMERA_WIDTH;
-    //     const int rotationWidth = multipleFaceData.rects->height * g_appWidth / CAMERA_HEIGHT;
-    //     const int rotationHeight = multipleFaceData.rects->width * g_appHeight / CAMERA_WIDTH;
-    //
-    //     // 校正
-    //     const int maxWidth = g_appWidth;
-    //     const int maxHeight = g_appHeight;
-    //     const int faceX = std::min(std::max(0, rotationX), maxWidth);
-    //     const int faceY = std::min(std::max(0, rotationY), maxHeight);
-    //     int faceW = std::max(0, rotationWidth);
-    //     int faceH = std::max(0, rotationHeight);
-    //     faceW = faceX + faceW > maxWidth ? maxWidth - faceX : faceW;
-    //     faceH = faceY + faceH > maxHeight ? maxHeight - faceY : faceH;
-    //
-    //     logPrintln("Detect :" + to_string(faceX) + " "
-    //                + to_string(faceY) + " "
-    //                + to_string(faceW) + " "
-    //                + to_string(faceH) + " " + to_string(multipleFaceData.trackIds[0]),
-    //                airstrip::INFO, __FUNCTION__);
-    //
-    //     display_paint_box(faceX, faceY, faceX + faceW, faceY + faceH);
-    //
-    //     HFReleaseImageStream(stream);
-    // }
-    //
-    // const auto curTime = std::chrono::duration_cast<std::chrono::milliseconds>(
-    //     std::chrono::system_clock::now().time_since_epoch()).count();
-    // static time_t lastRecognitionTime = 0;
-    // // 距离上次时间不足 g_faceRegCoreIvMillSec 或者还在核验中
-    // if (curTime - lastRecognitionTime < g_faceRegCoreIvMillSec || g_isCheckFace) {
-    //     return;
-    // }
-    // g_isCheckFace = true;
-    // lastRecognitionTime = curTime;
-    //
-    // // 数据拷贝
-    // memcpy(&g_curRgbDataAuth, &g_curRgbData, sizeof(CameraOutputFrameInfo));
-    // memcpy(&g_curIrDataAuth, &g_curIrData, sizeof(CameraOutputFrameInfo));
+    // 数据拷贝
+    g_curRgbDataMatAuth = g_curRgbDataMat.clone();
+    g_curIrDataMatAuth = g_curIrDataMat.clone();
 
     static_cast<airstrip::ThreadPool *>(g_mainThreadPool)->enqueue([] {
         HResult ret;
+
+        cv::imwrite("/data/frd/1.jpg", g_curRgbDataMatAuth);
+        cv::imwrite("/data/frd/2.jpg", g_curIrDataMatAuth);
 
         // 红外部分
         // cv::Rect rectIr;

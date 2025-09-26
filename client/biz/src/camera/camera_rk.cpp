@@ -25,59 +25,6 @@ int g_onFaceFrameIr = false;
 int g_onFaceFrameRga = false;
 
 
-void rotate90_nv12(const unsigned char *src, unsigned char *dst, int width, int height) {
-    int wh = width * height;
-    const unsigned char *srcY = src;
-    const unsigned char *srcUV = src + wh;
-
-    unsigned char *dstY = dst;
-    unsigned char *dstUV = dst + wh;
-
-    // Y 平面旋转 90°
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            dstY[x * height + (height - y - 1)] = srcY[y * width + x];
-        }
-    }
-
-    // UV 平面旋转 90°，步长是2
-    for (int y = 0; y < height / 2; y++) {
-        for (int x = 0; x < width; x += 2) {
-            int src_index = y * width + x;
-            int dst_index = x / 2 * height * 2 + (height / 2 - y - 1) * 2;
-            dstUV[dst_index] = srcUV[src_index]; // U
-            dstUV[dst_index + 1] = srcUV[src_index + 1]; // V
-        }
-    }
-}
-
-void rotate270_nv12(const unsigned char* src, unsigned char* dst, int width, int height) {
-    int wh = width * height;
-    const unsigned char* srcY = src;
-    const unsigned char* srcUV = src + wh;
-
-    unsigned char* dstY = dst;
-    unsigned char* dstUV = dst + wh;
-
-    // Y 平面旋转 270°
-    for (int y = 0; y < height; y++) {
-        for (int x = 0; x < width; x++) {
-            dstY[(width - x - 1) * height + y] = srcY[y * width + x];
-        }
-    }
-
-    // UV 平面旋转 270°，步长是2
-    for (int y = 0; y < height / 2; y++) {
-        for (int x = 0; x < width; x += 2) {
-            int src_index = y * width + x;
-            int dst_index = (width - x - 2) / 2 * height * 2 + y * 2;
-            dstUV[dst_index] = srcUV[src_index];         // U
-            dstUV[dst_index + 1] = srcUV[src_index + 1]; // V
-        }
-    }
-}
-
-
 
 void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height) {
     // 这里加锁防止普通和红外摄像头前后脚进入，导致触发两次 faceRecognition
@@ -91,26 +38,26 @@ void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height)
     const int calSize = width * height * 3 / 2;
 
     if (irFrame && MAX_OUTPUT_FRAME_SIZE >= calSize) {
-        g_curIrData.size = calSize;
-        rotate270_nv12(static_cast<unsigned char *>(irFrame), g_curIrData.data, width, height);
-        g_curIrData.height = width;
-        g_curIrData.width = height;
+        auto *yuv_data = static_cast<uint8_t *>(irFrame);
+        const cv::Mat yuv(height * 3 / 2, width, CV_8UC1, yuv_data);
+        cv::cvtColor(yuv, g_curIrDataMat, cv::COLOR_YUV2BGR_NV12);
+        cv::rotate(g_curIrDataMat, g_curIrDataMat, cv::ROTATE_90_COUNTERCLOCKWISE);
     }
 
     logPrintln("Free ir and clone",
                airstrip::DEBUG, __FUNCTION__);
 
     if (rgaFrame && MAX_OUTPUT_FRAME_SIZE >= calSize) {
-        g_curRgbData.size = calSize;
-        rotate90_nv12(static_cast<unsigned char *>(rgaFrame), g_curRgbData.data, width, height);
-        g_curRgbData.height = width;
-        g_curRgbData.width = height;
+        auto *yuv_data = static_cast<uint8_t *>(rgaFrame);
+        const cv::Mat yuv(height * 3 / 2, width, CV_8UC1, yuv_data);
+        cv::cvtColor(yuv, g_curRgbDataMat, cv::COLOR_YUV2BGR_NV12);
+        cv::rotate(g_curRgbDataMat, g_curRgbDataMat, cv::ROTATE_90_CLOCKWISE);
     }
 
     logPrintln("Free rga and clone",
                airstrip::DEBUG, __FUNCTION__);
 
-    if (0 == g_curIrData.size || 0 == g_curRgbData.size) {
+    if (g_curRgbDataMat.empty() || g_curIrDataMat.empty()) {
         return;
     }
 
@@ -137,8 +84,8 @@ void faceRecognitionPreFun(void *irFrame, void *rgaFrame, int width, int height)
     logPrintln("FaceRecognition finish",
                airstrip::DEBUG, __FUNCTION__);
 
-    memset(&g_curRgbData, 0, sizeof(g_curRgbData));
-    memset(&g_curIrData, 0, sizeof(g_curIrData));
+    g_curRgbDataMat.release();
+    g_curIrDataMat.release();
 
     logPrintln("FaceRecognition release",
                airstrip::DEBUG, __FUNCTION__);
