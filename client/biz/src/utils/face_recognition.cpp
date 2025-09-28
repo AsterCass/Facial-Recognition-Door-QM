@@ -1064,10 +1064,10 @@ void faceRecognition() {
             cv::Rect rectRgb = cv::Rect(faceX, faceY, faceW, faceH);
 
             logPrintln("RGB Detect :" + to_string(faceX) + " "
-           + to_string(faceY) + " "
-           + to_string(faceW) + " "
-           + to_string(faceH) + " " + to_string(multipleFaceData.trackIds[0]),
-           airstrip::INFO, __FUNCTION__);
+                       + to_string(faceY) + " "
+                       + to_string(faceW) + " "
+                       + to_string(faceH) + " " + to_string(multipleFaceData.trackIds[0]),
+                       airstrip::INFO, __FUNCTION__);
 
             faceLightDarkParamOpt(rectRgb);
 

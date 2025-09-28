@@ -98,7 +98,7 @@ int checkDoorKey() {
 void closeIrLed() {
     logPrintln("Close ir led pre", airstrip::INFO, __FUNCTION__);
     auto now = chrono::system_clock::to_time_t(chrono::system_clock::now());
-    if (now - lastModifyIrLedTime < 1) {
+    if (now - lastModifyIrLedTime < 3) {
         return;
     }
     lastModifyIrLedTime = now;
@@ -119,7 +119,7 @@ void closeIrLed() {
 void openIrLed() {
     logPrintln("Open ir led pre", airstrip::INFO, __FUNCTION__);
     auto now = chrono::system_clock::to_time_t(chrono::system_clock::now());
-    if (now - lastModifyIrLedTime < 1) {
+    if (now - lastModifyIrLedTime < 3) {
         return;
     }
     lastModifyIrLedTime = now;

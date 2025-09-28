@@ -163,7 +163,7 @@ void updateCommonAppData() {
     logPrintln("Start update common app data", DEBUG, __FUNCTION__);
     if (g_lightOnlyCheck) {
 #ifndef WIN32
-        closeLight();
+        updateOnlyLight(0);
 #endif
     }
 }
@@ -550,7 +550,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
             // todo save frame
             if (g_lightOnlyCheck) {
 #ifndef WIN32
-                closeLight();
+                updateOnlyLight(0);
 #endif
             }
         }
