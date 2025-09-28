@@ -24,6 +24,8 @@ int g_showRgb = 1;
 
 int g_enableIrLed = 1;
 
+int g_currentIsNight = 0;
+
 std::string g_prepareUpdateUrl;
 std::string g_prepareUpdateVersion;
 

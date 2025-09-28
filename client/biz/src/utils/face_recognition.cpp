@@ -94,6 +94,11 @@ void updateLight(int expose, int gain, int light) {
 }
 
 void updateOnlyLight(int light) {
+    if (light > 0) {
+        g_currentIsNight = true;
+    } else {
+        g_currentIsNight = false;
+    }
     ostringstream updateExposeGainCmd;
     updateExposeGainCmd << "sh "
             << g_appWorkDir + "script/linux/reset_light.sh "
@@ -1128,8 +1133,8 @@ void faceRecognition() {
             logPrintln("Face recognition ret id = " + to_string(searchResult.id)
                        + " userId = " + userData.userId + " " + to_string(confidence),
                        airstrip::INFO, __FUNCTION__);
-            if ((!currentIsNight() && confidence < g_faceThreshold) || (
-                    currentIsNight() && confidence < g_faceThresholdNight)) {
+            if ((!g_currentIsNight && confidence < g_faceThreshold) || (
+                    g_currentIsNight && confidence < g_faceThresholdNight)) {
                 ScheduledTask::sendFaceRegRes({}, g_curRgbDataMatAuth, 0.0);
             } else {
                 ScheduledTask::sendFaceRegRes(userData, g_curRgbDataMatAuth, confidence);
