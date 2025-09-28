@@ -46,7 +46,7 @@ MainSettingDoor::MainSettingDoor(QWidget *parent): QWidget(parent) {
                         } else {
                             display_switch(DISPLAY_VIDEO_IR);
                         }
-                        if (enableIrLed) {
+                        if (enableIrLedValue) {
                             openIrLed();
                         } else {
                             closeIrLed();
@@ -243,5 +243,12 @@ void MainSettingDoor::showEvent(QShowEvent *) {
     if (faceOpenInput) {
         faceOpenInput->setStyleSheet(g_allowFaceOpen ? SWITCH_BUTTON_ENABLE_STYLE : SWITCH_BUTTON_DISABLE_STYLE);
         faceOpenValue = g_allowFaceOpen;
+    }
+    if (showRgbInput) {
+        showRgbInput->setStyleSheet(showRgbValue ? SWITCH_BUTTON_ENABLE_STYLE : SWITCH_BUTTON_DISABLE_STYLE);
+    }
+
+    if (enableIrLedInput) {
+        enableIrLedInput->setStyleSheet(enableIrLedValue ? SWITCH_BUTTON_ENABLE_STYLE : SWITCH_BUTTON_DISABLE_STYLE);
     }
 }
