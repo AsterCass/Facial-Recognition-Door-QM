@@ -205,7 +205,7 @@ void initFaceRecognition() {
         constexpr HOption option = HF_ENABLE_FACE_RECOGNITION;
         constexpr HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
         constexpr HInt32 maxDetectNum = 1;
-        constexpr HInt32 detectPixelLevel = 160;
+        constexpr HInt32 detectPixelLevel = 320;
         ret = HFCreateInspireFaceSessionOptional(
             option, detMode, maxDetectNum, detectPixelLevel, -1, &faceRecognitionSession);
         if (ret != HSUCCEED) {
@@ -242,7 +242,7 @@ void initFaceRecognition() {
         constexpr HOption option = HF_ENABLE_FACE_RECOGNITION;
         constexpr HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
         constexpr HInt32 maxDetectNum = 1;
-        constexpr HInt32 detectPixelLevel = 160;
+        constexpr HInt32 detectPixelLevel = 320;
         ret = HFCreateInspireFaceSessionOptional(
             option, detMode, maxDetectNum, detectPixelLevel, -1, &faceRecognitionSessionDetect);
         if (ret != HSUCCEED) {
@@ -975,6 +975,7 @@ void faceRecognition() {
             if (multipleFaceData.detectedNum <= 0) {
                 logPrintln("RGB Face not found" + ret,
                            airstrip::INFO, __FUNCTION__);
+                // todo 切换红外补光灯
                 HFReleaseImageStream(stream);
                 g_isCheckFace = false;
                 return;
@@ -1000,6 +1001,7 @@ void faceRecognition() {
                 const cv::Point rectIrCenter(rectIr.x + rectIr.width / 2, rectIr.y + rectIr.height / 2);
                 if (!rectRgb.contains(rectIrCenter) || !rectIr.contains(rectRgbCenter)) {
                     logPrintln("Face fake face !!!!!", airstrip::WARN, __FUNCTION__);
+                    // todo 切换红外补光灯
                     HFReleaseImageStream(stream);
                     g_isCheckFace = false;
                     return;

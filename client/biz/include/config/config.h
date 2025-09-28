@@ -135,6 +135,10 @@ extern bool g_onFaceRegisterProcess;
 
 extern int g_currentLightLevel;
 
+extern int g_showRgb;
+
+extern int g_enableIrLed;
+
 extern std::string g_prepareUpdateUrl;
 extern std::string g_prepareUpdateVersion;
 

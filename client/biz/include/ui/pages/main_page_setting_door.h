@@ -49,13 +49,13 @@ private:
     QHBoxLayout *showRgbLayout = nullptr;
     QLabel *showRgbLabel = nullptr;
     QPushButton *showRgbInput = nullptr;
-    int showRgbValue = 1;
+    int showRgbValue = 0;
 
     QWidget *enableIrLed = nullptr;
     QHBoxLayout *enableIrLedLayout = nullptr;
     QLabel *enableIrLedLabel = nullptr;
     QPushButton *enableIrLedInput = nullptr;
-    int enableIrLedValue = 1;
+    int enableIrLedValue = 0;
 
     SettingHeader *settingHeader = nullptr;
     MainComponentHeader *mainHeader = nullptr;

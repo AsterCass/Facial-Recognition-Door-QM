@@ -20,6 +20,10 @@ bool g_onFaceRegisterProcess = false;
 
 int g_currentLightLevel = 13;
 
+int g_showRgb = 1;
+
+int g_enableIrLed = 1;
+
 std::string g_prepareUpdateUrl;
 std::string g_prepareUpdateVersion;
 

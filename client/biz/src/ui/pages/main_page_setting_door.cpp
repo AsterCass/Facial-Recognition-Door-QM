@@ -41,15 +41,22 @@ MainSettingDoor::MainSettingDoor(QWidget *parent): QWidget(parent) {
                             g_commonDb.upsertConfig(
                                 PRO_DB_ALLOW_FACE_OPEN, to_string(g_allowFaceOpen));
                         }
-                        if (showRgbValue) {
-                            display_switch(DISPLAY_VIDEO_RGB);
-                        } else {
-                            display_switch(DISPLAY_VIDEO_IR);
+                        if (g_showRgb != showRgbValue) {
+                            g_showRgb = showRgbValue;
+                            if (showRgbValue) {
+                                display_switch(DISPLAY_VIDEO_RGB);
+                            } else {
+                                display_switch(DISPLAY_VIDEO_IR);
+                            }
                         }
-                        if (enableIrLedValue) {
-                            openIrLed();
-                        } else {
-                            closeIrLed();
+
+                        if (g_enableIrLed != enableIrLedValue) {
+                            g_enableIrLed = enableIrLedValue;
+                            if (enableIrLedValue) {
+                                openIrLed();
+                            } else {
+                                closeIrLed();
+                            }
                         }
 
                         MainRouter::getInstance()->mainNotificationShow("保存成功", nullptr);
@@ -245,10 +252,12 @@ void MainSettingDoor::showEvent(QShowEvent *) {
         faceOpenValue = g_allowFaceOpen;
     }
     if (showRgbInput) {
-        showRgbInput->setStyleSheet(showRgbValue ? SWITCH_BUTTON_ENABLE_STYLE : SWITCH_BUTTON_DISABLE_STYLE);
+        showRgbInput->setStyleSheet(g_showRgb ? SWITCH_BUTTON_ENABLE_STYLE : SWITCH_BUTTON_DISABLE_STYLE);
+        showRgbValue = g_showRgb;
     }
 
     if (enableIrLedInput) {
-        enableIrLedInput->setStyleSheet(enableIrLedValue ? SWITCH_BUTTON_ENABLE_STYLE : SWITCH_BUTTON_DISABLE_STYLE);
+        enableIrLedInput->setStyleSheet(g_enableIrLed ? SWITCH_BUTTON_ENABLE_STYLE : SWITCH_BUTTON_DISABLE_STYLE);
+        enableIrLedValue = g_enableIrLed;
     }
 }
