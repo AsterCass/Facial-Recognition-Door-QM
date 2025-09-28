@@ -96,11 +96,13 @@ int checkDoorKey() {
 }
 
 void closeIrLed() {
+    logPrintln("Close ir led pre", airstrip::INFO, __FUNCTION__);
     auto now = chrono::system_clock::to_time_t(chrono::system_clock::now());
     if (now - lastModifyIrLedTime < 1) {
         return;
     }
     lastModifyIrLedTime = now;
+    logPrintln("Close ir led start", airstrip::INFO, __FUNCTION__);
 #ifndef WIN32
     if (-1 == fdForDoor) {
         fdForDoor = open("/dev/telpo_gpio", O_RDWR);
@@ -117,11 +119,13 @@ void closeIrLed() {
 }
 
 void openIrLed() {
+    logPrintln("Open ir led pre", airstrip::INFO, __FUNCTION__);
     auto now = chrono::system_clock::to_time_t(chrono::system_clock::now());
     if (now - lastModifyIrLedTime < 1) {
         return;
     }
     lastModifyIrLedTime = now;
+    logPrintln("Open ir led start", airstrip::INFO, __FUNCTION__);
 #ifndef WIN32
     if (-1 == fdForDoor) {
         fdForDoor = open("/dev/telpo_gpio", O_RDWR);

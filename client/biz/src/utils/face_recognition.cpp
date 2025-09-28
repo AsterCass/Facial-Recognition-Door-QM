@@ -93,6 +93,17 @@ void updateLight(int expose, int gain, int light) {
     airstrip::execCommand(updateExposeGainCmd.str());
 }
 
+void updateOnlyLight(int light) {
+    ostringstream updateExposeGainCmd;
+    updateExposeGainCmd << "sh "
+            << g_appWorkDir + "script/linux/reset_light.sh "
+            << light;
+
+    logPrintln("Current cmd : " + updateExposeGainCmd.str(),
+               airstrip::DEBUG, __FUNCTION__);
+    airstrip::execCommand(updateExposeGainCmd.str());
+}
+
 
 void closeLight() {
     if (currentIsNight() && g_camAutoLight) {
@@ -639,6 +650,58 @@ bool faceDetect(const cv::Mat &frameFull, const cv::Rect &rect) {
     return ret;
 }
 
+void faceLightDarkParamOpt(const cv::Rect &rectOutput) {
+    if (g_curRgbDataMatAuth.empty()) {
+        return;
+    }
+    // 检查最小范围
+    if (!g_longDistanceDetect) {
+        const auto minSide = min(rectOutput.height, rectOutput.width);
+        logPrintln("Size min side =  " + to_string(minSide) +
+                   " faceDistance = " + to_string(g_faceDistance), airstrip::DEBUG, __FUNCTION__);
+        if (minSide < 120) {
+            return;
+        }
+    }
+    // 获取rgb图像对应区域
+    const auto frameRgbFace = g_curRgbDataMatAuth(rectOutput);
+    // 灰度
+    cv::Mat grayFrameFace;
+    cvtColor(frameRgbFace, grayFrameFace, cv::COLOR_BGR2GRAY);
+
+    //亮暗比例
+    int darkPixels = 0;
+    int brightPixels = 0;
+    double brightnessSum = 0;
+    const int totalPixels = grayFrameFace.rows * grayFrameFace.cols;
+
+    for (int i = 0; i < grayFrameFace.rows; i++) {
+        const uchar *row = grayFrameFace.ptr<uchar>(i);
+        for (int j = 0; j < grayFrameFace.cols; j++) {
+            const uchar pixel = row[j];
+            brightnessSum += pixel;
+            if (pixel < g_darkThreshold) {
+                darkPixels++;
+            }
+            if (pixel > g_lightThreshold) {
+                brightPixels++;
+            }
+        }
+    }
+
+    const double lightRatio = static_cast<double>(brightPixels) / totalPixels;
+    const double darkRatio = static_cast<double>(darkPixels) / totalPixels;
+
+    logPrintln("Face Detect light radio: " + to_string(lightRatio)
+               + " dark radio: " + to_string(darkRatio), airstrip::INFO, __FUNCTION__);
+
+    if (lightRatio > g_lightRatio) {
+        updateOnlyLight(0);
+    } else if (darkRatio > g_darkRatio) {
+        updateOnlyLight(160);
+    }
+}
+
 bool faceDetectInspire(const cv::Mat &frame, const cv::Mat &frameIr, cv::Rect &rectOutput, bool moreAction) {
     bool ret = false;
     if (!initializedFaceRec || frame.empty() || frameIr.empty()) {
@@ -808,7 +871,7 @@ void faceRecognition() {
         if (multipleFaceData.detectedNum <= 0) {
             logPrintln("Face recognition lay detect num " + to_string(ret)
                        + " " + to_string(consecutiveFailCnt),
-                       airstrip::INFO, __FUNCTION__);
+                       airstrip::DEBUG, __FUNCTION__);
             // < 5 是为了略微减少cpu压力，因为他这里会加锁  >=1 是为了防止由于人像抖动造成的框消失
             if (consecutiveFailCnt >= 1 && consecutiveFailCnt < 5) {
                 display_paint_box(0, 0, 0, 0);
@@ -840,7 +903,7 @@ void faceRecognition() {
                    + to_string(faceY) + " "
                    + to_string(faceW) + " "
                    + to_string(faceH) + " " + to_string(multipleFaceData.trackIds[0]),
-                   airstrip::INFO, __FUNCTION__);
+                   airstrip::DEBUG, __FUNCTION__);
 
         display_paint_box(faceX, faceY, faceX + faceW, faceY + faceH);
 
@@ -912,7 +975,7 @@ void faceRecognition() {
             }
 
             if (multipleFaceData.detectedNum <= 0) {
-                logPrintln("Ir Face not found" + ret,
+                logPrintln("Ir Face not found " + to_string(g_enableIrLed) + " " + to_string(ret),
                            airstrip::INFO, __FUNCTION__);
                 if (g_enableIrLed) {
                     closeIrLed();
@@ -945,7 +1008,7 @@ void faceRecognition() {
                        + to_string(faceY) + " "
                        + to_string(faceW) + " "
                        + to_string(faceH) + " " + to_string(multipleFaceData.trackIds[0]),
-                       airstrip::INFO, __FUNCTION__);
+                       airstrip::DEBUG, __FUNCTION__);
 
             HFReleaseImageStream(stream);
         }
@@ -1000,12 +1063,15 @@ void faceRecognition() {
             faceH = faceY + faceH > maxHeight ? maxHeight - faceY : faceH;
             cv::Rect rectRgb = cv::Rect(faceX, faceY, faceW, faceH);
 
+            faceLightDarkParamOpt(rectRgb);
+
             // 重合检测
             if (g_enableFaceSpoof) {
                 const cv::Point rectRgbCenter(rectRgb.x + rectRgb.width / 2, rectRgb.y + rectRgb.height / 2);
                 const cv::Point rectIrCenter(rectIr.x + rectIr.width / 2, rectIr.y + rectIr.height / 2);
                 if (!rectRgb.contains(rectIrCenter) || !rectIr.contains(rectRgbCenter)) {
-                    logPrintln("Face fake face !!!!!", airstrip::WARN, __FUNCTION__);
+                    logPrintln("Face fake face !!!! " + to_string(g_enableIrLed),
+                               airstrip::WARN, __FUNCTION__);
                     if (g_enableIrLed) {
                         closeIrLed();
                     } else {
