@@ -25,6 +25,7 @@
 #include "utils/global_data_manager.h"
 #include <boost/filesystem.hpp>
 #include <camera/camera_rk.h>
+#include <camera/common/display.h>
 #include <utils/general_utils.h>
 
 int doorOpenSec = 0;
@@ -575,6 +576,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
                     playWav(AuthFail);
                     if (consecutiveErrorCount >= g_faceRegCount) {
                         consecutiveErrorCount = 0;
+                        display_paint_box(0, 0, 0, 0);
                         MainRouter::getInstance()->showFaceRegister(frame);
                         lastShowFaceRegisterTime = currentTimeSec;
                     }

@@ -1,6 +1,7 @@
 #include "utils/face_recognition.h"
 
 #include <airstrip_thread_pool.h>
+#include <api/api.h>
 #include <camera/camera_frame.h>
 #include <camera/common/display.h>
 #include <config/config_camera.h>
@@ -913,6 +914,11 @@ void faceRecognition() {
             if (multipleFaceData.detectedNum <= 0) {
                 logPrintln("Ir Face not found" + ret,
                            airstrip::INFO, __FUNCTION__);
+                if (g_enableIrLed) {
+                    closeIrLed();
+                } else {
+                    openIrLed();
+                }
                 HFReleaseImageStream(stream);
                 g_isCheckFace = false;
                 return;
@@ -975,7 +981,6 @@ void faceRecognition() {
             if (multipleFaceData.detectedNum <= 0) {
                 logPrintln("RGB Face not found" + ret,
                            airstrip::INFO, __FUNCTION__);
-                // todo 切换红外补光灯
                 HFReleaseImageStream(stream);
                 g_isCheckFace = false;
                 return;
@@ -1001,7 +1006,11 @@ void faceRecognition() {
                 const cv::Point rectIrCenter(rectIr.x + rectIr.width / 2, rectIr.y + rectIr.height / 2);
                 if (!rectRgb.contains(rectIrCenter) || !rectIr.contains(rectRgbCenter)) {
                     logPrintln("Face fake face !!!!!", airstrip::WARN, __FUNCTION__);
-                    // todo 切换红外补光灯
+                    if (g_enableIrLed) {
+                        closeIrLed();
+                    } else {
+                        openIrLed();
+                    }
                     HFReleaseImageStream(stream);
                     g_isCheckFace = false;
                     return;
@@ -1009,6 +1018,9 @@ void faceRecognition() {
             }
 
             logPrintln("RGA face detected ...", airstrip::DEBUG, __FUNCTION__);
+            if (g_enableIrLed) {
+                closeIrLed();
+            }
 
             HFFaceFeature feature = {};
             ret = HFFaceFeatureExtract(faceRecognitionSession, stream, multipleFaceData.tokens[0], &feature);

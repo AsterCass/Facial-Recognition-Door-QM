@@ -43,6 +43,8 @@ deque<int> playWavQueue = {};
 int fdForDoor = -1;
 unsigned char doorKeyValues[6];
 
+static time_t lastModifyIrLedTime = 0;
+
 // local
 string getSn() {
 #ifdef  WIN32
@@ -94,6 +96,11 @@ int checkDoorKey() {
 }
 
 void closeIrLed() {
+    auto now = chrono::system_clock::to_time_t(chrono::system_clock::now());
+    if (now - lastModifyIrLedTime < 1) {
+        return;
+    }
+    lastModifyIrLedTime = now;
 #ifndef WIN32
     if (-1 == fdForDoor) {
         fdForDoor = open("/dev/telpo_gpio", O_RDWR);
@@ -105,10 +112,16 @@ void closeIrLed() {
     auto openRet = ioctl(fdForDoor,TELPO_IOCTL_IR_LED_POWER,0);
     logPrintln("Close ir led " + to_string(openRet), airstrip::INFO, __FUNCTION__);
 #endif
+    g_enableIrLed = 0;
     logPrintln("Close ir led ", airstrip::INFO, __FUNCTION__);
 }
 
 void openIrLed() {
+    auto now = chrono::system_clock::to_time_t(chrono::system_clock::now());
+    if (now - lastModifyIrLedTime < 1) {
+        return;
+    }
+    lastModifyIrLedTime = now;
 #ifndef WIN32
     if (-1 == fdForDoor) {
         fdForDoor = open("/dev/telpo_gpio", O_RDWR);
@@ -120,6 +133,7 @@ void openIrLed() {
     auto openRet = ioctl(fdForDoor,TELPO_IOCTL_IR_LED_POWER,1);
     logPrintln("Open ir led " + to_string(openRet), airstrip::INFO, __FUNCTION__);
 #endif
+    g_enableIrLed = 1;
     logPrintln("Open ir led ", airstrip::INFO, __FUNCTION__);
 }
 
