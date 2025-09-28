@@ -139,7 +139,7 @@ extern int g_showRgb;
 
 extern int g_enableIrLed;
 
-extern int g_currentIsNight;
+extern bool g_currentIsNight;
 
 extern std::string g_prepareUpdateUrl;
 extern std::string g_prepareUpdateVersion;
