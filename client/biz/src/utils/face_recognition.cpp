@@ -978,11 +978,11 @@ void faceRecognition() {
             if (multipleFaceData.detectedNum <= 0) {
                 logPrintln("Ir Face not found " + to_string(g_enableIrLed) + " " + to_string(ret),
                            airstrip::INFO, __FUNCTION__);
-                if (g_enableIrLed) {
-                    closeIrLed();
-                } else {
-                    openIrLed();
-                }
+                // if (g_enableIrLed) {
+                //     closeIrLed();
+                // } else {
+                //     openIrLed();
+                // }
                 HFReleaseImageStream(stream);
                 g_isCheckFace = false;
                 return;
