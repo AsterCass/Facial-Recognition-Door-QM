@@ -14,6 +14,8 @@ struct FaceUserInfo {
     std::string voiceTemplate;
 };
 
+void updateOnlyLight(int light);
+
 void updateLight(int expose, int gain, int light);
 
 void closeLight();
