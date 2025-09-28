@@ -211,8 +211,29 @@ void initFaceRecognition() {
 
     logPrintln("Load model finish", airstrip::INFO, __FUNCTION__);
 
-    // 识别
+    // 检测
+    {
+        constexpr HOption option = HF_ENABLE_FACE_RECOGNITION;
+        constexpr HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
+        constexpr HInt32 maxDetectNum = 1;
+        constexpr HInt32 detectPixelLevel = 320;
+        ret = HFCreateInspireFaceSessionOptional(
+            option, detMode, maxDetectNum, detectPixelLevel, -1, &faceRecognitionSessionDetect);
+        if (ret != HSUCCEED) {
+            logPrintln("Create face context error: " + ret, airstrip::CRITICAL, __FUNCTION__);
+            exit(-1);
+        }
 
+        logPrintln("Load optional finish", airstrip::INFO, __FUNCTION__);
+
+        HFSessionSetTrackPreviewSize(faceRecognitionSessionDetect, detectPixelLevel);
+        HFSessionSetFilterMinimumFacePixelSize(faceRecognitionSessionDetect, 30);
+
+        logPrintln("Load more optional finish", airstrip::INFO, __FUNCTION__);
+    }
+
+
+    // 识别
     {
         constexpr HOption option = HF_ENABLE_FACE_RECOGNITION;
         constexpr HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
@@ -249,26 +270,7 @@ void initFaceRecognition() {
         }
     }
 
-    // 检测
-    {
-        constexpr HOption option = HF_ENABLE_FACE_RECOGNITION;
-        constexpr HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
-        constexpr HInt32 maxDetectNum = 1;
-        constexpr HInt32 detectPixelLevel = 320;
-        ret = HFCreateInspireFaceSessionOptional(
-            option, detMode, maxDetectNum, detectPixelLevel, -1, &faceRecognitionSessionDetect);
-        if (ret != HSUCCEED) {
-            logPrintln("Create face context error: " + ret, airstrip::CRITICAL, __FUNCTION__);
-            exit(-1);
-        }
 
-        logPrintln("Load optional finish", airstrip::INFO, __FUNCTION__);
-
-        HFSessionSetTrackPreviewSize(faceRecognitionSessionDetect, detectPixelLevel);
-        HFSessionSetFilterMinimumFacePixelSize(faceRecognitionSessionDetect, 30);
-
-        logPrintln("Load more optional finish", airstrip::INFO, __FUNCTION__);
-    }
 
     logPrintln("Face model init finish", airstrip::INFO, __FUNCTION__);
     initializedFaceRec = true;
