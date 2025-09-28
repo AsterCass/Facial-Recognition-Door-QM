@@ -99,9 +99,9 @@ void processWithMbIr(void *buf, int size, int width, int height, uint64_t cnt) {
     }
     g_onFaceFrameIr = true;
 
-    // 30帧数据，每5帧调用一次
+    // 30帧数据，每3帧调用一次
     static uint64_t lastCnt = 0;
-    if (cnt - lastCnt < 5) {
+    if (cnt - lastCnt < 3) {
         g_onFaceFrameIr = false;
         return;
     }
@@ -130,9 +130,9 @@ void processWithMbRga(void *buf, int size, int width, int height, uint64_t cnt) 
     g_onFaceFrameRga = true;
 
 
-    // 30帧数据，每5帧调用一次
+    // 30帧数据，每3帧调用一次
     static uint64_t lastCnt = 0;
-    if (cnt - lastCnt < 5) {
+    if (cnt - lastCnt < 3) {
         g_onFaceFrameRga = false;
         return;
     }
