@@ -102,7 +102,6 @@ void closeIrLed() {
         return;
     }
     lastModifyIrLedTime = now;
-    logPrintln("Close ir led start", airstrip::INFO, __FUNCTION__);
 #ifndef WIN32
     if (-1 == fdForDoor) {
         fdForDoor = open("/dev/telpo_gpio", O_RDWR);
@@ -115,7 +114,6 @@ void closeIrLed() {
     logPrintln("Close ir led " + to_string(openRet), airstrip::INFO, __FUNCTION__);
 #endif
     g_enableIrLed = 0;
-    logPrintln("Close ir led ", airstrip::INFO, __FUNCTION__);
 }
 
 void openIrLed() {
@@ -125,7 +123,6 @@ void openIrLed() {
         return;
     }
     lastModifyIrLedTime = now;
-    logPrintln("Open ir led start", airstrip::INFO, __FUNCTION__);
 #ifndef WIN32
     if (-1 == fdForDoor) {
         fdForDoor = open("/dev/telpo_gpio", O_RDWR);
@@ -138,7 +135,6 @@ void openIrLed() {
     logPrintln("Open ir led " + to_string(openRet), airstrip::INFO, __FUNCTION__);
 #endif
     g_enableIrLed = 1;
-    logPrintln("Open ir led ", airstrip::INFO, __FUNCTION__);
 }
 
 void openDoor() {

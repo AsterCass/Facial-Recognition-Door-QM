@@ -54,7 +54,7 @@
     (important!)重启后修改定时任务`crontab -e`
     最后输入`0 4 * * * sh /data/frd/script/linux/reboot_app.sh`以及`* * * * * sh /data/frd/script/linux/check_app_live.sh`
 18. (important!)如果有线出现问题，调整脚本 reset_wired.sh 中对于dhcp的引用，改为真dhcp，这里是因为他有时候提供的包有问题，正常默认应该是真dhcp
-19. 
+19. (important!)check_app_live中5分钟可以适当改成1分钟，防止特定情况下，启动就失败，目前full模型启动较久，不怕进不去的情况
 
 ## 注意事项
 
