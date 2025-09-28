@@ -24,6 +24,10 @@ std::string getSign();
 
 int checkDoorKey();
 
+void closeIrLed();
+
+void openIrLed();
+
 void openDoor();
 
 void closeDoor();

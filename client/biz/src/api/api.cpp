@@ -93,6 +93,36 @@ int checkDoorKey() {
     return -1;
 }
 
+void closeIrLed() {
+#ifndef WIN32
+    if (-1 == fdForDoor) {
+        fdForDoor = open("/dev/telpo_gpio", O_RDWR);
+    }
+    if (fdForDoor < 0) {
+        logPrintln("Failed to open device", airstrip::ERROR, __FUNCTION__);
+        return;
+    }
+    auto openRet = ioctl(fd,TELPO_IOCTL_IR_POW,0);
+    logPrintln("Close ir led " + to_string(openRet), airstrip::INFO, __FUNCTION__);
+#endif
+    logPrintln("Close ir led ", airstrip::INFO, __FUNCTION__);
+}
+
+void openIrLed() {
+#ifndef WIN32
+    if (-1 == fdForDoor) {
+        fdForDoor = open("/dev/telpo_gpio", O_RDWR);
+    }
+    if (fdForDoor < 0) {
+        logPrintln("Failed to open device", airstrip::ERROR, __FUNCTION__);
+        return;
+    }
+    auto openRet = ioctl(fd,TELPO_IOCTL_IR_POW,1);
+    logPrintln("Open ir led " + to_string(openRet), airstrip::INFO, __FUNCTION__);
+#endif
+    logPrintln("Open ir led ", airstrip::INFO, __FUNCTION__);
+}
+
 void openDoor() {
 #ifndef WIN32
     if (-1 == fdForDoor) {

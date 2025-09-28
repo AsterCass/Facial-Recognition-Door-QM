@@ -995,13 +995,15 @@ void faceRecognition() {
             cv::Rect rectRgb = cv::Rect(faceX, faceY, faceW, faceH);
 
             // 重合检测
-            const cv::Point rectRgbCenter(rectRgb.x + rectRgb.width / 2, rectRgb.y + rectRgb.height / 2);
-            const cv::Point rectIrCenter(rectIr.x + rectIr.width / 2, rectIr.y + rectIr.height / 2);
-            if (!rectRgb.contains(rectIrCenter) || !rectIr.contains(rectRgbCenter)) {
-                logPrintln("Face fake face !!!!!", airstrip::WARN, __FUNCTION__);
-                HFReleaseImageStream(stream);
-                g_isCheckFace = false;
-                return;
+            if (g_enableFaceSpoof) {
+                const cv::Point rectRgbCenter(rectRgb.x + rectRgb.width / 2, rectRgb.y + rectRgb.height / 2);
+                const cv::Point rectIrCenter(rectIr.x + rectIr.width / 2, rectIr.y + rectIr.height / 2);
+                if (!rectRgb.contains(rectIrCenter) || !rectIr.contains(rectRgbCenter)) {
+                    logPrintln("Face fake face !!!!!", airstrip::WARN, __FUNCTION__);
+                    HFReleaseImageStream(stream);
+                    g_isCheckFace = false;
+                    return;
+                }
             }
 
             logPrintln("RGA face detected ...", airstrip::DEBUG, __FUNCTION__);

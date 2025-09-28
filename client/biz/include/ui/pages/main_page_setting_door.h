@@ -45,6 +45,17 @@ private:
     QPushButton *faceOpenInput = nullptr;
     int faceOpenValue = 0;
 
+    QWidget *showRgb = nullptr;
+    QHBoxLayout *showRgbLayout = nullptr;
+    QLabel *showRgbLabel = nullptr;
+    QPushButton *showRgbInput = nullptr;
+    int showRgbValue = 1;
+
+    QWidget *enableIrLed = nullptr;
+    QHBoxLayout *enableIrLedLayout = nullptr;
+    QLabel *enableIrLedLabel = nullptr;
+    QPushButton *enableIrLedInput = nullptr;
+    int enableIrLedValue = 1;
 
     SettingHeader *settingHeader = nullptr;
     MainComponentHeader *mainHeader = nullptr;

@@ -2,6 +2,8 @@
 
 #include <airstrip_log.h>
 #include <sstream>
+#include <api/api.h>
+#include <camera/common/display.h>
 #include <ui/main_router.h>
 #include <config/style.h>
 
@@ -38,6 +40,16 @@ MainSettingDoor::MainSettingDoor(QWidget *parent): QWidget(parent) {
                             g_allowFaceOpen = faceOpenValue;
                             g_commonDb.upsertConfig(
                                 PRO_DB_ALLOW_FACE_OPEN, to_string(g_allowFaceOpen));
+                        }
+                        if (showRgbValue) {
+                            display_switch(DISPLAY_VIDEO_RGB);
+                        } else {
+                            display_switch(DISPLAY_VIDEO_IR);
+                        }
+                        if (enableIrLed) {
+                            openIrLed();
+                        } else {
+                            closeIrLed();
                         }
 
                         MainRouter::getInstance()->mainNotificationShow("保存成功", nullptr);
@@ -146,6 +158,66 @@ MainSettingDoor::MainSettingDoor(QWidget *parent): QWidget(parent) {
         faceOpenLayout->addStretch();
         faceOpenLayout->addWidget(faceOpenInput);
         bodyLayout->addWidget(faceOpen);
+
+
+        // showRgb
+        showRgb = new QWidget(body);
+        showRgbLayout = new QHBoxLayout(showRgb);
+        showRgbLayout->setContentsMargins(20, 0, 0, 0);
+        showRgbLayout->setSpacing(20);
+#ifdef WIN32
+        showRgb->setStyleSheet(
+            "background-color: rgb(31, 31, 31);  border-radius: 8px; font-size: 14px; color: white");
+        showRgb->setFixedHeight(50);
+#else
+        showRgb->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: white");
+        showRgb->setFixedHeight(100);
+#endif
+        showRgbLabel = new QLabel("屏幕展示RGB摄像头", showRgb);
+        showRgbInput = new QPushButton("⬤", showRgb);
+        showRgbInput->setStyleSheet(SWITCH_BUTTON_DISABLE_STYLE);
+        connect(showRgbInput, &QPushButton::clicked, this,
+                [=] {
+                    showRgbValue = showRgbValue ? 0 : 1;
+                    showRgbInput->setStyleSheet(showRgbValue
+                                                    ? SWITCH_BUTTON_ENABLE_STYLE
+                                                    : SWITCH_BUTTON_DISABLE_STYLE);
+                });
+
+        showRgbLayout->addWidget(showRgbLabel);
+        showRgbLayout->addStretch();
+        showRgbLayout->addWidget(showRgbInput);
+        bodyLayout->addWidget(showRgb);
+
+
+        // enableIrLed
+        enableIrLed = new QWidget(body);
+        enableIrLedLayout = new QHBoxLayout(enableIrLed);
+        enableIrLedLayout->setContentsMargins(20, 0, 0, 0);
+        enableIrLedLayout->setSpacing(20);
+#ifdef WIN32
+        enableIrLed->setStyleSheet(
+            "background-color: rgb(31, 31, 31);  border-radius: 8px; font-size: 14px; color: white");
+        enableIrLed->setFixedHeight(50);
+#else
+        enableIrLed->setStyleSheet("background-color: rgb(31, 31, 31);  border-radius: 16px; font-size: 28px; color: white");
+        enableIrLed->setFixedHeight(100);
+#endif
+        enableIrLedLabel = new QLabel("打开红外补光灯", enableIrLed);
+        enableIrLedInput = new QPushButton("⬤", enableIrLed);
+        enableIrLedInput->setStyleSheet(SWITCH_BUTTON_DISABLE_STYLE);
+        connect(enableIrLedInput, &QPushButton::clicked, this,
+                [=] {
+                    enableIrLedValue = enableIrLedValue ? 0 : 1;
+                    enableIrLedInput->setStyleSheet(enableIrLedValue
+                                                        ? SWITCH_BUTTON_ENABLE_STYLE
+                                                        : SWITCH_BUTTON_DISABLE_STYLE);
+                });
+
+        enableIrLedLayout->addWidget(enableIrLedLabel);
+        enableIrLedLayout->addStretch();
+        enableIrLedLayout->addWidget(enableIrLedInput);
+        bodyLayout->addWidget(enableIrLed);
     }
     bodyLayout->addStretch();
 
