@@ -102,7 +102,7 @@ void closeIrLed() {
         logPrintln("Failed to open device", airstrip::ERROR, __FUNCTION__);
         return;
     }
-    auto openRet = ioctl(fd,TELPO_IOCTL_IR_POW,0);
+    auto openRet = ioctl(fdForDoor,TELPO_IOCTL_IR_LED_POWER,0);
     logPrintln("Close ir led " + to_string(openRet), airstrip::INFO, __FUNCTION__);
 #endif
     logPrintln("Close ir led ", airstrip::INFO, __FUNCTION__);
@@ -117,7 +117,7 @@ void openIrLed() {
         logPrintln("Failed to open device", airstrip::ERROR, __FUNCTION__);
         return;
     }
-    auto openRet = ioctl(fd,TELPO_IOCTL_IR_POW,1);
+    auto openRet = ioctl(fdForDoor,TELPO_IOCTL_IR_LED_POWER,1);
     logPrintln("Open ir led " + to_string(openRet), airstrip::INFO, __FUNCTION__);
 #endif
     logPrintln("Open ir led ", airstrip::INFO, __FUNCTION__);
