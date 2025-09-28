@@ -670,7 +670,7 @@ void faceLightDarkParamOpt(const cv::Rect &rectOutput) {
         }
     }
     // 获取rgb图像对应区域
-    const auto frameRgbFace = g_curRgbDataMatAuth(rectOutput);
+    const auto frameRgbFace = g_curRgbDataMatAuth(rectOutput).clone();
     // 灰度
     cv::Mat grayFrameFace;
     cvtColor(frameRgbFace, grayFrameFace, cv::COLOR_BGR2GRAY);
@@ -1000,8 +1000,8 @@ void faceRecognition() {
             const int rotationHeight = multipleFaceData.rects->height;
 
             // 校正
-            const int maxWidth = g_appWidth;
-            const int maxHeight = g_appHeight;
+            const int maxWidth = g_curIrDataMatAuth.cols;
+            const int maxHeight = g_curIrDataMatAuth.rows;
             const int faceX = std::min(std::max(0, rotationX), maxWidth);
             const int faceY = std::min(std::max(0, rotationY), maxHeight);
             int faceW = std::max(0, rotationWidth);
@@ -1063,8 +1063,8 @@ void faceRecognition() {
             // 校正
             const int maxWidth = g_curRgbDataMatAuth.cols;
             const int maxHeight = g_curRgbDataMatAuth.rows;
-            const int faceX = std::max(0, rect.x);
-            const int faceY = std::max(0, rect.y);
+            const int faceX = std::min(std::max(0, rect.x), maxWidth);
+            const int faceY = std::min(std::max(0, rect.y), maxHeight);
             int faceW = std::max(0, rect.width);
             int faceH = std::max(0, rect.height);
             faceW = faceX + faceW > maxWidth ? maxWidth - faceX : faceW;
