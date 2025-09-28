@@ -560,6 +560,7 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
         if (currentTimeSec - lastFailTime > g_faceRegIvSec) {
             if (currentTimeSec - lastFailTime < 10) {
                 if (consecutiveFailCount <= 1) {
+                    consecutiveFailCount = 1;
                     ostringstream oss;
                     oss << g_appWorkDir << "log-face/" <<
                             put_time(localtime(&currentTimeSec), "%Y-%m-%d-%H-%M-%S") << "-Fail1" << ".jpg";

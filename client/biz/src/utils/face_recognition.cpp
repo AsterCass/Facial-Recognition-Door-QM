@@ -236,7 +236,7 @@ void initFaceRecognition() {
     // 识别
     {
         constexpr HOption option = HF_ENABLE_FACE_RECOGNITION;
-        constexpr HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
+        constexpr HFDetectMode detMode = HF_DETECT_MODE_ALWAYS_DETECT;
         constexpr HInt32 maxDetectNum = 1;
         constexpr HInt32 detectPixelLevel = 320;
         ret = HFCreateInspireFaceSessionOptional(
@@ -269,7 +269,6 @@ void initFaceRecognition() {
             exit(-1);
         }
     }
-
 
 
     logPrintln("Face model init finish", airstrip::INFO, __FUNCTION__);
@@ -697,9 +696,10 @@ void faceLightDarkParamOpt(const cv::Rect &rectOutput) {
     logPrintln("Face Detect light radio: " + to_string(lightRatio)
                + " dark radio: " + to_string(darkRatio), airstrip::INFO, __FUNCTION__);
 
-    if (lightRatio > g_lightRatio) {
-        updateOnlyLight(0);
-    } else if (darkRatio > g_darkRatio) {
+    // if (lightRatio > g_lightRatio) {
+    //     updateOnlyLight(0);
+    // } else
+    if (darkRatio > g_darkRatio) {
         updateOnlyLight(160);
     }
 }
@@ -844,11 +844,11 @@ void faceRecognition() {
     {
         HFImageStream stream = nullptr;
         HFImageData imageData = {};
-        imageData.data = g_curRgbData.data;
+        imageData.data = g_curIrData.data;
         imageData.format = HF_STREAM_YUV_NV12;
-        imageData.height = g_curRgbData.height;
-        imageData.width = g_curRgbData.width;
-        imageData.rotation = HF_CAMERA_ROTATION_270;
+        imageData.height = g_curIrData.height;
+        imageData.width = g_curIrData.width;
+        imageData.rotation = HF_CAMERA_ROTATION_90;
         HResult ret = HFCreateImageStream(&imageData, &stream);
         if (ret != HSUCCEED) {
             logPrintln("Face recognition build image fail " + ret,
@@ -885,9 +885,9 @@ void faceRecognition() {
         consecutiveFailCnt = 0;
 
         // 校正
-        const int rotationX = (CAMERA_HEIGHT - multipleFaceData.rects->y - multipleFaceData.rects->height) *
-                              g_appWidth / CAMERA_HEIGHT;
-        const int rotationY = (multipleFaceData.rects->x) * g_appHeight / CAMERA_WIDTH;
+        const int rotationX = multipleFaceData.rects->y * g_appWidth / CAMERA_HEIGHT;
+        const int rotationY = (CAMERA_WIDTH - multipleFaceData.rects->x - multipleFaceData.rects->width) *
+                              g_appHeight / CAMERA_WIDTH;
         const int rotationWidth = multipleFaceData.rects->height * g_appWidth / CAMERA_HEIGHT;
         const int rotationHeight = multipleFaceData.rects->width * g_appHeight / CAMERA_WIDTH;
 
@@ -901,7 +901,7 @@ void faceRecognition() {
         faceW = faceX + faceW > maxWidth ? maxWidth - faceX : faceW;
         faceH = faceY + faceH > maxHeight ? maxHeight - faceY : faceH;
 
-        logPrintln("Detect :" + to_string(faceX) + " "
+        logPrintln("the Detect :" + to_string(faceX) + " "
                    + to_string(faceY) + " "
                    + to_string(faceW) + " "
                    + to_string(faceH) + " " + to_string(multipleFaceData.trackIds[0]),
@@ -949,8 +949,7 @@ void faceRecognition() {
 
 
         // 红外部分
-        cv::Rect rectIr;
-        if (g_enableFaceSpoof) {
+        cv::Rect rectIr; {
             HFImageStream stream = nullptr;
             HFImageData imageData = {};
             imageData.data = g_curIrDataMatAuth.data;
@@ -1015,6 +1014,8 @@ void faceRecognition() {
             HFReleaseImageStream(stream);
         }
 
+        faceLightDarkParamOpt(rectIr);
+
 
         // 普通摄像头部分
         {
@@ -1071,7 +1072,6 @@ void faceRecognition() {
                        + to_string(faceH) + " " + to_string(multipleFaceData.trackIds[0]),
                        airstrip::INFO, __FUNCTION__);
 
-            faceLightDarkParamOpt(rectRgb);
 
             // 重合检测
             if (g_enableFaceSpoof) {
@@ -1080,11 +1080,11 @@ void faceRecognition() {
                 if (!rectRgb.contains(rectIrCenter) || !rectIr.contains(rectRgbCenter)) {
                     logPrintln("Face fake face !!!! " + to_string(g_enableIrLed),
                                airstrip::WARN, __FUNCTION__);
-                    if (g_enableIrLed) {
-                        closeIrLed();
-                    } else {
-                        openIrLed();
-                    }
+                    // if (g_enableIrLed) {
+                    //     closeIrLed();
+                    // } else {
+                    //     openIrLed();
+                    // }
                     HFReleaseImageStream(stream);
                     g_isCheckFace = false;
                     return;
@@ -1092,9 +1092,9 @@ void faceRecognition() {
             }
 
             logPrintln("RGA face detected ...", airstrip::DEBUG, __FUNCTION__);
-            if (g_enableIrLed) {
-                closeIrLed();
-            }
+            // if (g_enableIrLed) {
+            //     closeIrLed();
+            // }
 
             HFFaceFeature feature = {};
             ret = HFFaceFeatureExtract(faceRecognitionSession, stream, multipleFaceData.tokens[0], &feature);
