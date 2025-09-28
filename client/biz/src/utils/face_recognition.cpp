@@ -36,7 +36,7 @@ HFSession faceRecognitionSession = nullptr;
 HFSession faceRecognitionSessionDetect = nullptr;
 
 
-void rotate_nv12_180_inplace(CameraOutputFrameInfo* frame) {
+void rotate_nv12_180_inplace(CameraOutputFrameInfo *frame) {
     if (!frame || frame->width <= 0 || frame->height <= 0) {
         return;
     }
@@ -46,7 +46,7 @@ void rotate_nv12_180_inplace(CameraOutputFrameInfo* frame) {
     int y_size = width * height;
 
     // 原地旋转Y分量
-    unsigned char* y_data = frame->data;
+    unsigned char *y_data = frame->data;
     for (int i = 0; i < y_size / 2; i++) {
         // 计算对称位置
         int mirror_pos = y_size - 1 - i;
@@ -58,7 +58,7 @@ void rotate_nv12_180_inplace(CameraOutputFrameInfo* frame) {
     }
 
     // 原地旋转UV分量
-    unsigned char* uv_data = frame->data + y_size;
+    unsigned char *uv_data = frame->data + y_size;
     int uv_size = y_size / 2;
 
     for (int i = 0; i < uv_size / 2; i += 2) {
@@ -199,38 +199,63 @@ void initFaceRecognition() {
 
     logPrintln("Load model finish", airstrip::INFO, __FUNCTION__);
 
-    constexpr HOption option = HF_ENABLE_FACE_RECOGNITION;
-    constexpr HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
-    constexpr HInt32 maxDetectNum = 1;
-    constexpr HInt32 detectPixelLevel = 160;
-    ret = HFCreateInspireFaceSessionOptional(
-        option, detMode, maxDetectNum, detectPixelLevel, -1, &faceRecognitionSession);
-    if (ret != HSUCCEED) {
-        logPrintln("Create face context error: " + ret, airstrip::CRITICAL, __FUNCTION__);
-        exit(-1);
+    // 识别
+
+    {
+        constexpr HOption option = HF_ENABLE_FACE_RECOGNITION;
+        constexpr HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
+        constexpr HInt32 maxDetectNum = 1;
+        constexpr HInt32 detectPixelLevel = 160;
+        ret = HFCreateInspireFaceSessionOptional(
+            option, detMode, maxDetectNum, detectPixelLevel, -1, &faceRecognitionSession);
+        if (ret != HSUCCEED) {
+            logPrintln("Create face context error: " + ret, airstrip::CRITICAL, __FUNCTION__);
+            exit(-1);
+        }
+
+        logPrintln("Load optional finish", airstrip::INFO, __FUNCTION__);
+
+        HFSessionSetTrackPreviewSize(faceRecognitionSession, detectPixelLevel);
+        HFSessionSetFilterMinimumFacePixelSize(faceRecognitionSession, 30);
+
+        logPrintln("Load more optional finish", airstrip::INFO, __FUNCTION__);
+
+        HFFeatureHubConfiguration configuration;
+        configuration.primaryKeyMode = HF_PK_MANUAL_INPUT;
+        configuration.enablePersistence = 0;
+        configuration.persistenceDbPath = nullptr;
+        if (g_fullFaceCompare) {
+            configuration.searchMode = HF_SEARCH_MODE_EXHAUSTIVE;
+        } else {
+            configuration.searchMode = HF_SEARCH_MODE_EAGER;
+        }
+        configuration.searchThreshold = static_cast<float>(std::min(g_faceThreshold, g_faceThresholdNight));
+        ret = HFFeatureHubDataEnable(configuration);
+        if (ret != HSUCCEED) {
+            logPrintln("Create face db error: " + ret, airstrip::CRITICAL, __FUNCTION__);
+            exit(-1);
+        }
     }
 
-    logPrintln("Load optional finish", airstrip::INFO, __FUNCTION__);
+    // 检测
+    {
+        constexpr HOption option = HF_ENABLE_FACE_RECOGNITION;
+        constexpr HFDetectMode detMode = HF_DETECT_MODE_LIGHT_TRACK;
+        constexpr HInt32 maxDetectNum = 1;
+        constexpr HInt32 detectPixelLevel = 160;
+        ret = HFCreateInspireFaceSessionOptional(
+            option, detMode, maxDetectNum, detectPixelLevel, -1, &faceRecognitionSessionDetect);
+        if (ret != HSUCCEED) {
+            logPrintln("Create face context error: " + ret, airstrip::CRITICAL, __FUNCTION__);
+            exit(-1);
+        }
 
-    HFSessionSetTrackPreviewSize(faceRecognitionSession, detectPixelLevel);
-    HFSessionSetFilterMinimumFacePixelSize(faceRecognitionSession, 30);
+        logPrintln("Load optional finish", airstrip::INFO, __FUNCTION__);
 
-    logPrintln("Load more optional finish", airstrip::INFO, __FUNCTION__);
+        HFSessionSetTrackPreviewSize(faceRecognitionSessionDetect, detectPixelLevel);
+        HFSessionSetFilterMinimumFacePixelSize(faceRecognitionSessionDetect, 30);
 
-    HFFeatureHubConfiguration configuration;
-    configuration.primaryKeyMode = HF_PK_MANUAL_INPUT;
-    configuration.enablePersistence = 0;
-    configuration.persistenceDbPath = nullptr;
-    if (g_fullFaceCompare) {
-        configuration.searchMode = HF_SEARCH_MODE_EXHAUSTIVE;
-    } else {
-        configuration.searchMode = HF_SEARCH_MODE_EAGER;
-    }
-    configuration.searchThreshold = static_cast<float>(std::min(g_faceThreshold, g_faceThresholdNight));
-    ret = HFFeatureHubDataEnable(configuration);
-    if (ret != HSUCCEED) {
-        logPrintln("Create face db error: " + ret, airstrip::CRITICAL, __FUNCTION__);
-        exit(-1);
+        logPrintln("Load more optional finish", airstrip::INFO, __FUNCTION__);
     }
 
     logPrintln("Face model init finish", airstrip::INFO, __FUNCTION__);
@@ -768,7 +793,7 @@ void faceRecognition() {
         logPrintln("RGA track to format ...", airstrip::DEBUG, __FUNCTION__);
 
         HFMultipleFaceData multipleFaceData = {};
-        ret = HFExecuteFaceTrack(faceRecognitionSession, stream, &multipleFaceData);
+        ret = HFExecuteFaceTrack(faceRecognitionSessionDetect, stream, &multipleFaceData);
         if (ret != HSUCCEED) {
             logPrintln("Face recognition track image fail " + ret,
                        airstrip::WARN, __FUNCTION__);
@@ -783,8 +808,8 @@ void faceRecognition() {
             logPrintln("Face recognition lay detect num " + to_string(ret)
                        + " " + to_string(consecutiveFailCnt),
                        airstrip::INFO, __FUNCTION__);
-            // < 10 是为了略微减少cpu压力，因为他这里会加锁  >=1 是为了防止由于人像抖动造成的框消失
-            if (consecutiveFailCnt >= 1 && consecutiveFailCnt < 10) {
+            // < 5 是为了略微减少cpu压力，因为他这里会加锁  >=1 是为了防止由于人像抖动造成的框消失
+            if (consecutiveFailCnt >= 1 && consecutiveFailCnt < 5) {
                 display_paint_box(0, 0, 0, 0);
             }
             ++consecutiveFailCnt;

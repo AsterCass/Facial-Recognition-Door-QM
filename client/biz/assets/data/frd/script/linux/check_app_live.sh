@@ -11,8 +11,8 @@ fi
 # 读取当前计数
 COUNT=$(cat "$COUNTER_FILE")
 
-# 判断是否达到延迟次数（5 次 = 5 分钟）
-if [ "$COUNT" -lt 5 ]; then
+# 判断是否达到延迟次数（1 次 = 1 分钟）
+if [ "$COUNT" -lt 1 ]; then
   COUNT=$((COUNT + 1))
   echo "$COUNT" > "$COUNTER_FILE"
   exit 0
