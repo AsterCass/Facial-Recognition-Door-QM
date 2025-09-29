@@ -161,11 +161,11 @@ void updateCommonAppData() {
     if (count++ < 60) return;
     count = 1;
     logPrintln("Start update common app data", DEBUG, __FUNCTION__);
-    if (g_lightOnlyCheck) {
+    // if (g_lightOnlyCheck) {
 #ifndef WIN32
         updateOnlyLight(0);
 #endif
-    }
+    // }
     openIrLed();
 }
 
