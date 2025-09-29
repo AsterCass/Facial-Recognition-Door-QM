@@ -656,6 +656,56 @@ bool faceDetect(const cv::Mat &frameFull, const cv::Rect &rect) {
     return ret;
 }
 
+int faceIrOverExp() {
+    // NV12 的 Y stride 一般就是宽度
+    const int yStride = g_curIrData.width;
+    unsigned char *yPlane = g_curIrData.data;
+
+    const int startX = g_curIrData.width / 3;
+    const int endX = 2 * g_curIrData.width / 3;
+    const int startY = g_curIrData.height / 3;
+    const int endY = 2 * g_curIrData.height / 3;
+
+    long sumY = 0;
+    int count = 0;
+    int overExpCount = 0;
+    int needExpCount = 0;
+
+    // 阈值，NV12 Y 亮度范围 0~255，过曝通常 > 240
+    const int overExpThresh = 240;
+    const int needExpThresh = 30;
+
+    for (int y = startY; y < endY; y++) {
+        unsigned char *row = yPlane + y * yStride;
+        for (int x = startX; x < endX; x++) {
+            unsigned char val = row[x];
+            sumY += val;
+            count++;
+            if (val > overExpThresh) {
+                overExpCount++;
+            }
+            if (val < needExpThresh) {
+                needExpCount++;
+            }
+        }
+    }
+
+    const double overExpRatio = static_cast<double>(overExpCount) / count;
+
+    const double needExpRatio = static_cast<double>(needExpCount) / count;
+
+    logPrintln("Ir expose data = " + to_string(overExpRatio) + " " + to_string(needExpRatio),
+               airstrip::INFO, __FUNCTION__);
+
+    if (overExpRatio > 0.3) {
+        return 1;
+    }
+    if (needExpRatio > 0.5) {
+        return -1;
+    }
+    return 0;
+}
+
 void faceLightDarkParamOpt(const cv::Rect &rectOutput) {
     if (g_curRgbDataMatAuth.empty()) {
         return;
@@ -884,6 +934,16 @@ void faceRecognition() {
                 display_paint_box(0, 0, 0, 0);
             }
             ++consecutiveFailCnt;
+
+            // 判断是否过曝
+            const int theExpRet = faceIrOverExp();
+            if (theExpRet > 0 && g_enableIrLed) {
+                closeIrLed();
+            }
+            if (theExpRet < 0 && !g_enableIrLed) {
+                openIrLed();
+            }
+
             HFReleaseImageStream(stream);
             return;
         }
