@@ -673,7 +673,7 @@ int faceIrOverExp() {
 
     // 阈值，NV12 Y 亮度范围 0~255，过曝通常 > 240
     const int overExpThresh = 240;
-    const int needExpThresh = 30;
+    const int needExpThresh = 60;
 
     for (int y = startY; y < endY; y++) {
         unsigned char *row = yPlane + y * yStride;
@@ -695,12 +695,12 @@ int faceIrOverExp() {
     const double needExpRatio = static_cast<double>(needExpCount) / count;
 
     logPrintln("Ir expose data = " + to_string(overExpRatio) + " " + to_string(needExpRatio),
-               airstrip::INFO, __FUNCTION__);
+               airstrip::DEBUG, __FUNCTION__);
 
-    if (overExpRatio > 0.3) {
+    if (overExpRatio > 0.25) {
         return 1;
     }
-    if (needExpRatio > 0.5) {
+    if (needExpRatio > 0.3) {
         return -1;
     }
     return 0;

@@ -90,7 +90,7 @@ void initConfigDb() {
     initConfigValue<int>(PRO_DB_FACE_DISTANCE, "2", g_faceDistance);
     initConfigValue<int>(PRO_DB_NET_MODEL, "1", g_netModel);
     initConfigValue<int>(PRO_DB_ENABLE_FACE_SPOOF, "1", g_enableFaceSpoof);
-    initConfigValue<int>(PRO_DB_ENABLE_LIGHT_ONLY_CHECK, "0", g_lightOnlyCheck);
+    initConfigValue<int>(PRO_DB_ENABLE_LIGHT_ONLY_CHECK, "1", g_lightOnlyCheck);
     initConfigValue<int>(PRO_DB_FACE_REG_COUNT, "2", g_faceRegCount);
     initConfigValue<int>(PRO_DB_TASK_IV_SEC, "600", g_taskIvSec);
     initConfigValue<int>(PRO_DB_SHOW_CONF_USER, "0", g_showConfUser);

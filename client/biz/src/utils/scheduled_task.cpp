@@ -166,6 +166,7 @@ void updateCommonAppData() {
         updateOnlyLight(0);
 #endif
     }
+    openIrLed();
 }
 
 
