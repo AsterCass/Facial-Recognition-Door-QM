@@ -1,4 +1,4 @@
-#ifndef WIN32x
+#ifndef WIN32
 
 #include <config/config_camera.h>
 #include <mutex>

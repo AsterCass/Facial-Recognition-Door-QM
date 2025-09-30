@@ -1,3 +1,4 @@
+#ifndef WIN32
 /*
  * Copyright (C) 2020 Rockchip Electronics Co., Ltd.
  * author: Zhihua Wang, hogan.wang@rock-chips.com
@@ -182,3 +183,6 @@ void display_paint_box(int left, int top, int right, int bottom) {
     g_disp.h = bottom - top;
     pthread_mutex_unlock(&g_lock);
 }
+
+
+#endif

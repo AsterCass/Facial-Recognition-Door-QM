@@ -1,3 +1,4 @@
+#ifndef WIN32
 /*
  * Copyright (C) 2019 Rockchip Electronics Co., Ltd.
  * author: Zhihua Wang, hogan.wang@rock-chips.com
@@ -127,3 +128,6 @@ int camrgb_control_init(void) {
 
     return 0;
 }
+
+
+#endif

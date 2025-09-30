@@ -1,3 +1,5 @@
+#ifndef WIN32
+
 /*
  * Copyright (C) 2020 Rockchip Electronics Co., Ltd.
  *
@@ -665,3 +667,6 @@ int drmCommit(struct drm_buf *buffer, int width, int height,
 
     return ret;
 }
+
+
+#endif

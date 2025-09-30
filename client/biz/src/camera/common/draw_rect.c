@@ -1,3 +1,5 @@
+#ifndef WIN32
+
 /*
  * Rockchip App
  *
@@ -354,3 +356,5 @@ void yuv420_draw_rectangle(void *imgdata,
     yuv420_draw_line(imgdata, width, height, Point[3], Point[2], color);
     yuv420_draw_line(imgdata, width, height, Point[0], Point[3], color);
 }
+
+#endif

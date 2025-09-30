@@ -43,11 +43,13 @@ MainSettingDoor::MainSettingDoor(QWidget *parent): QWidget(parent) {
                         }
                         if (g_showRgb != showRgbValue) {
                             g_showRgb = showRgbValue;
+#ifndef WIN32
                             if (showRgbValue) {
                                 display_switch(DISPLAY_VIDEO_RGB);
                             } else {
                                 display_switch(DISPLAY_VIDEO_IR);
                             }
+#endif
                         }
 
                         if (g_enableIrLed != enableIrLedValue) {

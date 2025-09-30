@@ -1,3 +1,5 @@
+#ifndef WIN32
+
 #include <pthread.h>
 #include "camera/common/camir_control.h"
 #include <stdbool.h>
@@ -93,3 +95,5 @@ int camir_control_init(void) {
 
     return 0;
 }
+
+#endif

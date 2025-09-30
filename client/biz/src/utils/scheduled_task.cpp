@@ -578,7 +578,9 @@ void ScheduledTask::sendFaceRegRes(const FaceUserInfo &userInfo, const cv::Mat &
                     playWav(AuthFail);
                     if (consecutiveErrorCount >= g_faceRegCount) {
                         consecutiveErrorCount = 0;
+#ifndef WIN32
                         display_paint_box(0, 0, 0, 0);
+#endif
                         MainRouter::getInstance()->showFaceRegister(frame);
                         lastShowFaceRegisterTime = currentTimeSec;
                     }

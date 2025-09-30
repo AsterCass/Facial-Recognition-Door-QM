@@ -1,3 +1,4 @@
+#ifndef WIN32
 /*
  * Copyright (C) 2019 Rockchip Electronics Co., Ltd.
  * author: Zhihua Wang, hogan.wang@rock-chips.com
@@ -329,3 +330,5 @@ bool aiq_control_get_status(enum aiq_control_type type)
     }
     return ok;
 }
+
+#endif
