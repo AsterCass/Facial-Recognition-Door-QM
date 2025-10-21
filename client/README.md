@@ -16,7 +16,7 @@
 * 下载[Boost]((https://www.boost.org/))到本地，并构建
 * 下载[SQLiteCpp](https://github.com/SRombauts/SQLiteCpp)到本地，并构建
 * 下载[OpenCV](https://opencv.org/)到本地，并构建
-* 下载[libfacedetection](https://github.com/ShiqiYu/libfacedetection)到本地，这里目前Windows没有用到，可以只使用头文件
+* 下载[libfacedetection](https://github.com/ShiqiYu/libfacedetection)到本地，这里目前Windows没有用到，可以只使用头文件（不需要了）
 * 下载[InspireFace](https://github.com/HyperInspire/InspireFace)到本地，这里目前Windows没有用到，可以只使用头文件
 * 编译脚手架`airstrip`
 * 再编译业务部分`biz`
