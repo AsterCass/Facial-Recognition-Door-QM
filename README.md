@@ -7,6 +7,8 @@
 
 [客户端文档](./client/README.md)
 
+[服务端文档](./server/README.md)
+
 ### 技术栈
 
 1. Qt
